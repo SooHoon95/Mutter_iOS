@@ -2,6 +2,16 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-28 — Feature 모듈명이 의존 SDK 모듈명과 충돌하면 합성 루트에서 깨진다
+- 상황: feature 모듈 `Auth`가 supabase-swift의 `Auth` 모듈과 동명. 개별 빌드는 OK(Auth feature는 supabase 미링크)지만, **MutterApp이 둘 다 링크**하자 `import Auth`가 supabase Auth로 해석돼 `cannot find 'AuthViewFactory' in scope`.
+- 교정: feature를 `AuthFeature`로 rename(디렉터리 `git mv` + Project.swift name + `.feature(target:)` 의존 + `import` 전부). `.featurePath(target)=Projects/Feature/<target>`라 디렉터리명=타깃명 일치 필요.
+- 규칙: **모듈/타깃 이름은 링크될 모든 외부 SDK 모듈명과 겹치지 않게 짓는다**(supabase: Auth/Storage/Functions/Realtime/PostgREST, Firebase 등). 충돌은 단일 모듈 빌드에선 안 보이고 **합성 루트(앱)에서만** 터진다 — 앱 빌드까지 가야 발견된다.
+
+### 2026-06-28 — Swift 호환성 심볼 링크 에러(swiftCompatibility56/Concurrency)는 의존 정리/정적링크로
+- 상황: 전체 앱 링크에서 `Undefined symbols: __swift_FORCE_LOAD_$_swiftCompatibilityConcurrency` 실패. 출처는 `GTMAppAuth`(GoogleSignIn 전이 의존) — 낮은 배포타깃으로 컴파일돼 compat 셰임을 강제로드하는데 앱 링크에서 못 찾음. (앞서 동일 증상이 동적 FirebaseCore에서도 났고 `.staticFramework`로 해결.)
+- 교정: GoogleSignIn/Kakao는 **코드에서 미사용**(소셜 보류)이라 MutterApp deps에서 **제거**(미사용 의존이 깨진 링크를 끌고 들어옴). Firebase는 `Tuist/Package.swift`에서 `.staticFramework`로 둠.
+- 규칙: **`__swift_FORCE_LOAD_$_swiftCompatibility*` 링크 실패 = 어떤 SPM 산물이 낮은 배포타깃으로 compat 셰임을 강제로드하는 것.** 해당 산물이 미사용이면 의존에서 제거하고, 필요하면 `PackageSettings.productTypes`에서 `.staticFramework`로(또는 배포타깃 상향). 재도입 시(예: 네이티브 Google 로그인) 같은 처리 필요.
+
 ### 2026-06-28 — `tuist build | tail`은 빌드 실패를 가린다 (파이프 종료코드)
 - 상황: `mise exec -- tuist build X 2>&1 | tail -12`를 `run_in_background`로 돌렸더니 완료 알림이 "exit code 0"이라 그린으로 오인할 뻔했다. 실제로는 `tail`의 종료코드(0)였고 tuist는 error 65로 실패(FirebaseCore Ld 링커 에러)였다.
 - 교정: 출력 **내용**을 `grep -E 'Build Succeeded|BUILD FAILED|error:'`로 확인하거나, `set -o pipefail`을 켜고 `> file 2>&1; echo "exit=$?"`로 tuist의 진짜 종료코드를 잡는다.

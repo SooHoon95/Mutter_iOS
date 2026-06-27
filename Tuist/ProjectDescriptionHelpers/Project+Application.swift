@@ -20,10 +20,10 @@ extension Project {
     let targets = makeAppTargets(
       name: name,
       destinations: destinations,
+      // L10n 코드젠(localization·swiftGen)은 Mutter 미사용(색은 모듈별 resourceSynthesizers).
+      // 빌드 시 SwiftLint만 유지(품질). 입력 누락으로 깨지지 않게 lint만 둔다.
       scripts: [
-        .prebuildScript(.swiftLint, name: "Lint"),
-        .prebuildScript(.localization, name: "Generate Localization"),
-        .prebuildScript(.swiftGen, name: "SwiftGen")
+        .prebuildScript(.swiftLint, name: "Lint")
       ],
       dependencies: dependencies,
       testDependencies: testDependencies

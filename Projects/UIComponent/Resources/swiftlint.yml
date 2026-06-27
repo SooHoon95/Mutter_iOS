@@ -1,0 +1,25 @@
+# Mutter SwiftLint 설정 — 빌드 시 경고만(빌드 비차단). 스타일 가이드 보조용.
+disabled_rules:
+  - trailing_whitespace
+  - todo
+  - line_length
+  - type_name
+  - identifier_name
+  - function_body_length
+  - type_body_length
+  - file_length
+  - cyclomatic_complexity
+  - function_parameter_count
+  - large_tuple
+  - nesting
+  - for_where
+  - multiple_closures_with_trailing_closure
+  - opening_brace
+  - trailing_comma
+
+excluded:
+  - "**/Derived"
+  - "**/.build"
+  - "Tuist"
+
+# 모든 위반은 warning(빌드 실패 방지) — strict 미사용.
