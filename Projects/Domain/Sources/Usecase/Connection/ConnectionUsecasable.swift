@@ -1,0 +1,16 @@
+import Foundation
+
+/// 연결 유스케이스 — 독점 1:1 연결(초대·수락·해제) + 연결 상대에게 발송.
+public protocol ConnectionUsecasable {
+  /// 초대 토큰 생성 → 공유용 토큰 반환.
+  func createInvite() async throws -> String
+  /// 초대 미리보기(수락 가능 여부 판단).
+  func invite(token: String) async throws -> ConnectInvite
+  /// 초대 수락(양쪽 미연결일 때만 — 서버에서 강제).
+  func accept(token: String) async throws
+  func myConnections() async throws -> [Connection]
+  /// 연결 해제(편지·받은함은 보존).
+  func disconnect() async throws
+  /// 연결된 상대에게 편지 발송(delivery 토큰 동반).
+  func send(letterId: String, recipientId: String, token: String) async throws
+}
