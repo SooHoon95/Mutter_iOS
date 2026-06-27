@@ -2,6 +2,7 @@
 
 > 승인된 모듈 분할(`module split`)의 구현 레벨 상세. Tuist 스캐폴드는 Mercury 1:1 복제,
 > 백엔드는 Supabase 그대로 재사용(supabase-swift). 편지 = 테마 본문 1장 + 음악 1곡.
+> v5 패리티(2026-06-27 reconcile): 읽음확인(`letter_opens`/`record_letter_open`/`get_my_letter_opens`)·예약공개(`revealAt`)·답장·이어쓰기 반영.
 
 ## 의존성 그래프 (확정)
 ```
@@ -19,7 +20,7 @@ MutterApp : 전체(합성 루트)
 
 ## 1. AppFoundation (deps: 없음)
 - **DI** `MutterContainer`(=Mercury MercuryContainer 복제): `register<T>(_:instance:)`, `resolve<T>()`. 프로퍼티래퍼 `@Inject` / `@LazyInject`.
-- **MutterError**: Supabase/네트워크 에러 → 사용자 메시지(한국어) 정규화. 케이스: `network`, `unauthorized`, `notFound`, `rateLimited`, `wrongPassword`, `linkRevoked`, `linkExpired`, `server(String)`, `unknown`.
+- **MutterError**: Supabase/네트워크 에러 → 사용자 메시지(한국어) 정규화. 케이스: `network`, `unauthorized`, `notFound`, `rateLimited`, `wrongPassword`, `linkRevoked`, `linkExpired`, `linkNotYetRevealed(Date)`, `server(String)`, `unknown`.
 - **Define**: `UserDefaultsKey`(세션·온보딩), `AppConfig`(Supabase URL/anonKey — xcconfig→Info.plist 주입), `Deeplink`(host/path).
 - **ViewModifiers**: `ViewDidLoadModifier` 등. **Extension/**: Date/String/Color(hex) 등.
 - **NetworkMonitor**: 연결 상태.
@@ -38,7 +39,7 @@ MutterApp : 전체(합성 루트)
 struct Letter { let id: String; var title: String; var body: String; var templateId: String; var cue: MusicCue? }   // body=본문 1장, cue=음악 1곡
 struct MusicCue { enum Source { case soundcloud, hosted }; let source: Source; let ref: String; let startMs: Int? }
 struct Track { let id, title, author: String; let license: String; let url: String; let mood: String }              // CC0 카탈로그
-struct DeliveryLink { let token: String; let letterId: String; let hasPassword: Bool; let expiresAt: Date?; let revoked: Bool }
+struct DeliveryLink { let token: String; let letterId: String; let hasPassword: Bool; let expiresAt: Date?; let revealAt: Date?; let revoked: Bool }   // revealAt: 예약공개(이 시각 이후에만 열림)
 struct LetterPayload { let id, title, body, templateId: String; let cue: MusicCue?; let audioDisabled: Bool }          // 수신 페이로드
 struct Profile { let id: String; var nickname: String? }
 struct Connection { let userId: String; let nickname: String?; let connectedAt: Date }
@@ -46,6 +47,7 @@ struct ConnectInvite { let inviterId: String; let inviterNickname: String?; let 
 struct InboxItem { let letterId, token, title: String; let savedAt: Date }
 struct Counterpart { let userId: String; let nickname: String?; let exchangeCount: Int }
 struct ThreadLetter { let letterId: String; let direction: Direction; let token: String?; let title: String; let sentAt: Date }  // Direction: sent/received
+struct LetterOpenSummary { let letterId: String; let openCount: Int; let lastOpenedAt: Date }   // 읽음확인 롤업(발신자용)
 ```
 
 ### Usecasable (핵심 메서드 — async throws)
@@ -55,7 +57,8 @@ struct ThreadLetter { let letterId: String; let direction: Direction; let token:
 | Profile | `myProfile() -> Profile?` · `updateNickname(_)` · `deleteAccount()` |
 | Letter | `create(draft) -> Letter` · `update(id, draft)` · `letter(id) -> Letter?` · `myLetters() -> [Letter]` · `delete(id)` · `ensureCue(_) -> MusicCue`(무음0: 미선택 시 기본 CC0) |
 | Catalog | `all() -> [Track]` · `track(id) -> Track?` · `byMood(_) -> [Track]` |
-| Delivery | `issue(letterId, password?) -> DeliveryLink` · `revoke(token)` · `links(letterId) -> [DeliveryLink]` · `open(token, password?) -> LetterPayload` |
+| Delivery | `issue(letterId, password?, revealAt?) -> DeliveryLink` · `revoke(token)` · `links(letterId) -> [DeliveryLink]` · `open(token, password?) -> LetterPayload`(예약 전이면 `linkNotYetRevealed`) |
+| Receipt | `recordOpen(token)`(수신자 ▶ 시 호출, 무계정 OK) · `myLetterOpens() -> [LetterOpenSummary]`(발신자 롤업) |
 | Inbox | `save(token)` · `myInbox() -> [InboxItem]` |
 | Connection | `createInvite(token) -> String` · `invite(token) -> ConnectInvite` · `accept(token)` · `myConnections() -> [Connection]` · `disconnect()` · `send(letterId, recipientId, token)` |
 | Thread | `counterparts() -> [Counterpart]` · `thread(counterpartId) -> [ThreadLetter]` · `sentWithRecipients() -> [...]` |
@@ -70,7 +73,7 @@ struct ThreadLetter { let letterId: String; let direction: Direction; let token:
 
 ## 5. Infrastructure (deps: AppFoundation, Domain, Networking)
 - `FeatureRepository/<영역>/`: Domain `<X>Repositorable` **구현**. `Model/`에 DTO(Codable) + `Mapper`(DTO↔Domain).
-- **RPC 17개 매핑**(메서드 1:1): `get_letter_by_token`(2-arg)→open · `issue_link`·`revoke_link`·`list`(delivery_links select) · `save_to_inbox`·`get_my_inbox` · `get_my_sent_with_recipients`·`get_counterparts`·`get_thread` · `create/get/accept_connect_invite`·`get_my_connections`·`send_to_connection`·`disconnect_connection` · `report_takedown` · `delete_my_account`. 테이블 직접: `profiles`(upsert), `letters`(CRUD).
+- **RPC 매핑(~20, 메서드 1:1)**: `get_letter_by_token`(2-arg, reveal 게이트)→open · `issue_link`(reveal_at 포함)·`revoke_link`·`list`(delivery_links select) · `record_letter_open`(읽음확인 기록)·`get_my_letter_opens`(발신자 롤업) · `save_to_inbox`·`get_my_inbox` · `get_my_sent_with_recipients`·`get_counterparts`·`get_thread` · `create/get/accept_connect_invite`·`get_my_connections`·`send_to_connection`·`disconnect_connection` · `report_takedown`·`disable_letter_audio` · `delete_my_account`. 테이블 직접: `profiles`(upsert), `letters`(CRUD), `letter_opens`(읽음확인).
 - **`paragraphs jsonb`↔`body` 변환**: 저장 시 body를 빈 줄 split → paragraphs[], cue는 paragraphs[0].cue. 로드 시 역변환. (웹과 동일 계약)
 - `Service/`: `PushTokenService`(FCM 토큰 등록 → `push_tokens` 테이블). `UserDefaults/`: 로컬 캐시.
 
@@ -94,10 +97,11 @@ Compose(미리듣기)·Viewer(수신 재생)가 `LetterAudioPlayer` 공유.
 ## 8. Feature 모듈 (각 deps: UIComponent·Router·Domain[, +AudioSync])
 구조: `public/{<F>View, <F>ViewFactory}` · `internal/{SubViews, ModelData}`. ModelData = `@MainActor ObservableObject`, `@Inject var usecase: <X>Usecasable`.
 - **Auth**: 코드/비번/소셜/Apple 로그인. `AuthModelData`.
-- **Compose**(+Audio): `LetterPaperView` 위 WYSIWYG 편집 + 템플릿 픽커 + 음악 1곡 선택 + 저장/보내기. `ComposeModelData`.
-- **Viewer**(+Audio): 딥링크/내편지 네이티브 열람 + 열기 게이트 + `LetterAudioPlayer`. `ViewerModelData`.
-- **Delivery/Inbox/Connections/Threads/Profile/Home/Legal**: 웹 대응 화면 1:1.
-- **Home**: 우체통(보낸 편지 수 비주얼) + 바로가기. **MainTab**: 루트 탭(ViewFactory로 각 탭 구성).
+- **Compose**(+Audio): `LetterPaperView` 위 WYSIWYG 편집 + 템플릿 픽커 + 음악 1곡 선택 + 저장/보내기. **이어쓰기**(letterId 로드해 재편집). `ComposeModelData`.
+- **Viewer**(+Audio): 딥링크/내편지 네이티브 열람 + 열기 게이트 + `LetterAudioPlayer` + **읽음확인 기록**(▶ 시 `recordOpen`) + **예약공개 게이트**(revealAt 전이면 "이 시각에 열려요"). `ViewerModelData`.
+- **Delivery**: 발급(암호 ON)·만료·revoke + **예약공개(revealAt)**. **Inbox/Connections/Profile/Legal**: 웹 대응 화면 1:1.
+- **Threads**: 상대별 주고받음 + **답장**(→ Compose에 상대 preselect, `send_to_connection` 재사용 — 새 RPC 없음).
+- **Home**: 우체통(보낸 편지 수 비주얼) + 바로가기 + **읽음상태 표시**(`myLetterOpens`). **MainTab**: 루트 탭(ViewFactory로 각 탭 구성).
 
 ## 9. MutterApp (합성 루트)
 - **DI 등록**: 모든 Repository 구현·UseCase·SupabaseProvider를 `MutterContainer`에 register.
