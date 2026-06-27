@@ -2,6 +2,11 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-27 — 색·리소스는 Asset 카탈로그 + SwiftGen(`Asset.Colors`)로, hex 확장 금지
+- 상황: AppFoundation에 `Color(hex:)` 확장을 만들어 색을 직접 다루려 했다.
+- 교정: "Asset 카탈로그에 디자인 시스템으로 만들고 `Asset.Colors.x.color`(Tuist SwiftGen 생성)로 써라. 모르면 Mercury 봐라."
+- 규칙: **색/이미지 리소스는 `Resources/Assets/*.xcassets`(colorset) + `swiftgen.yml`(Tools/swiftgen)로 `Asset.Colors.*`/`Asset.Images.*` 타입세이프 접근자를 생성해 쓴다.** 코드 hex 확장 금지. 디자인 토큰은 **UIComponent** 소관(AppFoundation 아님). 표준 패턴 = Mercury `Projects/UIComponent/Resources/Assets/` + `swiftgen.yml`.
+
 ### 2026-06-27 — 클론 식별자는 "원본 스캐폴드"를 보고 정한다 (설계문서만 믿지 말 것)
 - 상황: 에러 타입을 `module-architecture.md`(설계 SSOT)가 `AppError`(제네릭)로 적어 그대로 따랐는데, DI 컨테이너는 `MutterContainer`(브랜드명)라 명명 규칙이 어긋났다.
 - 교정: 사용자가 "Mercury 보고 정하라" → 원본 Mercury는 `MercuryError`·`MercuryContainer`로 **전부 프로젝트명 브랜딩**. 따라서 Mutter는 `MutterError`가 정합 → `AppError`→`MutterError` 전수 플립.
