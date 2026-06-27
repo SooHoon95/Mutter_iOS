@@ -1,0 +1,4 @@
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
+#include "Mutter.xcconfig"
+
+APS_ENVIRONMENT = development
