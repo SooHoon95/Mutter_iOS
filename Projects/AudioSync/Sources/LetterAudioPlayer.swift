@@ -6,11 +6,12 @@ import Domain
 /// 게이트 언락(▶) 시 시작해 끝까지 재생한다(스크롤 동기 없음 — PRD v5 단일트랙).
 /// 무음0: SC 실패 시 항상 CC0로 폴백한다.
 @MainActor
-public final class LetterAudioPlayer: ObservableObject {
-  @Published public private(set) var isPlaying = false
-  @Published public private(set) var isReady = false
+@Observable
+public final class LetterAudioPlayer {
+  public private(set) var isPlaying = false
+  public private(set) var isReady = false
   /// 현재 소스. SoundCloud면 `attachmentView`(숨김 WKWebView)를 수신 화면이 배치해야 한다.
-  @Published public private(set) var currentSource: TrackSource?
+  public private(set) var currentSource: TrackSource?
 
   private let audioUsecase: AudioUsecasable
 
