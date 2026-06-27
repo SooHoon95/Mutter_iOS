@@ -14,6 +14,8 @@ public enum MutterColor {
 
   /// 골드 CTA/액센트
   public static let gold = Asset.Colors.gold.color
+  /// 밝은 골드 — 포일 그라데이션 상단 광택
+  public static let goldLight = Asset.Colors.goldLight.color
   /// 진한 골드 — 그라데이션 하단/그림자
   public static let goldDeep = Asset.Colors.goldDeep.color
   /// 연한 골드 — 표면/배지
@@ -25,4 +27,11 @@ public enum MutterColor {
   public static let ivory = Asset.Colors.ivory.color
   /// 순백 표면
   public static let surface = Asset.Colors.surface.color
+
+  /// 골드 포일 그라데이션(웹 --gold-gradient, 135°). CTA 배경에 사용.
+  public static let goldGradient = LinearGradient(
+    colors: [goldLight, gold, goldDeep],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+  )
 }

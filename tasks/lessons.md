@@ -2,6 +2,11 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-28 — `.task(id:)` 재로드를 `@State` 가드로 막지 말 것 (셀프리뷰 발견)
+- 상황: `CachedAsyncImage`에서 `.task(id: url)` 안의 `load()`에 `if uiImage != nil { return }` 가드를 뒀다. 빌드는 그린이지만, 뷰가 재사용되어 `url`이 바뀌면 `uiImage`는 아직 이전 이미지(non-nil)라 가드가 새 url 로드를 막아 **stale 이미지**가 남는다(리스트 셀 재활용·아바타 교체).
+- 교정: 가드 제거. `.task(id:)`가 이미 id별 1회 실행·취소를 보장하므로, 로드는 매 id마다 수행하고 `Task.isCancelled`만 확인한다(메모리 캐시 히트면 즉시).
+- 규칙: **`.task(id:)`/`.onChange`로 외부 입력에 반응하는 뷰에서, 재실행을 "이전 결과가 있으면 스킵"하는 `@State` 가드로 억제하지 않는다.** 중복 방지는 id 기반 재실행 + 캐시 계층에 맡기고, 비동기 완료 후엔 `Task.isCancelled`로 취소를 확인해 stale 커밋을 막는다. 컴파일 그린 ≠ 동작 정확 — 뷰 재사용 시나리오를 항상 점검한다.
+
 ### 2026-06-27 — 색·리소스는 Asset 카탈로그 + SwiftGen(`Asset.Colors`)로, hex 확장 금지
 - 상황: AppFoundation에 `Color(hex:)` 확장을 만들어 색을 직접 다루려 했다.
 - 교정: "Asset 카탈로그에 디자인 시스템으로 만들고 `Asset.Colors.x.color`(Tuist SwiftGen 생성)로 써라. 모르면 Mercury 봐라."

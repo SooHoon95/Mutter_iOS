@@ -1,27 +1,46 @@
 import SwiftUI
 
-/// Mutter 그림자 토큰. 웹 tokens.css의 shadow 이식. 색은 디자인 시스템 색만 사용(하드코딩 금지).
-public struct MutterShadow {
-  public let color: Color
-  public let radius: CGFloat
-  public let x: CGFloat
-  public let y: CGFloat
+/// Mutter 그림자 토큰. 웹 `tokens.css`의 shadow 이식.
+/// 색은 디자인 시스템 색(`MutterColor`)만 사용한다 — hex 하드코딩 금지.
+/// `.shadows(_:)` 모디파이어로 적용한다(Mercury `MercuryShadow` 패턴).
+public enum MutterShadow {
+  /// 부드러운 표면 그림자 (웹 --shadow-soft)
+  case soft
+  /// 카드 그림자 (웹 --shadow-card)
+  case card
+  /// 골드 CTA 하이라이트 (웹 --shadow-gold)
+  case gold
 
-  public init(color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-    self.color = color
-    self.radius = radius
-    self.x = x
-    self.y = y
+  var color: Color {
+    switch self {
+    case .soft, .card: MutterColor.ink
+    case .gold: MutterColor.goldDeep
+    }
   }
 
-  /// 골드 CTA 하이라이트 그림자 (웹 --shadow-gold)
-  public static let gold = MutterShadow(color: MutterColor.goldDeep.opacity(0.5), radius: 13, x: 0, y: 10)
-  /// 부드러운 표면 그림자
-  public static let soft = MutterShadow(color: MutterColor.ink.opacity(0.12), radius: 8, x: 0, y: 4)
-}
+  var opacity: CGFloat {
+    switch self {
+    case .soft: 0.12
+    case .card: 0.16
+    case .gold: 0.5
+    }
+  }
 
-public extension View {
-  func mutterShadow(_ shadow: MutterShadow) -> some View {
-    self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
+  var radius: CGFloat {
+    switch self {
+    case .soft: 8
+    case .card: 16
+    case .gold: 13
+    }
+  }
+
+  var x: CGFloat { 0 }
+
+  var y: CGFloat {
+    switch self {
+    case .soft: 4
+    case .card: 8
+    case .gold: 10
+    }
   }
 }
