@@ -2,6 +2,11 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-28 — `tuist build | tail`은 빌드 실패를 가린다 (파이프 종료코드)
+- 상황: `mise exec -- tuist build X 2>&1 | tail -12`를 `run_in_background`로 돌렸더니 완료 알림이 "exit code 0"이라 그린으로 오인할 뻔했다. 실제로는 `tail`의 종료코드(0)였고 tuist는 error 65로 실패(FirebaseCore Ld 링커 에러)였다.
+- 교정: 출력 **내용**을 `grep -E 'Build Succeeded|BUILD FAILED|error:'`로 확인하거나, `set -o pipefail`을 켜고 `> file 2>&1; echo "exit=$?"`로 tuist의 진짜 종료코드를 잡는다.
+- 규칙: **빌드/테스트를 파이프(`| tail`/`| grep`)로 넘길 땐 종료코드를 신뢰하지 않는다.** `set -o pipefail`을 쓰거나 산출물 텍스트에서 성공/실패 토큰을 직접 확인한다. 백그라운드 작업의 "exit 0"도 파이프 끝 명령의 코드일 수 있다.
+
 ### 2026-06-28 — `.task(id:)` 재로드를 `@State` 가드로 막지 말 것 (셀프리뷰 발견)
 - 상황: `CachedAsyncImage`에서 `.task(id: url)` 안의 `load()`에 `if uiImage != nil { return }` 가드를 뒀다. 빌드는 그린이지만, 뷰가 재사용되어 `url`이 바뀌면 `uiImage`는 아직 이전 이미지(non-nil)라 가드가 새 url 로드를 막아 **stale 이미지**가 남는다(리스트 셀 재활용·아바타 교체).
 - 교정: 가드 제거. `.task(id:)`가 이미 id별 1회 실행·취소를 보장하므로, 로드는 매 id마다 수행하고 `Task.isCancelled`만 확인한다(메모리 캐시 히트면 즉시).

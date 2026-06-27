@@ -11,6 +11,6 @@ public protocol ConnectionUsecasable {
   func myConnections() async throws -> [Connection]
   /// 연결 해제(편지·받은함은 보존).
   func disconnect() async throws
-  /// 연결된 상대에게 편지 발송(delivery 토큰 동반).
-  func send(letterId: String, recipientId: String, token: String) async throws
+  /// 연결된 상대에게 편지 발송(전달 토큰은 구현부에서 생성).
+  func send(letterId: String, recipientId: String) async throws
 }

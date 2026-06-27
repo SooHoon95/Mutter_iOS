@@ -14,10 +14,12 @@ let packageSettings = PackageSettings(
     "Realtime": .framework,
     "Storage": .framework,
     "Functions": .framework,
-    "FirebaseCore": .framework,
-    "FirebaseMessaging": .framework,
-    "FirebaseCrashlytics": .framework,
-    "FirebaseAnalytics": .framework,
+    // Firebase는 정적 링크(공식 권장). 동적 .framework로 빌드 시 FirebaseCoreInternal의
+    // Swift 호환성 심볼(swiftCompatibilityConcurrency 등)이 링크에서 누락된다.
+    "FirebaseCore": .staticFramework,
+    "FirebaseMessaging": .staticFramework,
+    "FirebaseCrashlytics": .staticFramework,
+    "FirebaseAnalytics": .staticFramework,
     "Testing": .framework,
     "KakaoSDKCommon": .framework,
     "KakaoSDKAuth": .framework,

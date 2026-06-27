@@ -28,7 +28,7 @@ public final class ConnectionUsecase: ConnectionUsecasable {
     try await repository.disconnect()
   }
 
-  public func send(letterId: String, recipientId: String, token: String) async throws {
-    try await repository.send(letterId: letterId, recipientId: recipientId, token: token)
+  public func send(letterId: String, recipientId: String) async throws {
+    try await repository.send(letterId: letterId, recipientId: recipientId)
   }
 }
