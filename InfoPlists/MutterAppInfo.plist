@@ -23,6 +23,12 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 
+	<!-- Supabase 자격값: Sensitive.xcconfig(미추적)의 빌드 설정을 주입. 소스 하드코딩 금지. -->
+	<key>SUPABASE_URL</key>
+	<string>$(SUPABASE_URL)</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>$(SUPABASE_ANON_KEY)</string>
+
 	<!-- 딥링크: 커스텀 스킴(개발/테스트용). 실제 /l/·/connect/ 수신은 Universal Links(https)로,
 	     Associated Domains 엔타이틀먼트(applinks:도메인) 추가 시 onOpenURL이 받는다. -->
 	<key>CFBundleURLTypes</key>
