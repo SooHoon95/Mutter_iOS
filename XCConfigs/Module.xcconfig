@@ -1,6 +1,7 @@
 #include "./Sensitive.xcconfig"
 
-DEVELOPMENT_TEAM = M3U22RZ325
+// 개발: 비움(프레임워크는 CODE_SIGNING_REQUIRED=NO라 팀 불요). 앱 서명 시 앱 팀을 따른다.
+DEVELOPMENT_TEAM =
 PRODUCT_NAME = $(TARGET_NAME)
 SUPPORTS_MACCATALYST = NO
 SWIFT_VERSION = 5.9

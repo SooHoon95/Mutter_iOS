@@ -1,15 +1,18 @@
 #include "./MarketingVersion.xcconfig"
 #include "./Sensitive.xcconfig"
 
-CODE_SIGN_IDENTITY = iPhone Development
-IPHONEOS_DEPLOYMENT_TARGET = 16.0
+CODE_SIGN_IDENTITY = Apple Development
+IPHONEOS_DEPLOYMENT_TARGET = 18.0
 PRODUCT_NAME = $(TARGET_NAME)
 SUPPORTS_MACCATALYST = NO
 SWIFT_VERSION = 5.9
 TARGETED_DEVICE_FAMILY = 1
 OTHER_LDFLAGS = $(inherited) -ObjC
 CODE_SIGN_STYLE = Automatic
-DEVELOPMENT_TEAM = M3U22RZ325
+// 개발: 비워서 Xcode가 네 개인(무료) 팀을 쓰게 함.
+// Xcode → Mutter 타깃 → Signing & Capabilities에서 본인 Personal Team 선택.
+// (매 tuist generate 후 재선택이 귀찮으면 여기에 개인 Team ID를 박아라.)
+DEVELOPMENT_TEAM =
 CODE_SIGNING_REQUIRED = YES
 CODE_SIGNING_ALLOWED = YES
 VERSIONING_SYSTEM = Apple Generic
