@@ -13,7 +13,7 @@ public struct AuthView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
 
       VStack(spacing: 24) {
         Spacer()
@@ -21,10 +21,10 @@ public struct AuthView: View {
         VStack(spacing: 8) {
           Text("Mutter")
             .fonts(.display)
-            .foregroundStyle(MutterColor.ink)
+            .foregroundStyle(Asset.Colors.ink.color)
           Text("연출되는 편지")
             .fonts(.bodyMedium)
-            .foregroundStyle(MutterColor.inkSoft)
+            .foregroundStyle(Asset.Colors.inkSoft.color)
         }
 
         VStack(spacing: 12) {
@@ -37,12 +37,12 @@ public struct AuthView: View {
           if let message = model.errorMessage {
             Text(message)
               .fonts(.caption)
-              .foregroundStyle(MutterColor.goldDeep)
+              .foregroundStyle(Asset.Colors.goldDeep.color)
               .multilineTextAlignment(.center)
           }
         }
         .padding(20)
-        .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+        .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
         .shadows(.soft)
 
         socialSection
@@ -73,7 +73,7 @@ public struct AuthView: View {
     VStack(spacing: 12) {
       Text("\(model.email)로 보낸 6자리 코드를 입력하세요")
         .fonts(.caption)
-        .foregroundStyle(MutterColor.inkSoft)
+        .foregroundStyle(Asset.Colors.inkSoft.color)
         .multilineTextAlignment(.center)
       field("인증 코드", text: $model.code, keyboard: .numberPad)
       MutterButton("확인", isLoading: model.isLoading, isEnabled: !model.code.isEmpty) {
@@ -91,7 +91,7 @@ public struct AuthView: View {
       SecureField("비밀번호", text: $model.password)
         .textFieldStyle(.plain)
         .padding(14)
-        .background(MutterColor.ivory, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+        .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
       MutterButton("로그인", isLoading: model.isLoading, isEnabled: model.isEmailValid && !model.password.isEmpty) {
         Task { await model.signInWithPassword() }
       }
@@ -107,7 +107,7 @@ public struct AuthView: View {
     VStack(spacing: 8) {
       Text("또는")
         .fonts(.caption)
-        .foregroundStyle(MutterColor.inkFaint)
+        .foregroundStyle(Asset.Colors.inkFaint.color)
       HStack(spacing: 12) {
         socialButton("Apple로 계속")
         socialButton("Google로 계속")
@@ -121,12 +121,12 @@ public struct AuthView: View {
     } label: {
       Text(title)
         .fonts(.captionBold)
-        .foregroundStyle(MutterColor.ink)
+        .foregroundStyle(Asset.Colors.ink.color)
         .frame(maxWidth: .infinity, minHeight: 44)
-        .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+        .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
         .overlay(
           RoundedRectangle(cornerRadius: MutterRadius.md)
-            .stroke(MutterColor.inkFaint.opacity(0.3), lineWidth: 1)
+            .stroke(Asset.Colors.inkFaint.color.opacity(0.3), lineWidth: 1)
         )
     }
   }
@@ -140,6 +140,6 @@ public struct AuthView: View {
       .textInputAutocapitalization(.never)
       .autocorrectionDisabled()
       .padding(14)
-      .background(MutterColor.ivory, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+      .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
   }
 }

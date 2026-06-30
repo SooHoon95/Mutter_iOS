@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// 편지 템플릿 테마(웹 `templates.ts`의 `TemplateTheme` 이식).
-/// 색은 전부 `Asset.Theme.*`(xcassets) — 디자인시스템 색(`MutterColor`)과 분리된
+/// 색은 전부 `Asset.Theme.*`(xcassets) — 디자인시스템 색(`Asset.Colors`)과 분리된
 /// 테마별 콘텐츠 색이다. `id`는 웹/DB와 호환되는 문자열(Letter.templateId).
 public struct LetterTheme: Identifiable, Equatable {
   public let id: String

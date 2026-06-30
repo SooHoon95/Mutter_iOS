@@ -23,7 +23,7 @@ public struct ThreadsView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
       if model.counterparts.isEmpty && !model.isLoading {
         emptyState
       } else {
@@ -47,16 +47,16 @@ public struct ThreadsView: View {
 
   private func row(_ counterpart: Counterpart) -> some View {
     HStack(spacing: 12) {
-      Image(systemName: "person.crop.circle.fill").foregroundStyle(MutterColor.gold)
+      Image(systemName: "person.crop.circle.fill").foregroundStyle(Asset.Colors.gold.color)
       Text(counterpart.nickname ?? "이름 없음")
-        .fonts(.bodyMediumBold).foregroundStyle(MutterColor.ink)
+        .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
       Spacer()
       Text("\(counterpart.exchangeCount)통")
-        .fonts(.caption).foregroundStyle(MutterColor.inkSoft)
-      Image(systemName: "chevron.right").foregroundStyle(MutterColor.inkFaint)
+        .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
+      Image(systemName: "chevron.right").foregroundStyle(Asset.Colors.inkFaint.color)
     }
     .padding(16)
-    .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+    .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
     .shadows(.soft)
   }
 
@@ -70,7 +70,7 @@ public struct ThreadsView: View {
         }
         .padding(20)
       }
-      .background(MutterColor.ivory.ignoresSafeArea())
+      .background(Asset.Colors.ivory.color.ignoresSafeArea())
       .navigationTitle(counterpart.nickname ?? "편지")
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
@@ -89,12 +89,12 @@ public struct ThreadsView: View {
       if isSent { Spacer(minLength: 40) }
       VStack(alignment: isSent ? .trailing : .leading, spacing: 4) {
         Text(letter.title.isEmpty ? "편지" : letter.title)
-          .fonts(.bodyMediumBold).foregroundStyle(MutterColor.ink)
+          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
         Text(isSent ? "보냄" : "받음")
-          .fonts(.caption).foregroundStyle(MutterColor.inkSoft)
+          .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
       }
       .padding(14)
-      .background(isSent ? MutterColor.goldSoft : MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+      .background(isSent ? Asset.Colors.goldSoft.color : Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
       .onTapGesture {
         if !isSent, let token = letter.token {
           model.closeThread()
@@ -107,8 +107,8 @@ public struct ThreadsView: View {
 
   private var emptyState: some View {
     VStack(spacing: 8) {
-      Image(systemName: "bubble.left.and.bubble.right").font(.system(size: 32)).foregroundStyle(MutterColor.inkFaint)
-      Text("주고받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(MutterColor.inkSoft)
+      Image(systemName: "bubble.left.and.bubble.right").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+      Text("주고받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
   }
 }

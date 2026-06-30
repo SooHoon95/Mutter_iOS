@@ -9,7 +9,7 @@ public struct EqualizerView: View {
 
   @State private var phase = false
 
-  public init(barCount: Int = 4, color: Color = MutterColor.gold, isPlaying: Bool = true) {
+  public init(barCount: Int = 4, color: Color = Asset.Colors.gold.color, isPlaying: Bool = true) {
     self.barCount = barCount
     self.color = color
     self.isPlaying = isPlaying

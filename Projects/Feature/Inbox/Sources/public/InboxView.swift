@@ -15,7 +15,7 @@ public struct InboxView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
 
       if model.items.isEmpty && !model.isLoading {
         emptyState
@@ -37,25 +37,25 @@ public struct InboxView: View {
 
   private func row(_ item: InboxItem) -> some View {
     HStack(spacing: 12) {
-      Image(systemName: "envelope.fill").foregroundStyle(MutterColor.gold)
+      Image(systemName: "envelope.fill").foregroundStyle(Asset.Colors.gold.color)
       VStack(alignment: .leading, spacing: 4) {
         Text(item.title.isEmpty ? "제목 없는 편지" : item.title)
-          .fonts(.bodyMediumBold).foregroundStyle(MutterColor.ink).lineLimit(1)
+          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
         Text(Self.dateText(item.savedAt))
-          .fonts(.caption).foregroundStyle(MutterColor.inkSoft)
+          .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
       }
       Spacer()
-      Image(systemName: "chevron.right").foregroundStyle(MutterColor.inkFaint)
+      Image(systemName: "chevron.right").foregroundStyle(Asset.Colors.inkFaint.color)
     }
     .padding(16)
-    .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+    .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
     .shadows(.soft)
   }
 
   private var emptyState: some View {
     VStack(spacing: 8) {
-      Image(systemName: "tray").font(.system(size: 32)).foregroundStyle(MutterColor.inkFaint)
-      Text("받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(MutterColor.inkSoft)
+      Image(systemName: "tray").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+      Text("받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
   }
 

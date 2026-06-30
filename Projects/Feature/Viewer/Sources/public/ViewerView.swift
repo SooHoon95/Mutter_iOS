@@ -27,8 +27,9 @@ public struct ViewerView: View {
   public var body: some View {
     ZStack {
       // 숨김 오디오 뷰(SoundCloud WKWebView). 소스 타입을 모른 채 계층에 둔다(없으면 표시 안 함).
-      if let attachment = model.player.currentSource?.attachmentView {
-        attachment
+      // 소스 인스턴스에 .id를 묶어 재렌더마다 WKWebView가 재생성(위젯 JS 소실)되는 것을 막는다.
+      if let source = model.player.currentSource, let attachment = source.attachmentView {
+        attachment.id(ObjectIdentifier(source))
       }
       content
     }
@@ -39,18 +40,18 @@ public struct ViewerView: View {
   private var content: some View {
     switch model.state {
     case .loading:
-      stage(MutterColor.ivory) {
-        ProgressView().tint(MutterColor.gold)
+      stage(Asset.Colors.ivory.color) {
+        ProgressView().tint(Asset.Colors.gold.color)
       }
     case .passwordRequired:
       passwordGate
     case .revealPending(let date):
       revealPending(date)
     case .failed(let message):
-      stage(MutterColor.ivory) {
+      stage(Asset.Colors.ivory.color) {
         VStack(spacing: 8) {
-          Text("편지를 열 수 없어요").fonts(.title).foregroundStyle(MutterColor.ink)
-          Text(message).fonts(.bodyMedium).foregroundStyle(MutterColor.inkSoft)
+          Text("편지를 열 수 없어요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
+          Text(message).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
         }
       }
     case .ready(let payload, let theme):
@@ -125,13 +126,13 @@ public struct ViewerView: View {
   }
 
   private var passwordGate: some View {
-    stage(MutterColor.ivory) {
+    stage(Asset.Colors.ivory.color) {
       VStack(spacing: 12) {
-        Text("암호가 걸린 편지예요").fonts(.title).foregroundStyle(MutterColor.ink)
+        Text("암호가 걸린 편지예요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
         SecureField("암호", text: $model.password)
           .textFieldStyle(.plain)
           .padding(14)
-          .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+          .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
         MutterButton("열기", isEnabled: !model.password.isEmpty) {
           Task { await model.submitPassword() }
         }
@@ -142,12 +143,12 @@ public struct ViewerView: View {
   }
 
   private func revealPending(_ date: Date) -> some View {
-    stage(MutterColor.ink) {
+    stage(Asset.Colors.ink.color) {
       VStack(spacing: 12) {
-        Image(systemName: "lock.fill").font(.system(size: 28)).foregroundStyle(MutterColor.gold)
-        Text("아직 열 수 없는 편지예요").fonts(.title).foregroundStyle(MutterColor.ivory)
+        Image(systemName: "lock.fill").font(.system(size: 28)).foregroundStyle(Asset.Colors.gold.color)
+        Text("아직 열 수 없는 편지예요").fonts(.title).foregroundStyle(Asset.Colors.ivory.color)
         Text(Self.dateFormatter.string(from: date) + "에 열려요")
-          .fonts(.bodyMedium).foregroundStyle(MutterColor.goldSoft)
+          .fonts(.bodyMedium).foregroundStyle(Asset.Colors.goldSoft.color)
       }
       .padding(32)
     }

@@ -55,10 +55,17 @@ public struct MutterButton: View {
     .opacity(isEnabled ? 1 : 0.5)
   }
 
+  /// 골드 포일 그라데이션(웹 --gold-gradient, 135°). primary CTA 배경.
+  private static let goldGradient = LinearGradient(
+    colors: [Asset.Colors.goldLight.color, Asset.Colors.gold.color, Asset.Colors.goldDeep.color],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+  )
+
   private var foregroundColor: Color {
     switch style {
-    case .primary: MutterColor.onGold
-    case .secondary, .ghost: MutterColor.ink
+    case .primary: Asset.Colors.onGold.color
+    case .secondary, .ghost: Asset.Colors.ink.color
     }
   }
 
@@ -66,9 +73,9 @@ public struct MutterButton: View {
   private var background: some View {
     switch style {
     case .primary:
-      MutterColor.goldGradient
+      Self.goldGradient
     case .secondary:
-      MutterColor.goldSoft
+      Asset.Colors.goldSoft.color
     case .ghost:
       Color.clear
     }

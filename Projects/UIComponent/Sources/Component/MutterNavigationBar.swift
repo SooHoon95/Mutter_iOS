@@ -25,7 +25,7 @@ public struct MutterNavigationBar<LeftContent: View, RightContent: View>: View {
       if let title {
         Text(title)
           .fonts(titleFont)
-          .foregroundStyle(MutterColor.ink)
+          .foregroundStyle(Asset.Colors.ink.color)
           .lineLimit(1)
       }
 
@@ -41,6 +41,6 @@ public struct MutterNavigationBar<LeftContent: View, RightContent: View>: View {
     .frame(height: 52)
     .frame(maxWidth: .infinity)
     .contentShape(Rectangle())
-    .background(MutterColor.surface)
+    .background(Asset.Colors.surface.color)
   }
 }

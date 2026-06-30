@@ -25,57 +25,73 @@ public struct HomeView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          header
-          MutterButton("새 편지 쓰기") { onCompose() }
+      Asset.Colors.ivory.color.ignoresSafeArea()
+      VStack(alignment: .leading, spacing: 20) {
+        header
+        MutterButton("새 편지 쓰기") { onCompose() }
 
-          if model.rows.isEmpty && !model.isLoading {
-            emptyState
-          } else {
-            LazyVStack(spacing: 10) {
-              ForEach(model.rows) { row in
-                letterCard(row)
-              }
+        if model.rows.isEmpty && !model.isLoading {
+          emptyState
+          Spacer()
+        } else {
+          // 스와이프 삭제 — 네이티브 .swipeActions는 List가 필요해 카드 목록을 List로.
+          List {
+            ForEach(model.rows) { row in
+              letterCard(row)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                  Button(role: .destructive) {
+                    Task { await model.delete(row.letter.id) }
+                  } label: {
+                    Label("삭제", systemImage: "trash")
+                  }
+                }
             }
           }
+          .listStyle(.plain)
+          .scrollContentBackground(.hidden)
         }
-        .padding(24)
-        .frame(maxWidth: 600)
+
+        if let message = model.errorMessage {
+          Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+        }
       }
+      .padding(24)
+      .frame(maxWidth: 600)
     }
     .task { await model.load() }
   }
 
   private var header: some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text("우체통").fonts(.titleLarge).foregroundStyle(MutterColor.ink)
+      Text("우체통").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
       Text("보낸 편지 \(model.sentCount)통 · 열어본 \(model.openedCount)통")
-        .fonts(.bodyMedium).foregroundStyle(MutterColor.inkSoft)
+        .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
     }
   }
 
   private func letterCard(_ row: HomeModelData.LetterRow) -> some View {
     HStack(spacing: 12) {
       Image(systemName: row.isOpened ? "envelope.open.fill" : "envelope.fill")
-        .foregroundStyle(row.isOpened ? MutterColor.gold : MutterColor.inkFaint)
+        .foregroundStyle(row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
       VStack(alignment: .leading, spacing: 4) {
         Text(row.letter.title.isEmpty ? "제목 없는 편지" : row.letter.title)
-          .fonts(.bodyMediumBold).foregroundStyle(MutterColor.ink).lineLimit(1)
+          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
         if let summary = row.openSummary {
-          Text("\(summary.openCount)번 열림").fonts(.caption).foregroundStyle(MutterColor.gold)
+          Text("\(summary.openCount)번 열림").fonts(.caption).foregroundStyle(Asset.Colors.gold.color)
         } else {
-          Text("아직 열리지 않음").fonts(.caption).foregroundStyle(MutterColor.inkFaint)
+          Text("아직 열리지 않음").fonts(.caption).foregroundStyle(Asset.Colors.inkFaint.color)
         }
       }
       Spacer()
       Button("이어쓰기") { onEdit(row.letter.id) }
         .fonts(.captionBold)
-        .foregroundStyle(MutterColor.goldDeep)
+        .foregroundStyle(Asset.Colors.goldDeep.color)
     }
     .padding(16)
-    .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+    .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
     .shadows(.soft)
     .contentShape(Rectangle())
     .onTapGesture { onPreview(row.letter.id) }
@@ -83,8 +99,8 @@ public struct HomeView: View {
 
   private var emptyState: some View {
     VStack(spacing: 8) {
-      Image(systemName: "paperplane").font(.system(size: 32)).foregroundStyle(MutterColor.inkFaint)
-      Text("아직 보낸 편지가 없어요").fonts(.bodyLarge).foregroundStyle(MutterColor.inkSoft)
+      Image(systemName: "paperplane").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+      Text("아직 보낸 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
     .frame(maxWidth: .infinity)
     .padding(.top, 40)

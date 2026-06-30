@@ -12,7 +12,9 @@ public struct ComposeView: View {
     letterUsecase: LetterUsecasable,
     catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
+    deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
+    linkBaseURL: String,
     onDone: @escaping () -> Void
   ) {
     _model = State(initialValue: ComposeModelData(
@@ -20,18 +22,21 @@ public struct ComposeView: View {
       letterUsecase: letterUsecase,
       catalogUsecase: catalogUsecase,
       connectionUsecase: connectionUsecase,
+      deliveryUsecase: deliveryUsecase,
       audioUsecase: audioUsecase,
+      linkBaseURL: linkBaseURL,
       onDone: onDone
     ))
   }
 
   public var body: some View {
     ZStack {
-      // SoundCloud 미리듣기용 숨김 오디오 뷰.
-      if let attachment = model.player.currentSource?.attachmentView {
-        attachment
+      // SoundCloud 미리듣기용 숨김 오디오 뷰. 소스 인스턴스에 .id를 묶어 재렌더마다
+      // WKWebView가 재생성(위젯 JS 컨텍스트 소실)되는 것을 막는다 — 소스가 바뀔 때만 교체.
+      if let source = model.player.currentSource, let attachment = source.attachmentView {
+        attachment.id(ObjectIdentifier(source))
       }
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
 
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
@@ -39,7 +44,7 @@ public struct ComposeView: View {
           paper
           musicSection
           if let message = model.errorMessage {
-            Text(message).fonts(.caption).foregroundStyle(MutterColor.goldDeep)
+            Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
           }
           actions
         }
@@ -48,6 +53,9 @@ public struct ComposeView: View {
       }
     }
     .task { await model.load() }
+    .sheet(isPresented: $model.showSendSheet) {
+      SendSheet(model: model)
+    }
   }
 
   // MARK: - Template
@@ -62,10 +70,10 @@ public struct ComposeView: View {
                 .fill(theme.background)
                 .frame(width: 44, height: 44)
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(
-                  theme.id == model.templateId ? MutterColor.gold : theme.border,
+                  theme.id == model.templateId ? Asset.Colors.gold.color : theme.border,
                   lineWidth: theme.id == model.templateId ? 2 : 1))
               Text(theme.name).fonts(.caption)
-                .foregroundStyle(theme.id == model.templateId ? MutterColor.ink : MutterColor.inkSoft)
+                .foregroundStyle(theme.id == model.templateId ? Asset.Colors.ink.color : Asset.Colors.inkSoft.color)
             }
           }
         }
@@ -107,15 +115,24 @@ public struct ComposeView: View {
   private var musicSection: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
-        Text("음악").fonts(.bodyMediumBold).foregroundStyle(MutterColor.ink)
+        Text("음악").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
         Spacer()
         if model.cue != nil {
           Button {
             Task { await model.previewAudio() }
           } label: {
             Image(systemName: model.player.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-              .font(.system(size: 22)).foregroundStyle(MutterColor.gold)
+              .font(.system(size: 22)).foregroundStyle(Asset.Colors.gold.color)
           }
+        }
+      }
+
+      // 현재 선택된 음악(호스티드/SoundCloud 공통) — 어떤 곡이 편지에 실릴지 명확히.
+      if let label = model.appliedCueLabel {
+        HStack(spacing: 6) {
+          Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 13)).foregroundStyle(Asset.Colors.gold.color)
+          Text("선택된 음악 · \(label)").fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
         }
       }
 
@@ -125,9 +142,9 @@ public struct ComposeView: View {
             Button { model.selectTrack(track) } label: {
               Text(track.title)
                 .fonts(.caption)
-                .foregroundStyle(isSelected(track) ? MutterColor.onGold : MutterColor.ink)
+                .foregroundStyle(isSelected(track) ? Asset.Colors.onGold.color : Asset.Colors.ink.color)
                 .padding(.horizontal, 12).padding(.vertical, 8)
-                .background(isSelected(track) ? MutterColor.gold : MutterColor.surface, in: Capsule())
+                .background(isSelected(track) ? Asset.Colors.gold.color : Asset.Colors.surface.color, in: Capsule())
             }
           }
         }
@@ -137,9 +154,9 @@ public struct ComposeView: View {
         TextField("SoundCloud 링크 붙여넣기", text: $model.soundcloudURL)
           .textFieldStyle(.plain)
           .padding(10)
-          .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+          .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
         Button("적용") { model.applySoundCloudURL() }
-          .fonts(.captionBold).foregroundStyle(MutterColor.goldDeep)
+          .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
       }
     }
   }
@@ -157,9 +174,16 @@ public struct ComposeView: View {
         MutterButton("답장 보내기", isLoading: model.isSaving) {
           Task { await model.sendReply() }
         }
-      }
-      MutterButton(model.isReply ? "임시 저장" : "저장", style: model.isReply ? .secondary : .primary, isLoading: model.isSaving) {
-        Task { await model.saveAndClose() }
+        MutterButton("임시 저장", style: .secondary, isLoading: model.isSaving) {
+          Task { await model.saveAndClose() }
+        }
+      } else {
+        MutterButton("저장하고 보내기", isLoading: model.isSaving) {
+          Task { await model.saveAndOpenSend() }
+        }
+        MutterButton("임시 저장", style: .secondary, isLoading: model.isSaving) {
+          Task { await model.saveAndClose() }
+        }
       }
     }
   }

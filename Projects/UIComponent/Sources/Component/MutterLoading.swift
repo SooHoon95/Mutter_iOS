@@ -23,12 +23,12 @@ public struct MutterLoadingView: View {
   public var body: some View {
     if model.isLoading {
       ZStack {
-        MutterColor.ink.opacity(0.12).ignoresSafeArea()
+        Asset.Colors.ink.color.opacity(0.12).ignoresSafeArea()
         ProgressView()
           .controlSize(.large)
-          .tint(MutterColor.gold)
+          .tint(Asset.Colors.gold.color)
           .padding(24)
-          .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+          .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
           .shadows(.card)
       }
       .transition(.opacity)

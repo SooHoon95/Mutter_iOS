@@ -8,20 +8,26 @@ public struct ComposeViewFactory: ViewFactory {
   private let letterUsecase: LetterUsecasable
   private let catalogUsecase: CatalogUsecasable
   private let connectionUsecase: ConnectionUsecasable
+  private let deliveryUsecase: DeliveryUsecasable
   private let audioUsecase: AudioUsecasable
+  private let linkBaseURL: String
   private let onDone: () -> Void
 
   public init(
     letterUsecase: LetterUsecasable,
     catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
+    deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
+    linkBaseURL: String,
     onDone: @escaping () -> Void
   ) {
     self.letterUsecase = letterUsecase
     self.catalogUsecase = catalogUsecase
     self.connectionUsecase = connectionUsecase
+    self.deliveryUsecase = deliveryUsecase
     self.audioUsecase = audioUsecase
+    self.linkBaseURL = linkBaseURL
     self.onDone = onDone
   }
 
@@ -42,7 +48,9 @@ public struct ComposeViewFactory: ViewFactory {
       letterUsecase: letterUsecase,
       catalogUsecase: catalogUsecase,
       connectionUsecase: connectionUsecase,
+      deliveryUsecase: deliveryUsecase,
       audioUsecase: audioUsecase,
+      linkBaseURL: linkBaseURL,
       onDone: onDone
     )
   }

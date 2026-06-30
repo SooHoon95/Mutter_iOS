@@ -13,28 +13,28 @@ struct NicknameOnboardView: View {
 
   var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
 
       VStack(spacing: 20) {
         Spacer()
         VStack(spacing: 8) {
           Text("어떻게 불러드릴까요?")
             .fonts(.titleLarge)
-            .foregroundStyle(MutterColor.ink)
+            .foregroundStyle(Asset.Colors.ink.color)
           Text("받는 사람에게 보일 이름이에요")
             .fonts(.bodyMedium)
-            .foregroundStyle(MutterColor.inkSoft)
+            .foregroundStyle(Asset.Colors.inkSoft.color)
         }
 
         TextField("닉네임", text: $model.nickname)
           .textFieldStyle(.plain)
           .padding(14)
-          .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+          .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
 
         if let message = model.errorMessage {
           Text(message)
             .fonts(.caption)
-            .foregroundStyle(MutterColor.goldDeep)
+            .foregroundStyle(Asset.Colors.goldDeep.color)
         }
 
         MutterButton("시작하기", isLoading: model.isLoading, isEnabled: model.isValid) {

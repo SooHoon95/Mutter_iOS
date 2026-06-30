@@ -19,11 +19,11 @@ public struct ConnectionsView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
           Text("연결")
-            .fonts(.titleLarge).foregroundStyle(MutterColor.ink)
+            .fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
           if model.isConnected {
             connectedCard
@@ -32,7 +32,7 @@ public struct ConnectionsView: View {
           }
 
           if let message = model.errorMessage {
-            Text(message).fonts(.caption).foregroundStyle(MutterColor.goldDeep)
+            Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
           }
         }
         .padding(24)
@@ -51,39 +51,39 @@ public struct ConnectionsView: View {
   private var connectedCard: some View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(spacing: 12) {
-        Image(systemName: "person.2.fill").foregroundStyle(MutterColor.gold)
+        Image(systemName: "person.2.fill").foregroundStyle(Asset.Colors.gold.color)
         Text(model.connection?.nickname ?? "연결된 사람")
-          .fonts(.bodyLargeBold).foregroundStyle(MutterColor.ink)
+          .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
       }
       Text("이 사람과 1:1로 연결돼 있어요.")
-        .fonts(.bodyMedium).foregroundStyle(MutterColor.inkSoft)
+        .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
       MutterButton("연결 해제", style: .ghost) { showDisconnectConfirm = true }
     }
     .padding(20)
-    .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+    .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
     .shadows(.soft)
   }
 
   private var inviteCard: some View {
     VStack(alignment: .leading, spacing: 16) {
       Text("아직 연결된 사람이 없어요")
-        .fonts(.bodyLargeBold).foregroundStyle(MutterColor.ink)
+        .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
       Text("초대 링크를 보내 한 사람과 연결하세요.")
-        .fonts(.bodyMedium).foregroundStyle(MutterColor.inkSoft)
+        .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
 
       if let token = model.inviteToken {
         let link = "\(inviteBaseURL)/connect/\(token)"
         HStack {
-          Text(link).fonts(.caption).foregroundStyle(MutterColor.inkMid).lineLimit(1)
+          Text(link).fonts(.caption).foregroundStyle(Asset.Colors.inkMid.color).lineLimit(1)
           Spacer()
           Button {
             UIPasteboard.general.string = link
           } label: {
-            Image(systemName: "doc.on.doc").foregroundStyle(MutterColor.gold)
+            Image(systemName: "doc.on.doc").foregroundStyle(Asset.Colors.gold.color)
           }
         }
         .padding(12)
-        .background(MutterColor.ivory, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+        .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
       } else {
         MutterButton("초대 링크 만들기", isLoading: model.isLoading) {
           Task { await model.createInvite() }
@@ -91,7 +91,7 @@ public struct ConnectionsView: View {
       }
     }
     .padding(20)
-    .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+    .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
     .shadows(.soft)
   }
 }

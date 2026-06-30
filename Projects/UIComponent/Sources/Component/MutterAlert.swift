@@ -72,7 +72,7 @@ public struct MutterAlertView: View {
   public var body: some View {
     if let type = model.type {
       ZStack {
-        MutterColor.ink.opacity(0.4).ignoresSafeArea()
+        Asset.Colors.ink.color.opacity(0.4).ignoresSafeArea()
           .onTapGesture {}
 
         VStack(spacing: 20) {
@@ -80,7 +80,7 @@ public struct MutterAlertView: View {
         }
         .padding(24)
         .frame(maxWidth: 340)
-        .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+        .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
         .shadows(.card)
         .padding(.horizontal, 24)
         .scaleEffect(animate ? 1 : 0.85)
@@ -117,12 +117,12 @@ public struct MutterAlertView: View {
     VStack(spacing: 8) {
       Text(title)
         .fonts(.title)
-        .foregroundStyle(MutterColor.ink)
+        .foregroundStyle(Asset.Colors.ink.color)
         .multilineTextAlignment(.center)
       if !message.isEmpty {
         Text(message)
           .fonts(.bodyMedium)
-          .foregroundStyle(MutterColor.inkSoft)
+          .foregroundStyle(Asset.Colors.inkSoft.color)
           .multilineTextAlignment(.center)
       }
     }

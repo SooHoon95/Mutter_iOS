@@ -26,12 +26,25 @@ final class ComposeModelData {
   var errorMessage: String?
   var savedToast = false
 
+  // MARK: - 보내기 시트(저장 후 발급/발송)
+  var showSendSheet = false
+  private(set) var sentLetterId: String?   // 시트 대상 편지 id(저장으로 확정).
+  var usePassword = true                    // 전달 링크 암호 기본 ON(기본값이 프라이버시).
+  var password = ""
+  var issuedLink: String?                   // 발급된 전달 링크 전체 URL.
+  var isIssuing = false
+  var connections: [Connection] = []        // 연결된 사람(독점 1:1 — 0 또는 1).
+  var isSending = false                     // 연결 상대 직접 발송 중.
+
   let player: LetterAudioPlayer
 
-  private let mode: Mode
+  private var mode: Mode                     // 첫 저장 후 .edit로 승격(중복 생성 방지).
+  private let replyRecipientId: String?      // 답장 대상 — mode 승격과 무관하게 isReply/발송 타깃 유지.
   private let letterUsecase: LetterUsecasable
   private let catalogUsecase: CatalogUsecasable
   private let connectionUsecase: ConnectionUsecasable
+  private let deliveryUsecase: DeliveryUsecasable
+  private let linkBaseURL: String
   private let onDone: () -> Void
 
   init(
@@ -39,20 +52,28 @@ final class ComposeModelData {
     letterUsecase: LetterUsecasable,
     catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
+    deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
+    linkBaseURL: String,
     onDone: @escaping () -> Void
   ) {
     self.mode = mode
+    if case .reply(let recipientId) = mode { self.replyRecipientId = recipientId } else { self.replyRecipientId = nil }
     self.letterUsecase = letterUsecase
     self.catalogUsecase = catalogUsecase
     self.connectionUsecase = connectionUsecase
+    self.deliveryUsecase = deliveryUsecase
+    self.linkBaseURL = linkBaseURL
     self.player = LetterAudioPlayer(audioUsecase: audioUsecase)
     self.onDone = onDone
   }
 
+  /// 전달 링크 발급 가능 여부(암호 ON이면 암호 입력 필수).
+  var canIssueLink: Bool { usePassword ? !password.isEmpty : true }
+
   var theme: LetterTheme { LetterTheme.theme(id: templateId) }
   var allThemes: [LetterTheme] { LetterTheme.all }
-  var isReply: Bool { if case .reply = mode { return true } else { return false } }
+  var isReply: Bool { replyRecipientId != nil }
 
   func load() async {
     tracks = (try? await catalogUsecase.all()) ?? []
@@ -73,17 +94,47 @@ final class ComposeModelData {
     soundcloudURL = ""
   }
 
-  /// SoundCloud paste-URL을 큐로(공식 임베드 전제 — 검증은 추후 oEmbed).
+  /// SoundCloud paste-URL을 큐로 적용. 형식(soundcloud.com 호스트)만 동기 검증하고,
+  /// 임베드 가능 여부(oEmbed)는 재생 시점에 확인되며 실패 시 CC0로 폴백한다(무음0).
   func applySoundCloudURL() {
+    errorMessage = nil
     let trimmed = soundcloudURL.trimmingCharacters(in: .whitespaces)
     guard !trimmed.isEmpty else { return }
+    guard Self.isValidSoundCloudURL(trimmed) else {
+      errorMessage = "SoundCloud 링크가 맞는지 확인해 주세요 (soundcloud.com 주소)."
+      return
+    }
     cue = MusicCue(source: .soundcloud, ref: trimmed, startMs: 0)
+    soundcloudURL = ""   // 적용됨 — 입력칸을 비워 즉시 피드백.
   }
+
+  /// SoundCloud 공식 도메인만 허용(스트림 rip/프록시 금지 — 임베드 가능 URL 전제).
+  static func isValidSoundCloudURL(_ raw: String) -> Bool {
+    guard let host = URL(string: raw)?.host?.lowercased() else { return false }
+    return host == "soundcloud.com" || host.hasSuffix(".soundcloud.com")
+  }
+
+  /// 현재 선택된 음악의 사용자용 이름(명사구). nil이면 미선택.
+  var appliedCueLabel: String? {
+    guard let cue else { return nil }
+    switch cue.source {
+    case .soundcloud:
+      return "SoundCloud 트랙"
+    case .hosted:
+      return tracks.first { $0.url == cue.ref }.map { "‘\($0.title)’" } ?? "기본 제공 음악"
+    }
+  }
+
+  private var isPreparingPreview = false
 
   func previewAudio() async {
     guard let cue else { return }
+    if player.isPlaying { player.pause(); return }
+    guard !isPreparingPreview else { return }   // 준비 중 중복 탭 방지(소스 중복 로드 레이스).
+    isPreparingPreview = true
+    defer { isPreparingPreview = false }
     await player.prepare(cue: cue)
-    player.toggle()
+    player.play()   // toggle 대신 명시적 play — 준비 후 항상 재생 의도 전달.
   }
 
   /// 저장(이어쓰기면 update, 아니면 create). 무음0은 usecase가 보장.
@@ -98,8 +149,13 @@ final class ComposeModelData {
       case .edit(let id):
         try await letterUsecase.update(id: id, draft)
         return id
-      case .new, .reply:
+      case .new:
         let letter = try await letterUsecase.create(draft)
+        mode = .edit(letter.id)   // 이후 저장은 갱신 — 반복 저장 시 중복 생성 방지.
+        return letter.id
+      case .reply:
+        let letter = try await letterUsecase.create(draft)
+        mode = .edit(letter.id)   // 답장도 첫 저장 후 갱신 — 중복 생성 방지(isReply는 유지).
         return letter.id
       }
     } catch {
@@ -118,7 +174,7 @@ final class ComposeModelData {
 
   /// 답장 발송 — 저장 후 연결 상대에게 전송.
   func sendReply() async {
-    guard case .reply(let recipientId) = mode else { return }
+    guard let recipientId = replyRecipientId else { return }
     guard let letterId = await save() else { return }
     do {
       try await connectionUsecase.send(letterId: letterId, recipientId: recipientId)
@@ -126,5 +182,58 @@ final class ComposeModelData {
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? "보내지 못했어요."
     }
+  }
+
+  // MARK: - 보내기 시트
+
+  /// 저장 후 보내기 시트 열기(새 편지/이어쓰기). 연결 상대를 미리 불러온다.
+  func saveAndOpenSend() async {
+    guard let id = await save() else { return }
+    sentLetterId = id
+    issuedLink = nil
+    password = ""
+    usePassword = true
+    errorMessage = nil
+    connections = (try? await connectionUsecase.myConnections()) ?? []
+    showSendSheet = true
+  }
+
+  /// 전달 링크 발급(시트). 무마찰 위해 예약공개는 생략 — 풀옵션은 전달 관리 화면.
+  func issueLink() async {
+    guard let id = sentLetterId else { return }
+    isIssuing = true
+    errorMessage = nil
+    defer { isIssuing = false }
+    do {
+      let link = try await deliveryUsecase.issue(
+        letterId: id,
+        password: usePassword ? password : nil,
+        revealAt: nil
+      )
+      issuedLink = "\(linkBaseURL)/l/\(link.token)"
+      password = ""
+    } catch {
+      errorMessage = (error as? MutterError)?.userMessage ?? "링크를 만들지 못했어요."
+    }
+  }
+
+  /// 연결된 상대에게 링크 없이 직접 발송(시트). 성공 시 닫고 홈으로.
+  func sendToConnection(_ recipientId: String) async {
+    guard let id = sentLetterId else { return }
+    isSending = true
+    errorMessage = nil
+    defer { isSending = false }
+    do {
+      try await connectionUsecase.send(letterId: id, recipientId: recipientId)
+      finishSend()
+    } catch {
+      errorMessage = (error as? MutterError)?.userMessage ?? "보내지 못했어요."
+    }
+  }
+
+  /// 보내기 완료 — 시트 닫고 제작 화면도 닫는다.
+  func finishSend() {
+    showSendSheet = false
+    onDone()
   }
 }

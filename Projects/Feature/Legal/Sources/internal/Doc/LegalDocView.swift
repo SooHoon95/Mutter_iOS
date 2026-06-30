@@ -9,11 +9,11 @@ struct LegalDocView: View {
 
   var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
       ScrollView {
         VStack(alignment: .leading, spacing: 16) {
-          Text(title).fonts(.titleLarge).foregroundStyle(MutterColor.ink)
-          Text(text).fonts(.bodyMedium).foregroundStyle(MutterColor.inkMid)
+          Text(title).fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
+          Text(text).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkMid.color)
         }
         .padding(24)
         .frame(maxWidth: 600, alignment: .leading)

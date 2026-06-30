@@ -2,6 +2,42 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-30 — 서비스 로케이터엔 전역만, usecase/repository는 호출부 생성자 주입 (Mercury 패턴 검증)
+- 상황: `AppDependencies.registerAll()`이 usecase 11개를 전부 `MutterContainer`(서비스 로케이터)에 등록하고, RootViewFactory·탭 ViewWrapper 6개가 `@Inject`로 꺼내 썼다. 사용자 지적: "당장 안 쓰는 usecase까지 다 전역에 들고 있는 건 Mercury 방식이 아니다. Mercury는 SessionManager 같은 진짜 전역만 로케이터에 넣고 usecase는 DI(생성자 주입)로 준다."
+- 검증: 실제 Mercury(`/Users/choesuhun/Desktop/Code/Mercury`) 확인 결과 정확히 그러함. 로케이터 register = 전역 cross-cutting만(SignInInformationManager=세션/토큰, Toast/Alert/Loading/Config). usecase·repository **0개**. usecase는 `RootViewFactory` 각 case와 `*ViewWrapperView.init()`에서 `XUsecase(repository: XRepository())`로 **그 자리에 인라인 조립 → 생성자 주입**.
+- 교정: Mutter도 동일하게. `AppDependencies` god-object 삭제. `AppDelegate.didFinishLaunching`은 전역(`SessionManagable`)만 등록. RootViewFactory·6개 ViewWrapper의 `@Inject` 제거하고 호출부에서 usecase 인라인 생성(repo는 이미 `provider: SupabaseProvider = .shared` 기본값이라 `LetterRepository()` 무인자 가능). 코디네이터 콜백 때문에 init에서 피처뷰 전체를 못 만드는 래퍼는 **usecase만 init에서 `let`으로 조립**하고 body에서 피처뷰+코디네이터 클로저 구성. 남은 `@Inject`는 `sessionManager`(전역) 둘뿐.
+- 규칙: **서비스 로케이터/DIContainer엔 앱 전체가 공유하는 진짜 전역(세션·토스트·얼럿·로딩·config)만 등록한다.** usecase/repository는 컨테이너에 넣지 말고 의존성 방향대로 호출부(Factory·ViewWrapper)에서 생성자 주입한다. `@Inject`(호출부 주입)도 결국 전역 로케이터를 찌르는 것이므로, usecase에 `@Inject`를 쓰면 그게 곧 "전역 등록"이다 — 둘은 한 몸. 클론 프로젝트의 DI 방식은 **원본(Mercury) 실제 코드**로 확인해 맞춘다(추정 금지).
+
+### 2026-06-29 — 다중 파일 일괄 치환 루프는 zsh `read -d ''`로 짜지 말 것 — 조용히 0건 처리
+- 상황: `MutterColor.X`→`Asset.Colors.X.color`를 24개 파일에 일괄 치환하려고 `grep -rlZ ... | while IFS= read -r -d '' f; do perl -pi -e ... "$f"; done`을 돌렸다. 에러 없이 끝났지만 **치환이 하나도 안 됐다**(직후 grep으로 잔존 전부 확인). 원인: Claude Bash가 zsh로 초기화돼 `read -r -d ''`의 빈-구분자 시맨틱이 bash와 달라 루프 본문이 안 돌았다. "exit 0 + 무변경"이라 성공으로 오인하기 쉬움.
+- 교정: `grep -rl "패턴" Projects --include="*.swift" | xargs perl -pi -e 's/.../.../g'`로 전환(파일명 공백 없음 확인). 치환 직후 **반드시 `grep`으로 잔존=0 검증**.
+- 규칙: **이 저장소(zsh Bash)에서 다중 파일 일괄 치환은 `while read -d ''` 루프 대신 `grep -rl | xargs perl -pi -e`를 쓴다.** 균일 토큰 치환은 파일별 Read+Edit보다 스크립트가 빠르고 정확하되, 실행 후 grep으로 잔존 0과 의도치 않은 과치환(예: 복합값 `goldGradient`)을 동시에 확인한다. "에러 없음"을 "치환됨"으로 단정 금지.
+
+### 2026-06-29 — 리소스 추가/수정 후엔 Clean Build Folder 안 하면 "안 고쳐진 것처럼" 보인다
+- 상황: 번들 음원·웹뷰 fix·SC 레이스 fix를 차례로 넣었는데 사용자가 계속 "안 된다"고 함. 원인은 코드가 아니라 **빌드 캐시** — Xcode가 옛 산출물(리소스 번들 포함)을 재사용해 내 변경이 앱에 반영 안 됨. 사용자가 캐시를 날리자 그제서야 모든 fix가 한꺼번에 적용돼 동작. 디버깅이 "되는데/안 되는데"로 흔들려 시간 낭비.
+- 교정: 리소스(오디오·이미지·xcassets·tracks.json 등) 추가/변경 시 **반드시 `Clean Build Folder`(⇧⌘K) 후 Run**. 무음/무반응이 코드 수정 후에도 지속되면 "런타임 버그"로 단정 말고 **"옛 빌드를 돌리고 있나?"를 먼저 의심**.
+- 규칙: **리소스 번들에 영향 주는 변경 후 사용자에게 검증을 요청할 땐, 항상 "앱 삭제 + Clean Build Folder + Run"을 명시**한다. 내가 시뮬레이터를 직접 못 돌릴 땐 진단 로그(os.Logger category)를 심어 사용자 콘솔로 실패 지점을 받되, 먼저 클린 빌드부터 확인시킨다(stale 빌드면 로그조차 옛 코드 것).
+
+### 2026-06-29 — SoundCloud Widget은 READY 전에 play()가 오면 무음 — 소스가 재생의도(wantsPlay)를 기억해 READY 시 자동재생
+- 상황: SC가 미리보기에서 무음. 로그 순서가 `SC play() ready=false` → (웹뷰 로드) → `SC READY 수신` → `tryLoad 성공`. 즉 위젯 준비 **전에** `play()`가 호출돼 `window.scPlay` 미정의로 no-op 됐고, READY 후엔 아무도 재생을 재요청 안 해 영영 무음. (READY 자체는 정상 수신 = 위젯 로드는 성공.)
+- 교정: `SoundCloudSource`에 `wantsPlay` 플래그 — `play()`는 항상 의도를 기록하고 `isReady`면 즉시 JS, 아니면 보류. READY 핸들러에서 `wantsPlay`면 그 때 재생. `pause()`는 `wantsPlay=false`. 추가로 Compose `previewAudio`를 toggle→명시적 play/pause + `isPreparingPreview` 가드(준비 중 중복 탭에 의한 소스 중복 로드·toggle→pause 자기무효화 방지).
+- 규칙: **비동기 준비(WKWebView/위젯/원격 로드)가 필요한 재생 소스는 "재생 의도"를 준비 상태와 분리해 보관하고, 준비 완료 시 의도를 실행한다.** 준비 전에 온 제어 명령을 버리지 말 것. 호출부도 await-준비-후-재생 흐름에서 중복 진입을 가드한다.
+
+### 2026-06-29 — SwiftUI에서 숨김 WKWebView(오디오)를 마운트할 땐 `.id(ObjectIdentifier(source))`로 고정
+- 상황: SoundCloud 트랙이 미리보기에서 무음(호스티드 CC0 패드는 정상). 숨김 WKWebView를 `if let attachment = source.attachmentView { attachment }`로 마운트하는데, `attachmentView`가 매 접근마다 `AnyView(MutterWebView(...))`를 새로 생성. 부모 뷰가 재렌더(isPlaying/isReady 변화 등)되면 SwiftUI가 WKWebView를 재생성 → 위젯 JS 컨텍스트(`window.scPlay`)가 날아가 `play()`가 no-op → 무음(또는 READY 후 webview 교체로 제어 단절).
+- 교정: `if let source = model.player.currentSource, let attachment = source.attachmentView { attachment.id(ObjectIdentifier(source)) }`. 소스 인스턴스 ID로 뷰 정체성을 고정 → 소스가 바뀔 때만 webview 교체, 재렌더엔 유지. (WebView 설정 자체는 정상: `allowsInlineMediaPlayback=true` + `mediaTypesRequiringUserActionForPlayback=[]`. 1×1 숨김 webview 오디오 throttling은 다음 의심 후보.)
+- 규칙: **명령형 상태(WKWebView·AVPlayerLayer 등)를 담은 UIViewRepresentable을 computed 프로퍼티/AnyView로 매번 새로 만들어 조건부 마운트할 땐, 인스턴스에 묶인 안정적 `.id()`를 줘서 재렌더 시 재생성을 막는다.** 특히 JS 브리지로 제어하는 웹뷰는 재생성되면 네이티브→JS 명령이 죽은 컨텍스트로 가 조용히 실패한다. 무음/무반응이면 "뷰가 재생성되고 있나?"를 먼저 의심.
+
+### 2026-06-29 — 웹 상대 에셋경로(`/audio/x.m4a`)는 iOS에서 무음 — 번들 포함 + 재생시점 해석 필요
+- 상황: 기본 제공 CC0 음악이 iOS에서 안 들림. 원인: 카탈로그(`tracks.json`)의 `url`이 웹용 상대경로 `/audio/pixabay-calm-001.m4a`. 웹은 origin에 붙어 재생되지만, iOS `AVPlayer`는 스킴·호스트 없는 상대경로를 못 푼다. 게다가 `.m4a` 파일이 **웹 `public/audio`에만 있고 iOS 번들엔 미포함**이었다. `URL(string:"/audio/..")`는 nil이 아니라 통과해버려(상대 URL) 에러 없이 **조용히 무음** → 재생 실패가 안 보였다.
+- 교정: ① 6개 `.m4a`를 `Projects/Infrastructure/Resources/audio/`에 번들(Tuist `Resources/**` 글로빙 → `Infrastructure_Infrastructure.bundle/`에 flat 포함, 빌드 산출물에서 확인). ② cue `ref`는 **이식가능 상대경로 그대로 유지**(웹·수신자·크로스기기 호환)하고, **재생 시점에만** `CatalogRepositorable.localAudioURL(for:)`(기본 nil + Infra 구현)로 번들 파일 URL 해석. `AudioUsecase.resolvePlayback`의 hosted 분기에서 로컬 우선·없으면 원격 폴백.
+- 규칙: **웹→iOS 포팅 시, 웹에서 origin-상대로 동작하던 에셋경로(오디오·이미지)는 iOS 앱 번들에 실제 파일을 포함하고 재생/표시 시점에 번들 URL로 해석한다.** 절대 파일 URL을 영속 데이터(cue/letter)에 저장하지 말 것(기기·번들 경로가 달라 수신자/크로스기기에서 깨진다) — 영속값은 이식가능 상대경로로, 해석은 플랫폼별 경계(Repository/Usecase)에서. `URL(string:)`이 상대경로에 대해 nil을 안 주므로 "주소 유효=재생 가능"으로 착각 금지.
+
+### 2026-06-29 — 비대화형 셸의 `tuist`는 mise 핀 버전이 아니라 전역(4.20.0)이 잡혀 그래프 디코드가 깨진다
+- 상황: 세션 초반엔 통과하던 `tuist generate`/`build`가 갑자기 `DecodingError.keyNotFound: Key 'name' not found ... Path: targets[3].settings[0]`로 실패. 매니페스트·소스는 안 건드렸는데도 그래프 로딩 자체가 깨짐. 원인: 활성 `tuist`=**4.20.0**(homebrew 전역)인데 프로젝트 `.mise.toml` 핀=**4.118.0**. 구버전(4.20) 디코더가 신버전(4.118) `Settings`/`Configuration` 스키마(`name` 키)를 못 읽음. Claude의 Bash는 비대화형이라 mise shim이 PATH에 없어 전역 바이너리가 잡힘(대화형 셸에선 mise 활성화돼 4.118이 잡혀 통과했던 것).
+- 교정: tuist를 **항상 `mise exec -- tuist ...`로** 호출(핀 버전 강제). `mise which tuist`로 핀 경로 확인(`~/.local/share/mise/installs/tuist/4.118.0/tuist`).
+- 규칙: **이 저장소에서 tuist/xcodegen 등 mise로 핀된 툴은 Bash에서 반드시 `mise exec -- <tool>` 접두사로 실행한다.** 맨 `tuist`는 전역(4.20.0)이라 매니페스트 디코드가 깨진다. "전엔 됐는데 갑자기 디코드 에러" = 버전 불일치 의심 → `tuist version` vs `.mise.toml` 핀을 먼저 대조.
+
 ### 2026-06-28 — Feature 모듈명이 의존 SDK 모듈명과 충돌하면 합성 루트에서 깨진다
 - 상황: feature 모듈 `Auth`가 supabase-swift의 `Auth` 모듈과 동명. 개별 빌드는 OK(Auth feature는 supabase 미링크)지만, **MutterApp이 둘 다 링크**하자 `import Auth`가 supabase Auth로 해석돼 `cannot find 'AuthViewFactory' in scope`.
 - 교정: feature를 `AuthFeature`로 rename(디렉터리 `git mv` + Project.swift name + `.feature(target:)` 의존 + `import` 전부). `.featurePath(target)=Projects/Feature/<target>`라 디렉터리명=타깃명 일치 필요.

@@ -16,9 +16,9 @@ public enum ToastType {
 
   var iconColor: Color {
     switch self {
-    case .common: MutterColor.goldSoft
-    case .success: MutterColor.gold
-    case .error: MutterColor.goldLight
+    case .common: Asset.Colors.goldSoft.color
+    case .success: Asset.Colors.gold.color
+    case .error: Asset.Colors.goldLight.color
     }
   }
 }
@@ -84,12 +84,12 @@ private struct ToastRow: View {
         .foregroundStyle(item.type.iconColor)
       Text(item.title)
         .fonts(.bodyMediumBold)
-        .foregroundStyle(MutterColor.ivory)
+        .foregroundStyle(Asset.Colors.ivory.color)
         .lineLimit(2)
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-    .background(MutterColor.ink, in: Capsule())
+    .background(Asset.Colors.ink.color, in: Capsule())
     .shadows(.card)
     .opacity(visible ? 1 : 0)
     .offset(y: visible ? 0 : 16)

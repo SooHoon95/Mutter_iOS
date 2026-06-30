@@ -22,30 +22,30 @@ public struct ProfileView: View {
 
   public var body: some View {
     ZStack {
-      MutterColor.ivory.ignoresSafeArea()
+      Asset.Colors.ivory.color.ignoresSafeArea()
 
       ScrollView {
         VStack(alignment: .leading, spacing: 24) {
           Text("프로필")
             .fonts(.titleLarge)
-            .foregroundStyle(MutterColor.ink)
+            .foregroundStyle(Asset.Colors.ink.color)
 
           VStack(alignment: .leading, spacing: 8) {
-            Text("닉네임").fonts(.captionBold).foregroundStyle(MutterColor.inkSoft)
+            Text("닉네임").fonts(.captionBold).foregroundStyle(Asset.Colors.inkSoft.color)
             TextField("닉네임", text: $model.nickname)
               .textFieldStyle(.plain)
               .padding(14)
-              .background(MutterColor.surface, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+              .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
             MutterButton("저장", isLoading: model.isLoading, isEnabled: !model.nickname.isEmpty) {
               Task { await model.saveNickname() }
             }
           }
 
           if let message = model.errorMessage {
-            Text(message).fonts(.caption).foregroundStyle(MutterColor.goldDeep)
+            Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
           }
 
-          Divider().background(MutterColor.inkFaint.opacity(0.2))
+          Divider().background(Asset.Colors.inkFaint.color.opacity(0.2))
 
           VStack(spacing: 12) {
             MutterButton("로그아웃", style: .secondary) {
@@ -79,9 +79,9 @@ private extension View {
       if flag.wrappedValue {
         Text(text)
           .fonts(.bodyMediumBold)
-          .foregroundStyle(MutterColor.ivory)
+          .foregroundStyle(Asset.Colors.ivory.color)
           .padding(.horizontal, 16).padding(.vertical, 12)
-          .background(MutterColor.ink, in: Capsule())
+          .background(Asset.Colors.ink.color, in: Capsule())
           .padding(.bottom, 24)
           .task {
             try? await Task.sleep(for: .seconds(1.5))
