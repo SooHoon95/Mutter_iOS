@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import MediaPlayer
+import os
 
 /// 호스팅 오디오(CC0 폴백·Storage) 재생 — AVPlayer 기반.
 /// 백그라운드/잠금화면 재생을 위해 AVAudioSession(.playback) + 원격 명령(재생/일시정지)을 설정한다.
@@ -13,6 +14,7 @@ public final class HostedAudioSource: TrackSource {
   private var player: AVPlayer?
   private var endObserver: NSObjectProtocol?
   private var remoteConfigured = false
+  private static let log = Logger(subsystem: "com.efreedom.mutter", category: "audio")
 
   public var onFinish: (() -> Void)?
 
@@ -28,7 +30,10 @@ public final class HostedAudioSource: TrackSource {
   }
 
   public func load() async throws {
-    try configureAudioSession()
+    configureAudioSession()   // 비치명적 — 세션 설정 실패해도 재생은 시도한다(무음0).
+
+    let fileOK = url.isFileURL ? FileManager.default.fileExists(atPath: url.path) : true
+    Self.log.debug("Hosted load url=\(self.url.absoluteString, privacy: .public) isFile=\(self.url.isFileURL) exists=\(fileOK)")
 
     let item = AVPlayerItem(url: url)
     let player = AVPlayer(playerItem: item)
@@ -45,6 +50,7 @@ public final class HostedAudioSource: TrackSource {
 
   public func play() {
     player?.play()
+    Self.log.debug("Hosted play() rate=\(self.player?.rate ?? -1) itemStatus=\(self.player?.currentItem?.status.rawValue ?? -99)")
     updateNowPlaying(rate: 1)
   }
 
@@ -67,10 +73,14 @@ public final class HostedAudioSource: TrackSource {
     CMTime(value: CMTimeValue(ms), timescale: 1000)
   }
 
-  private func configureAudioSession() throws {
-    let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playback, mode: .default)
-    try session.setActive(true)
+  private func configureAudioSession() {
+    do {
+      let session = AVAudioSession.sharedInstance()
+      try session.setCategory(.playback, mode: .default)
+      try session.setActive(true)
+    } catch {
+      Self.log.error("AVAudioSession 설정 실패(무시): \(error.localizedDescription, privacy: .public)")
+    }
   }
 
   private func observeEnd(item: AVPlayerItem) {

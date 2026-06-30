@@ -23,6 +23,18 @@ public final class CatalogRepository: CatalogRepositorable {
     tracks.filter { $0.mood == mood }
   }
 
+  /// `/audio/pixabay-calm-001.m4a` → 번들된 CC0 음원 파일 URL.
+  /// (이미 절대 URL이면 nil 반환 → 호출부가 원격 스트리밍으로 폴백.)
+  public func localAudioURL(for ref: String) -> URL? {
+    if let scheme = URL(string: ref)?.scheme, !scheme.isEmpty { return nil } // http(s) 등 절대 URL은 그대로.
+    let filename = (ref as NSString).lastPathComponent
+    let name = (filename as NSString).deletingPathExtension
+    let ext = (filename as NSString).pathExtension
+    guard !name.isEmpty, !ext.isEmpty else { return nil }
+    return Bundle.module.url(forResource: name, withExtension: ext)
+      ?? Bundle.module.url(forResource: name, withExtension: ext, subdirectory: "audio")
+  }
+
   private static func loadBundledCatalog() -> [Track] {
     guard
       let url = Bundle.module.url(forResource: "tracks", withExtension: "json"),

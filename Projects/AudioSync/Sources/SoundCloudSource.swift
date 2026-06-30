@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 import AppFoundation
 import UIComponent
@@ -24,6 +25,9 @@ public final class SoundCloudSource: TrackSource {
   private let controller = MutterWebViewController()
   private var readyContinuation: CheckedContinuation<Void, Error>?
   private var isReady = false
+  /// 재생 의도. READY 전에 play()가 와도 기억했다가 위젯 준비 시 자동 재생한다(레이스 방지).
+  private var wantsPlay = false
+  private static let log = Logger(subsystem: "com.efreedom.mutter", category: "audio")
 
   public var onFinish: (() -> Void)?
 
@@ -33,6 +37,7 @@ public final class SoundCloudSource: TrackSource {
   }
 
   public func load() async throws {
+    Self.log.debug("SC load 시작 url=\(self.trackURL.absoluteString, privacy: .public)")
     try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
       self.readyContinuation = continuation
       // 타임아웃: READY가 안 오면 실패시켜 무음0 폴백을 유도한다.
@@ -40,16 +45,24 @@ public final class SoundCloudSource: TrackSource {
         try? await Task.sleep(for: .seconds(10))
         guard !self.isReady, let pending = self.readyContinuation else { return }
         self.readyContinuation = nil
+        Self.log.error("SC READY 타임아웃(10s) — 위젯 미로드 → CC0 폴백")
         pending.resume(throwing: MutterError(.network))
       }
     }
   }
 
   public func play() {
+    wantsPlay = true
+    guard isReady else {
+      Self.log.debug("SC play() 보류 — 위젯 준비 후 자동재생 예약")
+      return
+    }
+    Self.log.debug("SC play() 실행")
     controller.evaluateJavaScript("window.scPlay && window.scPlay();")
   }
 
   public func pause() {
+    wantsPlay = false
     controller.evaluateJavaScript("window.scPause && window.scPause();")
   }
 
@@ -93,9 +106,14 @@ public final class SoundCloudSource: TrackSource {
     case "ready":
       guard !isReady else { return }
       isReady = true
+      Self.log.debug("SC READY 수신 — 위젯 로드 완료")
       readyContinuation?.resume()
       readyContinuation = nil
       if startMs > 0 { seek(toMs: startMs) }
+      if wantsPlay {
+        Self.log.debug("SC READY 후 보류된 재생 실행")
+        controller.evaluateJavaScript("window.scPlay && window.scPlay();")
+      }
     case "finish":
       onFinish?()
     default:

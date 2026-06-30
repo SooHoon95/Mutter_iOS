@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 import Domain
 
@@ -14,6 +15,7 @@ public final class LetterAudioPlayer {
   public private(set) var currentSource: TrackSource?
 
   private let audioUsecase: AudioUsecasable
+  private static let log = Logger(subsystem: "com.efreedom.mutter", category: "audio")
 
   public init(audioUsecase: AudioUsecasable) {
     self.audioUsecase = audioUsecase
@@ -53,7 +55,11 @@ public final class LetterAudioPlayer {
   // MARK: - Private
 
   private func tryLoad(cue: MusicCue) async -> Bool {
-    guard let spec = try? audioUsecase.resolvePlayback(cue) else { return false }
+    guard let spec = try? audioUsecase.resolvePlayback(cue) else {
+      Self.log.error("resolvePlayback 실패 source=\(String(describing: cue.source)) ref=\(cue.ref, privacy: .public)")
+      return false
+    }
+    Self.log.debug("tryLoad source=\(String(describing: cue.source)) ref=\(cue.ref, privacy: .public)")
     let source = TrackSourceFactory.make(spec: spec)
     source.onFinish = { [weak self] in self?.handleFinish() }
     // attachmentView 마운트를 위해 source를 먼저 노출 → 이어서 load 대기(SC는 webview READY 필요).
@@ -62,8 +68,10 @@ public final class LetterAudioPlayer {
     do {
       try await source.load()
       isReady = true
+      Self.log.debug("tryLoad 성공 source=\(String(describing: cue.source))")
       return true
     } catch {
+      Self.log.error("source.load() 실패(폴백) source=\(String(describing: cue.source)): \(error.localizedDescription, privacy: .public)")
       currentSource = nil
       return false
     }

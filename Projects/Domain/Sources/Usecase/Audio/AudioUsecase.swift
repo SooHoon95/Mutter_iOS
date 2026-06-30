@@ -19,13 +19,17 @@ public final class AudioUsecase: AudioUsecasable {
   }
 
   public func resolvePlayback(_ cue: MusicCue) throws -> TrackSourceSpec {
-    guard let url = URL(string: cue.ref) else {
-      throw MutterError(.server("재생할 음원 주소가 올바르지 않아요."))
-    }
     switch cue.source {
     case .hosted:
+      // 호스팅 ref는 이식가능 상대경로(`/audio/x.m4a`) — 번들 파일로 우선 해석, 없으면 원격 URL.
+      guard let url = catalog.localAudioURL(for: cue.ref) ?? URL(string: cue.ref) else {
+        throw MutterError(.server("재생할 음원 주소가 올바르지 않아요."))
+      }
       return .hosted(url: url, startMs: cue.startMs)
     case .soundcloud:
+      guard let url = URL(string: cue.ref) else {
+        throw MutterError(.server("재생할 음원 주소가 올바르지 않아요."))
+      }
       return .soundcloud(trackURL: url, startMs: cue.startMs)
     }
   }
