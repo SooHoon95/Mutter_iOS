@@ -113,37 +113,26 @@ public struct ComposeView: View {
   // MARK: - Music
 
   private var musicSection: some View {
-    VStack(alignment: .leading, spacing: 10) {
-      HStack {
-        Text("음악").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
-        Spacer()
-        if model.cue != nil {
-          Button {
-            Task { await model.previewAudio() }
-          } label: {
-            MutterIcon(model.player.isPlaying ? Asset.Images.pause : Asset.Images.play, size: 24)
-              .foregroundStyle(Asset.Colors.gold.color)
-          }
-        }
+    VStack(alignment: .leading, spacing: 12) {
+      Text("함께 흐를 음악 · 한 곡")
+        .fonts(.captionBold).foregroundStyle(Asset.Colors.inkFaint.color)
+        .frame(maxWidth: .infinity, alignment: .leading)
+
+      // 선택된 곡 — 골드 플레이어 바(미리듣기).
+      if model.cue != nil {
+        MusicPlayerBar(
+          title: model.appliedCueLabel ?? "선택된 음악",
+          isPlaying: model.player.isPlaying,
+          onToggle: { Task { await model.previewAudio() } }
+        )
       }
 
-      // 현재 선택된 음악(호스티드/SoundCloud 공통) — 어떤 곡이 편지에 실릴지 명확히.
-      if let label = model.appliedCueLabel {
-        HStack(spacing: 6) {
-          MutterIcon(Asset.Images.checkCircle, size: 14).foregroundStyle(Asset.Colors.gold.color)
-          Text("선택된 음악 · \(label)").fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
-        }
-      }
-
+      // 무드 픽커 — CC0 트랙 칩.
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 8) {
           ForEach(model.tracks) { track in
-            Button { model.selectTrack(track) } label: {
-              Text(track.title)
-                .fonts(.caption)
-                .foregroundStyle(isSelected(track) ? Asset.Colors.onGold.color : Asset.Colors.ink.color)
-                .padding(.horizontal, 12).padding(.vertical, 8)
-                .background(isSelected(track) ? Asset.Colors.gold.color : Asset.Colors.surface.color, in: Capsule())
+            MutterChip(track.title, icon: Asset.Images.note, selected: isSelected(track)) {
+              model.selectTrack(track)
             }
           }
         }
