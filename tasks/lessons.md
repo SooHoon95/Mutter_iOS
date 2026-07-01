@@ -2,6 +2,11 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-07-01 — [재발] 카탈로그 2개 회귀가 또 터짐 (claude_design 임포트가 Images.xcassets 재생성)
+- 상황: 디자인 MCP로 이미지를 임포트하는 과정에서 별도 `Images.xcassets`가 다시 생성됨 → 2026-06-30 함정 ③ 그대로 재발. `Asset.Colors.Colors.gold`로 밀려 `MutterGradient.swift` 등 전부 컴파일 실패(빌드가 `Asset.Colors.gold`부터 못 찾음). 원인은 stencil 133행 `{% if catalogs.count > 1 %}`가 카탈로그명 래퍼를 켜는 것 — 근본은 "카탈로그가 2개가 됐다".
+- 조치: `Images.xcassets`의 `Images/`·`Social/`를 `Colors.xcassets/`로 이동, `Images.xcassets` 삭제 → 다시 카탈로그 1개. (`Social/`엔 provides-namespace 추가.)
+- **가드(에셋 임포트/디자인 반영 직후 필수)**: `find Projects/*/Resources -name '*.xcassets' -type d` 가 **정확히 1개**인지 확인. 2개 이상이면 즉시 하나로 병합(분류는 provides-namespace 하위 폴더로). 임포트 도구가 새 카탈로그를 만드는 경향이 있으니 임포트 후 항상 검사한다. → [[mutter-build-progress]]
+
 ### 2026-06-30 — Tuist 에셋 카탈로그에 이미지 추가 시 3가지 함정 (색 네임스페이스가 조용히 깨짐)
 - 상황: 디자인 시스템 SVG 아이콘을 iOS에 적용하려 Images.xcassets를 추가했더니 빌드가 3번 연속 다른 이유로 깨짐. 각 함정:
   - ① **stencil availability 충돌**: `Tuist/ResourceSynthesizers/Assets.stencil`이 iOS에서 `Color`/`Image`를 SwiftUI 타입(iOS 13+)으로 typealias하면서 그 확장/프로퍼티 init엔 UIKit 시절 `@available(iOS 8/11)`를 박음 → "initializer cannot be more available than enclosing scope". 이미지가 있을 때만 풀 템플릿이 트리거돼 드러남. → stencil의 해당 `@available`를 iOS 13.0으로 수정.
