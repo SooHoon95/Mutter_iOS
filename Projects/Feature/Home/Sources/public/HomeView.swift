@@ -3,7 +3,7 @@ import SwiftUI
 import Domain
 import UIComponent
 
-/// 홈(우체통) 탭 — 보낸 편지 수 비주얼 + 읽음 상태 + 새 편지/이어쓰기.
+/// 홈(우체통) 탭 — 골드 통계카드 + 새 편지 쓰기 + 최근 보낸 편지(읽음 배지). 디자인 시스템 반영.
 public struct HomeView: View {
   @State private var model: HomeModelData
   private let onCompose: () -> Void
@@ -26,15 +26,15 @@ public struct HomeView: View {
   public var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-      VStack(alignment: .leading, spacing: 20) {
-        header
-        MutterButton("새 편지 쓰기") { onCompose() }
+      VStack(alignment: .leading, spacing: 18) {
+        statCard
+        MutterButton("새 편지 쓰기", icon: Asset.Images.compose) { onCompose() }
 
         if model.rows.isEmpty && !model.isLoading {
           emptyState
           Spacer()
         } else {
-          // 스와이프 삭제 — 네이티브 .swipeActions는 List가 필요해 카드 목록을 List로.
+          sectionLabel("최근 보낸 편지")
           List {
             ForEach(model.rows) { row in
               letterCard(row)
@@ -48,6 +48,12 @@ public struct HomeView: View {
                     Label("삭제", systemImage: "trash")
                   }
                 }
+                .swipeActions(edge: .leading) {
+                  Button { onEdit(row.letter.id) } label: {
+                    Label("이어쓰기", systemImage: "pencil")
+                  }
+                  .tint(Asset.Colors.gold.color)
+                }
             }
           }
           .listStyle(.plain)
@@ -55,40 +61,55 @@ public struct HomeView: View {
         }
 
         if let message = model.errorMessage {
-          Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+          Text(message).fonts(.caption).foregroundStyle(Asset.Colors.danger.color)
         }
       }
-      .padding(24)
+      .padding(20)
       .frame(maxWidth: 600)
     }
     .task { await model.load() }
   }
 
-  private var header: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text("우체통").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
-      Text("보낸 편지 \(model.sentCount)통 · 열어본 \(model.openedCount)통")
-        .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
+  // MARK: - 골드 통계 카드
+
+  private var statCard: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text("보낸 편지").fonts(.caption).foregroundStyle(Asset.Colors.onGold.color.opacity(0.8))
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        Text("\(model.sentCount)").fonts(.display).foregroundStyle(Asset.Colors.onGold.color)
+        Text("통 · \(model.openedCount)통 읽음")
+          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.onGold.color)
+      }
     }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .padding(.horizontal, 20)
+    .padding(.vertical, 18)
+    .background(MutterGradient.gold, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+    .shadows(.gold)
   }
+
+  private func sectionLabel(_ text: String) -> some View {
+    Text(text)
+      .fonts(.captionBold)
+      .foregroundStyle(Asset.Colors.inkFaint.color)
+      .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  // MARK: - 편지 카드
 
   private func letterCard(_ row: HomeModelData.LetterRow) -> some View {
     HStack(spacing: 12) {
-      Image(systemName: row.isOpened ? "envelope.open.fill" : "envelope.fill")
+      MutterIcon(row.isOpened ? Asset.Images.envelopeOpen : Asset.Images.envelope, size: 22)
         .foregroundStyle(row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
       VStack(alignment: .leading, spacing: 4) {
         Text(row.letter.title.isEmpty ? "제목 없는 편지" : row.letter.title)
           .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
-        if let summary = row.openSummary {
-          Text("\(summary.openCount)번 열림").fonts(.caption).foregroundStyle(Asset.Colors.gold.color)
-        } else {
-          Text("아직 열리지 않음").fonts(.caption).foregroundStyle(Asset.Colors.inkFaint.color)
-        }
+        Text(row.openSummary.map { "\($0.openCount)번 열림" } ?? "아직 열리지 않음")
+          .fonts(.caption)
+          .foregroundStyle(row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
       }
       Spacer()
-      Button("이어쓰기") { onEdit(row.letter.id) }
-        .fonts(.captionBold)
-        .foregroundStyle(Asset.Colors.goldDeep.color)
+      readBadge(row.isOpened)
     }
     .padding(16)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
@@ -97,9 +118,20 @@ public struct HomeView: View {
     .onTapGesture { onPreview(row.letter.id) }
   }
 
+  private func readBadge(_ read: Bool) -> some View {
+    HStack(spacing: 3) {
+      if read { MutterIcon(Asset.Images.read, size: 11) }
+      Text(read ? "읽음" : "안읽음").fonts(.caption)
+    }
+    .foregroundStyle(read ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
+    .padding(.horizontal, 8)
+    .padding(.vertical, 4)
+    .background(read ? Asset.Colors.goldSoft.color : Asset.Colors.warm100.color, in: Capsule())
+  }
+
   private var emptyState: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "paperplane").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+    VStack(spacing: 12) {
+      Asset.Images.emptySent.image.resizable().scaledToFit().frame(height: 120)
       Text("아직 보낸 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
     .frame(maxWidth: .infinity)

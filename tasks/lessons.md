@@ -2,6 +2,13 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-06-30 — Tuist 에셋 카탈로그에 이미지 추가 시 3가지 함정 (색 네임스페이스가 조용히 깨짐)
+- 상황: 디자인 시스템 SVG 아이콘을 iOS에 적용하려 Images.xcassets를 추가했더니 빌드가 3번 연속 다른 이유로 깨짐. 각 함정:
+  - ① **stencil availability 충돌**: `Tuist/ResourceSynthesizers/Assets.stencil`이 iOS에서 `Color`/`Image`를 SwiftUI 타입(iOS 13+)으로 typealias하면서 그 확장/프로퍼티 init엔 UIKit 시절 `@available(iOS 8/11)`를 박음 → "initializer cannot be more available than enclosing scope". 이미지가 있을 때만 풀 템플릿이 트리거돼 드러남. → stencil의 해당 `@available`를 iOS 13.0으로 수정.
+  - ② **네임스페이스 폴더에 느슨한 콘텐츠 섞으면 카탈로그명 래퍼 발생**: `Colors.xcassets`가 네임스페이스 폴더(`Colors/`·`Theme/`)만 가질 땐 `Asset.Colors.ink`(폴더=최상위). 거기에 네임스페이스 아닌 `Semantic/` 폴더를 추가하니 카탈로그명 래퍼가 생겨 `Asset.Colors.Colors.ink`로 중첩 → 기존 `Asset.Colors.ink` 전부 깨짐. → 시맨틱 색을 기존 `Colors/` 폴더 안으로.
+  - ③ **카탈로그 2개가 되면 SwiftGen이 파일명으로 네임스페이스**: 별도 `Images.xcassets`를 추가하니 `Colors.xcassets`도 `Asset.Colors.Colors.*`로 밀림. → 별도 카탈로그 대신 기존 `Colors.xcassets/Images/`(provides-namespace 폴더)로 통합해 **카탈로그를 1개로 유지**.
+- 규칙: **Tuist 단일 모듈에선 에셋 카탈로그를 1개로 유지하고, 분류는 provides-namespace 하위 폴더로 한다(Colors/·Theme/·Images/).** 카탈로그를 새로 추가하거나 네임스페이스 폴더 옆에 느슨한 콘텐츠를 두면 기존 `Asset.X.*` 접근자가 한 단계 밀려 전부 깨진다. SwiftUI 타입을 쓰는 stencil은 `@available`를 iOS 13 이상으로. 그리고 **새 .swift 파일은 `tuist generate`로 프로젝트에 포함시킨 뒤** 빌드(안 하면 "cannot find X in scope").
+
 ### 2026-06-30 — 서비스 로케이터엔 전역만, usecase/repository는 호출부 생성자 주입 (Mercury 패턴 검증)
 - 상황: `AppDependencies.registerAll()`이 usecase 11개를 전부 `MutterContainer`(서비스 로케이터)에 등록하고, RootViewFactory·탭 ViewWrapper 6개가 `@Inject`로 꺼내 썼다. 사용자 지적: "당장 안 쓰는 usecase까지 다 전역에 들고 있는 건 Mercury 방식이 아니다. Mercury는 SessionManager 같은 진짜 전역만 로케이터에 넣고 usecase는 DI(생성자 주입)로 준다."
 - 검증: 실제 Mercury(`/Users/choesuhun/Desktop/Code/Mercury`) 확인 결과 정확히 그러함. 로케이터 register = 전역 cross-cutting만(SignInInformationManager=세션/토큰, Toast/Alert/Loading/Config). usecase·repository **0개**. usecase는 `RootViewFactory` 각 case와 `*ViewWrapperView.init()`에서 `XUsecase(repository: XRepository())`로 **그 자리에 인라인 조립 → 생성자 주입**.

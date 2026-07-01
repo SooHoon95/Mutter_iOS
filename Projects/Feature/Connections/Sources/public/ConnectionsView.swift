@@ -51,7 +51,7 @@ public struct ConnectionsView: View {
   private var connectedCard: some View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(spacing: 12) {
-        Image(systemName: "person.2.fill").foregroundStyle(Asset.Colors.gold.color)
+        MutterIcon(Asset.Images.connect, size: 22).foregroundStyle(Asset.Colors.gold.color)
         Text(model.connection?.nickname ?? "연결된 사람")
           .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
       }
@@ -79,7 +79,7 @@ public struct ConnectionsView: View {
           Button {
             UIPasteboard.general.string = link
           } label: {
-            Image(systemName: "doc.on.doc").foregroundStyle(Asset.Colors.gold.color)
+            MutterIcon(Asset.Images.copy, size: 20).foregroundStyle(Asset.Colors.gold.color)
           }
         }
         .padding(12)

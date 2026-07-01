@@ -6,11 +6,11 @@ public enum ToastType {
   case success
   case error
 
-  var systemImage: String {
+  var icon: ImageAsset {
     switch self {
-    case .common: "bell.fill"
-    case .success: "checkmark.circle.fill"
-    case .error: "exclamationmark.triangle.fill"
+    case .common: Asset.Images.check
+    case .success: Asset.Images.checkCircle
+    case .error: Asset.Images.warning
     }
   }
 
@@ -80,7 +80,7 @@ private struct ToastRow: View {
 
   var body: some View {
     HStack(spacing: 10) {
-      Image(systemName: item.type.systemImage)
+      MutterIcon(item.type.icon, size: 18)
         .foregroundStyle(item.type.iconColor)
       Text(item.title)
         .fonts(.bodyMediumBold)

@@ -121,8 +121,8 @@ public struct ComposeView: View {
           Button {
             Task { await model.previewAudio() }
           } label: {
-            Image(systemName: model.player.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-              .font(.system(size: 22)).foregroundStyle(Asset.Colors.gold.color)
+            MutterIcon(model.player.isPlaying ? Asset.Images.pause : Asset.Images.play, size: 24)
+              .foregroundStyle(Asset.Colors.gold.color)
           }
         }
       }
@@ -130,8 +130,7 @@ public struct ComposeView: View {
       // 현재 선택된 음악(호스티드/SoundCloud 공통) — 어떤 곡이 편지에 실릴지 명확히.
       if let label = model.appliedCueLabel {
         HStack(spacing: 6) {
-          Image(systemName: "checkmark.circle.fill")
-            .font(.system(size: 13)).foregroundStyle(Asset.Colors.gold.color)
+          MutterIcon(Asset.Images.checkCircle, size: 14).foregroundStyle(Asset.Colors.gold.color)
           Text("선택된 음악 · \(label)").fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
         }
       }

@@ -57,8 +57,8 @@ struct TakedownView: View {
 
   private var submittedView: some View {
     VStack(spacing: 12) {
-      Image(systemName: "checkmark.circle.fill")
-        .font(.system(size: 36)).foregroundStyle(Asset.Colors.gold.color)
+      MutterIcon(Asset.Images.checkCircle, size: 44)
+        .foregroundStyle(Asset.Colors.gold.color)
       Text("신고가 접수됐어요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
       Text("검토 후 연락처로 안내드립니다.").fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
     }

@@ -13,6 +13,7 @@ public struct MutterButton: View {
   }
 
   private let title: String
+  private let icon: ImageAsset?
   private let style: Style
   private let isLoading: Bool
   private let isEnabled: Bool
@@ -21,11 +22,13 @@ public struct MutterButton: View {
   public init(
     _ title: String,
     style: Style = .primary,
+    icon: ImageAsset? = nil,
     isLoading: Bool = false,
     isEnabled: Bool = true,
     action: @escaping () -> Void
   ) {
     self.title = title
+    self.icon = icon
     self.style = style
     self.isLoading = isLoading
     self.isEnabled = isEnabled
@@ -35,9 +38,13 @@ public struct MutterButton: View {
   public var body: some View {
     Button(action: action) {
       ZStack {
-        Text(title)
-          .fonts(.bodyLargeBold)
-          .opacity(isLoading ? 0 : 1)
+        HStack(spacing: 8) {
+          if let icon {
+            MutterIcon(icon, size: 18)
+          }
+          Text(title).fonts(.bodyLargeBold)
+        }
+        .opacity(isLoading ? 0 : 1)
 
         if isLoading {
           ProgressView()
@@ -55,13 +62,6 @@ public struct MutterButton: View {
     .opacity(isEnabled ? 1 : 0.5)
   }
 
-  /// 골드 포일 그라데이션(웹 --gold-gradient, 135°). primary CTA 배경.
-  private static let goldGradient = LinearGradient(
-    colors: [Asset.Colors.goldLight.color, Asset.Colors.gold.color, Asset.Colors.goldDeep.color],
-    startPoint: .topLeading,
-    endPoint: .bottomTrailing
-  )
-
   private var foregroundColor: Color {
     switch style {
     case .primary: Asset.Colors.onGold.color
@@ -73,7 +73,7 @@ public struct MutterButton: View {
   private var background: some View {
     switch style {
     case .primary:
-      Self.goldGradient
+      MutterGradient.gold
     case .secondary:
       Asset.Colors.goldSoft.color
     case .ghost:

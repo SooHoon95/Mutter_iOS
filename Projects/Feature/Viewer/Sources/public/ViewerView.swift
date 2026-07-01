@@ -76,7 +76,7 @@ public struct ViewerView: View {
           Task { await model.open() }
         } label: {
           HStack(spacing: 8) {
-            Image(systemName: "play.fill").font(.system(size: 13))
+            MutterIcon(Asset.Images.play, size: 14)
             Text("편지 열기")
           }
           .font(.system(size: 17, weight: .semibold))
@@ -115,7 +115,7 @@ public struct ViewerView: View {
         if model.player.isPlaying {
           EqualizerView(color: theme.accent, isPlaying: true)
         } else {
-          Image(systemName: "play.fill").font(.system(size: 13)).foregroundStyle(theme.accent)
+          MutterIcon(Asset.Images.play, size: 14).foregroundStyle(theme.accent)
         }
       }
       .padding(.horizontal, 14).padding(.vertical, 10)
@@ -145,7 +145,7 @@ public struct ViewerView: View {
   private func revealPending(_ date: Date) -> some View {
     stage(Asset.Colors.ink.color) {
       VStack(spacing: 12) {
-        Image(systemName: "lock.fill").font(.system(size: 28)).foregroundStyle(Asset.Colors.gold.color)
+        MutterIcon(Asset.Images.lock, size: 28).foregroundStyle(Asset.Colors.gold.color)
         Text("아직 열 수 없는 편지예요").fonts(.title).foregroundStyle(Asset.Colors.ivory.color)
         Text(Self.dateFormatter.string(from: date) + "에 열려요")
           .fonts(.bodyMedium).foregroundStyle(Asset.Colors.goldSoft.color)

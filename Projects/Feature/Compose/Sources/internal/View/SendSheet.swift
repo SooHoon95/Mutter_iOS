@@ -84,7 +84,7 @@ struct SendSheet: View {
           Button {
             UIPasteboard.general.string = link
           } label: {
-            Image(systemName: "doc.on.doc").foregroundStyle(Asset.Colors.gold.color)
+            MutterIcon(Asset.Images.copy, size: 20).foregroundStyle(Asset.Colors.gold.color)
           }
         }
         .padding(12)
@@ -110,7 +110,7 @@ struct SendSheet: View {
           .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
         ForEach(model.connections) { connection in
           HStack(spacing: 10) {
-            Image(systemName: "person.crop.circle.fill").foregroundStyle(Asset.Colors.gold.color)
+            MutterIcon(Asset.Images.person, size: 22).foregroundStyle(Asset.Colors.gold.color)
             Text(connection.nickname ?? "이름 없는 친구")
               .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
             Spacer()

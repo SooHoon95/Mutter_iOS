@@ -47,13 +47,13 @@ public struct ThreadsView: View {
 
   private func row(_ counterpart: Counterpart) -> some View {
     HStack(spacing: 12) {
-      Image(systemName: "person.crop.circle.fill").foregroundStyle(Asset.Colors.gold.color)
+      MutterIcon(Asset.Images.person, size: 24).foregroundStyle(Asset.Colors.gold.color)
       Text(counterpart.nickname ?? "이름 없음")
         .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
       Spacer()
       Text("\(counterpart.exchangeCount)통")
         .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
-      Image(systemName: "chevron.right").foregroundStyle(Asset.Colors.inkFaint.color)
+      MutterIcon(Asset.Images.chevronRight, size: 16).foregroundStyle(Asset.Colors.inkFaint.color)
     }
     .padding(16)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
@@ -106,8 +106,8 @@ public struct ThreadsView: View {
   }
 
   private var emptyState: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "bubble.left.and.bubble.right").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+    VStack(spacing: 12) {
+      Asset.Images.emptyConnections.image.resizable().scaledToFit().frame(height: 120)
       Text("주고받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
   }

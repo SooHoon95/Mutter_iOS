@@ -31,15 +31,15 @@ struct ConnectInviteView: View {
     case .ready(let invite):
       ready(invite)
     case .accepted:
-      message(icon: "checkmark.circle.fill", title: "연결됐어요", detail: "이제 서로에게 편지를 보낼 수 있어요.")
+      message(icon: Asset.Images.checkCircle, title: "연결됐어요", detail: "이제 서로에게 편지를 보낼 수 있어요.")
     case .failed(let text):
-      message(icon: "exclamationmark.triangle.fill", title: "연결할 수 없어요", detail: text)
+      message(icon: Asset.Images.warning, title: "연결할 수 없어요", detail: text)
     }
   }
 
   private func ready(_ invite: ConnectInvite) -> some View {
     VStack(spacing: 16) {
-      Image(systemName: "person.2.fill").font(.system(size: 32)).foregroundStyle(Asset.Colors.gold.color)
+      MutterIcon(Asset.Images.connect, size: 40).foregroundStyle(Asset.Colors.gold.color)
       Text("\(invite.inviterNickname ?? "누군가")님이\n연결을 요청했어요")
         .fonts(.title).foregroundStyle(Asset.Colors.ink.color).multilineTextAlignment(.center)
 
@@ -60,9 +60,9 @@ struct ConnectInviteView: View {
     return "지금은 연결할 수 없어요."
   }
 
-  private func message(icon: String, title: String, detail: String) -> some View {
+  private func message(icon: ImageAsset, title: String, detail: String) -> some View {
     VStack(spacing: 12) {
-      Image(systemName: icon).font(.system(size: 32)).foregroundStyle(Asset.Colors.gold.color)
+      MutterIcon(icon, size: 40).foregroundStyle(Asset.Colors.gold.color)
       Text(title).fonts(.title).foregroundStyle(Asset.Colors.ink.color)
       Text(detail).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color).multilineTextAlignment(.center)
     }

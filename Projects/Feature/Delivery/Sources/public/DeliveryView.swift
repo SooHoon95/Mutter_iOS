@@ -75,7 +75,7 @@ public struct DeliveryView: View {
       Button {
         UIPasteboard.general.string = link
       } label: {
-        Image(systemName: "doc.on.doc").foregroundStyle(Asset.Colors.gold.color)
+        MutterIcon(Asset.Images.copy, size: 20).foregroundStyle(Asset.Colors.gold.color)
       }
     }
     .padding(12)
@@ -87,7 +87,7 @@ public struct DeliveryView: View {
       Text("발급된 링크").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.inkSoft.color)
       ForEach(model.links) { link in
         HStack(spacing: 10) {
-          Image(systemName: link.hasPassword ? "lock.fill" : "link")
+          MutterIcon(link.hasPassword ? Asset.Images.lock : Asset.Images.link, size: 18)
             .foregroundStyle(link.revoked ? Asset.Colors.inkFaint.color : Asset.Colors.gold.color)
           VStack(alignment: .leading, spacing: 2) {
             Text(String(link.token.prefix(10)) + "…")

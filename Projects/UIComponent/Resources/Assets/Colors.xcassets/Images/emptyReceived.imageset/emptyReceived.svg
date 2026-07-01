@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150" role="img" aria-label="받은 편지가 없어요">
+  <g fill="none" stroke="#9A8F78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    
+    <path d="M44 84a26 26 0 0 1 52 0v34H44Z"></path>
+    <path d="M96 70h40a10 10 0 0 1 10 10v38H96"></path>
+    <path d="M70 118V94"></path>
+    <path d="M120 70v18h14"></path>
+    
+    <path d="M146 84h16v12h-16"></path>
+  </g>
+  
+  <g fill="none" stroke="#E2B43A" stroke-width="2.4" stroke-linecap="round" opacity="0.9">
+    <path d="M88 40h24"></path>
+    <path d="M80 30l6 8M120 30l-6 8"></path>
+  </g>
+  <circle cx="100" cy="44" r="3" fill="#E2B43A"></circle>
+</svg>

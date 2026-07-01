@@ -37,7 +37,7 @@ public struct InboxView: View {
 
   private func row(_ item: InboxItem) -> some View {
     HStack(spacing: 12) {
-      Image(systemName: "envelope.fill").foregroundStyle(Asset.Colors.gold.color)
+      MutterIcon(Asset.Images.envelope, size: 22).foregroundStyle(Asset.Colors.gold.color)
       VStack(alignment: .leading, spacing: 4) {
         Text(item.title.isEmpty ? "제목 없는 편지" : item.title)
           .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
@@ -45,7 +45,7 @@ public struct InboxView: View {
           .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
       }
       Spacer()
-      Image(systemName: "chevron.right").foregroundStyle(Asset.Colors.inkFaint.color)
+      MutterIcon(Asset.Images.chevronRight, size: 16).foregroundStyle(Asset.Colors.inkFaint.color)
     }
     .padding(16)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
@@ -53,8 +53,8 @@ public struct InboxView: View {
   }
 
   private var emptyState: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "tray").font(.system(size: 32)).foregroundStyle(Asset.Colors.inkFaint.color)
+    VStack(spacing: 12) {
+      Asset.Images.emptyReceived.image.resizable().scaledToFit().frame(height: 120)
       Text("받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
   }

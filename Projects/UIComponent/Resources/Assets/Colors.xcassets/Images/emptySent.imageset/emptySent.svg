@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150" role="img" aria-label="보낸 편지가 없어요">
+  <g fill="none" stroke="#9A8F78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    
+    <path d="M150 46 96 100"></path>
+    <path d="M150 46 128 116a1.2 1.2 0 0 1-2.2.2L116 96 92 84a1.2 1.2 0 0 1 .2-2.2Z"></path>
+  </g>
+  
+  <path d="M44 120c14-6 26-12 40-26" fill="none" stroke="#E2B43A" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 9" opacity="0.95"></path>
+  <circle cx="44" cy="120" r="3" fill="#E2B43A"></circle>
+</svg>

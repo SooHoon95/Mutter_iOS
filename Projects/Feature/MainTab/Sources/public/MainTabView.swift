@@ -20,21 +20,31 @@ public struct MainTabView<
   public var body: some View {
     TabView(selection: $selection) {
       HomeView()
-        .tabItem { Label("홈", systemImage: "house.fill") }
+        .tabItem { tabLabel("홈", .home, Asset.Images.tabHome, Asset.Images.tabHomeFill) }
         .tag(AppRoute.home)
       ThreadsView()
-        .tabItem { Label("주고받음", systemImage: "bubble.left.and.bubble.right.fill") }
+        .tabItem { tabLabel("주고받음", .threads, Asset.Images.tabThread, Asset.Images.tabThreadFill) }
         .tag(AppRoute.threads)
       InboxView()
-        .tabItem { Label("받은함", systemImage: "tray.fill") }
+        .tabItem { tabLabel("받은함", .inbox, Asset.Images.tabInbox, Asset.Images.tabInboxFill) }
         .tag(AppRoute.inbox)
       ConnectionsView()
-        .tabItem { Label("연결", systemImage: "person.2.fill") }
+        .tabItem { tabLabel("연결", .connections, Asset.Images.tabPeople, Asset.Images.tabPeopleFill) }
         .tag(AppRoute.connections)
       ProfileView()
-        .tabItem { Label("프로필", systemImage: "person.crop.circle.fill") }
+        .tabItem { tabLabel("프로필", .profile, Asset.Images.tabProfile, Asset.Images.tabProfileFill) }
         .tag(AppRoute.profile)
     }
     .tint(Asset.Colors.gold.color)
+  }
+
+  /// 선택 시 채움(fill), 아니면 라인 아이콘(디자인 시스템 탭바 페어). 탭바가 선택=골드/비선택=회색 틴팅.
+  @ViewBuilder
+  private func tabLabel(_ title: String, _ route: AppRoute, _ line: ImageAsset, _ fill: ImageAsset) -> some View {
+    Label {
+      Text(title)
+    } icon: {
+      (selection == route ? fill : line).image.renderingMode(.template)
+    }
   }
 }
