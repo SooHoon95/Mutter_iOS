@@ -8,7 +8,12 @@ let project = Project.framework(
   dependencies: [
     .uiComponent,
     .router,
-    .domain
+    .domain,
+    // 소셜 로그인 SDK (Mercury Onboard 대응).
+    .googleSignIn,
+    .googleSignInSwift,
+    .kakaoAuth,
+    .kakaoUser
   ],
   testDependencies: []
 )

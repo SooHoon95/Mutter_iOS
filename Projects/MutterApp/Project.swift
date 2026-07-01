@@ -26,9 +26,11 @@ let project = Project.app(
     .firebaseCore,
     .firebaseMessaging,
     .firebaseCrashlytics,
-    .firebaseAnalytics
-    // 소셜 로그인(Google/Kakao) SDK는 네이티브 연동(Phase2 후반)에서 추가한다.
-    // 현재 미사용이며, GoogleSignIn→GTMAppAuth가 Swift 호환성 심볼을 강제로드해 앱 링크를 깨므로 제외.
+    .firebaseAnalytics,
+    // 소셜 로그인 — AppDelegate에서 GIDSignIn 구성 + KakaoSDK 초기화.
+    // (GoogleSignIn→GTMAppAuth Swift 호환성 심볼 링크 에러 시 Tuist/Package.swift에서 static으로.)
+    .googleSignIn,
+    .external(name: "KakaoSDKCommon")
   ],
   testDependencies: []
 )

@@ -14,10 +14,25 @@ public enum AppConfig {
     infoString("SUPABASE_ANON_KEY")
   }
 
+  /// Google OAuth 클라이언트 ID(없으면 nil — 소셜 로그인 비활성). Sensitive.xcconfig에서 주입.
+  public static var googleClientID: String? { optionalInfoString("GOOGLE_CLIENT_ID") }
+
+  /// Kakao 네이티브 앱 키(없으면 nil). Sensitive.xcconfig에서 주입.
+  public static var kakaoAppKey: String? { optionalInfoString("KAKAO_APP_KEY") }
+
   private static func infoString(_ key: String) -> String {
     guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,
           !value.isEmpty else {
       fatalError("AppConfig: Info.plist '\(key)' 누락 — Sensitive.xcconfig 확인")
+    }
+    return value
+  }
+
+  /// 선택적 설정값 — 없거나 비면 nil(치명적 아님).
+  private static func optionalInfoString(_ key: String) -> String? {
+    guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,
+          !value.isEmpty else {
+      return nil
     }
     return value
   }

@@ -58,6 +58,20 @@ final class AuthModelData {
     }
   }
 
+  /// 소셜 로그인 — 팩토리로 provider 생성 → SDK 인증 → Supabase 교환 → 완료.
+  func signInSocial(_ provider: OauthProvider) async {
+    await run {
+      let credential = try await SignInProviderFactory().createProvider(provider).signIn()
+      switch credential {
+      case .social(let socialProvider, let token):
+        _ = try await authUsecase.signInSocial(provider: socialProvider, token: token)
+      case .apple(let idToken, let nonce):
+        _ = try await authUsecase.signInApple(idToken: idToken, nonce: nonce)
+      }
+      onAuthenticated()
+    }
+  }
+
   /// 비밀번호 로그인 화면으로 전환.
   func switchToPassword() {
     errorMessage = nil

@@ -101,34 +101,34 @@ public struct AuthView: View {
     }
   }
 
-  // MARK: - Social (SDK·콘솔 설정 보류 — Phase2 후반)
+  // MARK: - Social (Google/Kakao/Apple — 콘솔 키는 Sensitive.xcconfig에서 주입)
 
   private var socialSection: some View {
-    VStack(spacing: 8) {
+    VStack(spacing: 10) {
       Text("또는")
         .fonts(.caption)
         .foregroundStyle(Asset.Colors.inkFaint.color)
-      HStack(spacing: 12) {
-        socialButton("Apple로 계속")
-        socialButton("Google로 계속")
-      }
+      socialButton("Apple로 계속", .apple)
+      socialButton("Google로 계속", .google)
+      socialButton("카카오로 계속", .kakao)
     }
   }
 
-  private func socialButton(_ title: String) -> some View {
+  private func socialButton(_ title: String, _ provider: OauthProvider) -> some View {
     Button {
-      model.errorMessage = "소셜 로그인은 준비 중이에요."
+      Task { await model.signInSocial(provider) }
     } label: {
       Text(title)
         .fonts(.captionBold)
         .foregroundStyle(Asset.Colors.ink.color)
-        .frame(maxWidth: .infinity, minHeight: 44)
+        .frame(maxWidth: .infinity, minHeight: 48)
         .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
         .overlay(
           RoundedRectangle(cornerRadius: MutterRadius.md)
             .stroke(Asset.Colors.inkFaint.color.opacity(0.3), lineWidth: 1)
         )
     }
+    .disabled(model.isLoading)
   }
 
   // MARK: - Helpers

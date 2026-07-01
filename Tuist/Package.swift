@@ -24,8 +24,14 @@ let packageSettings = PackageSettings(
     "KakaoSDKCommon": .framework,
     "KakaoSDKAuth": .framework,
     "KakaoSDKUser": .framework,
-    "GoogleSignIn": .framework,
-    "GoogleSignInSwift": .framework,
+    // GoogleSignIn 체인도 정적 링크 — 동적 .framework면 GTMAppAuth 등이 Swift 호환성 심볼
+    // (__swift_FORCE_LOAD_$_swiftCompatibility50/51/56/Concurrency/…)을 강제로드해 앱 링크가 깨진다.
+    "GoogleSignIn": .staticFramework,
+    "GoogleSignInSwift": .staticFramework,
+    "GTMAppAuth": .staticFramework,
+    "AppAuth": .staticFramework,
+    "GTMSessionFetcher": .staticFramework,
+    "GTMSessionFetcherCore": .staticFramework,
     "Lottie": .framework,
     "Pulse": .framework,
     "PulseProxy": .framework,

@@ -31,6 +31,8 @@ struct MainView: View {
       isUserLoggedIn = loggedIn
     }
     .onOpenURL { url in
+      // 소셜 OAuth 콜백이면 SDK가 소진, 아니면 앱 딥링크(수신 라우트)로 폴백.
+      if OauthDeepLinkHandler.shared.handle(url: url) { return }
       // 딥링크는 무계정 허용(수신 화면). 로그인 여부와 무관하게 수신 라우트로 push.
       if let route = DeeplinkRouter.route(for: url) {
         coordinator.push(route)
