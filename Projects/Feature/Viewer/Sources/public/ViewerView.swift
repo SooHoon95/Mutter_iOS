@@ -63,76 +63,141 @@ public struct ViewerView: View {
     }
   }
 
-  // MARK: - Stages
+  // MARK: - Open Gate (Screen 4)
 
   private func openGate(_ payload: LetterPayload, _ theme: LetterTheme) -> some View {
-    stage(theme.background) {
-      VStack(spacing: 16) {
-        Text(payload.title.isEmpty ? "편지가 도착했어요" : payload.title)
-          .font(.system(size: theme.headingSize, weight: .semibold, design: theme.fontDesign))
-          .foregroundStyle(theme.foreground)
-          .multilineTextAlignment(.center)
-        Button {
-          Task { await model.open() }
-        } label: {
-          HStack(spacing: 8) {
-            MutterIcon(Asset.Images.play, size: 14)
-            Text("편지 열기")
+    stage(Asset.Colors.warm50.color) {
+      VStack(spacing: 0) {
+        Spacer()
+
+        VStack(spacing: 24) {
+          // 봉투 배지 — 골드 그라데이션 96pt 라운드 스퀘어
+          ZStack {
+            RoundedRectangle(cornerRadius: 28)
+              .fill(MutterGradient.gold)
+              .frame(width: 96, height: 96)
+              .shadows(.gold)
+            MutterIcon(Asset.Images.envelope, size: 46)
+              .foregroundStyle(Asset.Colors.onGold.color)
           }
-          .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.background)
-          .padding(.horizontal, 28).padding(.vertical, 14)
-          .background(theme.accent, in: Capsule())
+
+          VStack(spacing: 8) {
+            // 발신자 캡션 (LetterPayload에 sender 필드 없음 — 중립 문구 사용)
+            Text("편지가 도착했어요")
+              .fonts(.caption)
+              .foregroundStyle(Asset.Colors.inkSoft.color)
+
+            // 편지 제목
+            Text(payload.title.isEmpty ? "소중한 편지" : payload.title)
+              .fonts(.titleLarge)
+              .foregroundStyle(Asset.Colors.ink.color)
+              .multilineTextAlignment(.center)
+          }
+
+          // 안내 문구
+          Text("음악과 함께 천천히 읽어보세요.\n편지를 열면 바로 시작됩니다.")
+            .fonts(.bodyMedium)
+            .foregroundStyle(Asset.Colors.inkSoft.color)
+            .multilineTextAlignment(.center)
+            .lineSpacing(4)
+
+          // 열기 CTA
+          MutterButton("편지 열기", icon: Asset.Images.play) {
+            Task { await model.open() }
+          }
+          .frame(minWidth: 200, maxWidth: 280)
+
+          // 설치 불필요 푸터
+          HStack(spacing: 5) {
+            MutterIcon(Asset.Images.check, size: 14)
+              .foregroundStyle(Asset.Colors.inkFaint.color)
+            Text("설치 없이 바로 열려요")
+              .fonts(.caption)
+              .foregroundStyle(Asset.Colors.inkFaint.color)
+          }
         }
-        .buttonStyle(PressableButtonStyle())
-        Text("음악과 함께 시작됩니다")
-          .font(.system(size: 13, design: theme.fontDesign))
-          .foregroundStyle(theme.muted)
+        .padding(.horizontal, 32)
+
+        Spacer()
       }
-      .padding(32)
     }
   }
+
+  // MARK: - Reader (Screen 5)
 
   private func reader(_ payload: LetterPayload, _ theme: LetterTheme) -> some View {
-    ZStack(alignment: .bottomTrailing) {
-      ScrollView {
-        LetterPaperView(theme: theme, title: payload.title, text: payload.body)
-          .frame(maxWidth: .infinity)
-      }
-      .background(theme.background.ignoresSafeArea())
+    ZStack(alignment: .bottom) {
+      theme.background.ignoresSafeArea()
 
-      if !payload.audioDisabled {
-        audioPill(theme).padding(20)
-      }
-    }
-  }
+      VStack(spacing: 0) {
+        // 상단 바 — 뒤로가기(인터트) + 더보기(인터트, 액션 없음)
+        HStack {
+          Button(action: {}) {
+            MutterIcon(Asset.Images.back, size: 22)
+              .foregroundStyle(theme.foreground)
+          }
+          Spacer()
+          Button(action: {}) {
+            MutterIcon(Asset.Images.more, size: 22)
+              .foregroundStyle(theme.foreground)
+          }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
 
-  private func audioPill(_ theme: LetterTheme) -> some View {
-    Button {
-      model.player.toggle()
-    } label: {
-      HStack(spacing: 8) {
-        if model.player.isPlaying {
-          EqualizerView(color: theme.accent, isPlaying: true)
-        } else {
-          MutterIcon(Asset.Images.play, size: 14).foregroundStyle(theme.accent)
+        // 음악 플레이어 바
+        if !payload.audioDisabled {
+          MusicPlayerBar(
+            title: payload.title.isEmpty ? "음악" : payload.title,
+            author: nil,
+            isPlaying: model.player.isPlaying,
+            onToggle: { model.player.toggle() }
+          )
+          .padding(.horizontal, 20)
+          .padding(.bottom, 12)
+        }
+
+        // 편지 본문 스크롤
+        ScrollView {
+          LetterPaperView(theme: theme, title: payload.title, text: payload.body)
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 100)
         }
       }
-      .padding(.horizontal, 14).padding(.vertical, 10)
-      .background(theme.background, in: Capsule())
-      .overlay(Capsule().stroke(theme.border, lineWidth: 1))
-      .shadows(.soft)
     }
   }
+
+  // MARK: - Password Gate
 
   private var passwordGate: some View {
     stage(Asset.Colors.ivory.color) {
-      VStack(spacing: 12) {
-        Text("암호가 걸린 편지예요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
+      VStack(spacing: 20) {
+        // 자물쇠 배지 — 골드 소프트 배경 원형
+        ZStack {
+          Circle()
+            .fill(Asset.Colors.goldSoft.color)
+            .frame(width: 72, height: 72)
+          MutterIcon(Asset.Images.lock, size: 32)
+            .foregroundStyle(Asset.Colors.gold.color)
+        }
+
+        VStack(spacing: 6) {
+          Text("암호가 걸린 편지예요")
+            .fonts(.title)
+            .foregroundStyle(Asset.Colors.ink.color)
+          Text("발신자가 설정한 암호를 입력해 주세요")
+            .fonts(.bodyMedium)
+            .foregroundStyle(Asset.Colors.inkSoft.color)
+        }
+
+        // 암호 입력 필드
         SecureField("암호", text: $model.password)
           .textFieldStyle(.plain)
+          .fonts(.bodyMedium)
+          .foregroundStyle(Asset.Colors.ink.color)
           .padding(14)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+
         MutterButton("열기", isEnabled: !model.password.isEmpty) {
           Task { await model.submitPassword() }
         }
@@ -141,6 +206,8 @@ public struct ViewerView: View {
       .frame(maxWidth: 360)
     }
   }
+
+  // MARK: - Reveal Pending
 
   private func revealPending(_ date: Date) -> some View {
     stage(Asset.Colors.ink.color) {

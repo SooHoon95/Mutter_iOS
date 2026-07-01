@@ -24,6 +24,7 @@ public struct ThreadsView: View {
   public var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
+
       if model.counterparts.isEmpty && !model.isLoading {
         emptyState
       } else {
@@ -34,7 +35,8 @@ public struct ThreadsView: View {
                 .buttonStyle(PressableButtonStyle())
             }
           }
-          .padding(20)
+          .padding(.horizontal, 20)
+          .padding(.vertical, 16)
           .frame(maxWidth: 600)
         }
       }
@@ -45,70 +47,189 @@ public struct ThreadsView: View {
     }
   }
 
+  // MARK: - 상대 목록 카드 행
+
   private func row(_ counterpart: Counterpart) -> some View {
-    HStack(spacing: 12) {
-      MutterIcon(Asset.Images.person, size: 24).foregroundStyle(Asset.Colors.gold.color)
-      Text(counterpart.nickname ?? "이름 없음")
-        .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
+    HStack(spacing: 14) {
+      // 아바타 원 — 상대 이름 이니셜
+      ZStack {
+        Circle()
+          .fill(Asset.Colors.goldSoft.color)
+          .frame(width: 44, height: 44)
+        Text(String((counterpart.nickname ?? "?").prefix(1)))
+          .fonts(.bodyLargeBold)
+          .foregroundStyle(Asset.Colors.goldDeep.color)
+      }
+
+      VStack(alignment: .leading, spacing: 3) {
+        Text(counterpart.nickname ?? "이름 없음")
+          .fonts(.bodyLargeBold)
+          .foregroundStyle(Asset.Colors.ink.color)
+          .lineLimit(1)
+        Text("\(counterpart.exchangeCount)통 주고받음")
+          .fonts(.caption)
+          .foregroundStyle(Asset.Colors.inkFaint.color)
+      }
+
       Spacer()
-      Text("\(counterpart.exchangeCount)통")
-        .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
-      MutterIcon(Asset.Images.chevronRight, size: 16).foregroundStyle(Asset.Colors.inkFaint.color)
+
+      MutterIcon(Asset.Images.chevronRight, size: 16)
+        .foregroundStyle(Asset.Colors.inkFaint.color)
     }
-    .padding(16)
+    .padding(.horizontal, 16)
+    .padding(.vertical, 14)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+    .overlay(
+      RoundedRectangle(cornerRadius: MutterRadius.lg)
+        .strokeBorder(Asset.Colors.hairline.color, lineWidth: 0.5)
+    )
     .shadows(.soft)
   }
 
+  // MARK: - 대화 시트 (단일 상대와의 편지 흐름)
+
   private func threadSheet(_ counterpart: Counterpart) -> some View {
     NavigationStack {
-      ScrollView {
-        VStack(spacing: 10) {
-          ForEach(model.thread) { letter in
-            threadRow(letter)
+      ZStack {
+        Asset.Colors.ivory.color.ignoresSafeArea()
+
+        VStack(spacing: 0) {
+          // 편지 버블 목록
+          ScrollView {
+            LazyVStack(spacing: 12) {
+              ForEach(model.thread) { letter in
+                threadRow(letter)
+              }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+          }
+
+          // 하단 편지 쓰기 바
+          bottomBar(counterpart)
+        }
+      }
+      .navigationTitle(counterpart.nickname ?? "편지")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button {
+            model.closeThread()
+          } label: {
+            MutterIcon(Asset.Images.chevronRight, size: 20)
+              .rotationEffect(.degrees(180))
+              .foregroundStyle(Asset.Colors.ink.color)
           }
         }
-        .padding(20)
-      }
-      .background(Asset.Colors.ivory.color.ignoresSafeArea())
-      .navigationTitle(counterpart.nickname ?? "편지")
-      .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
-          Button("답장") {
-            model.closeThread()
-            onReply(counterpart.userId)
+          // 상대 이니셜 아바타
+          ZStack {
+            Circle()
+              .fill(Asset.Colors.goldSoft.color)
+              .frame(width: 32, height: 32)
+            Text(String((counterpart.nickname ?? "?").prefix(1)))
+              .fonts(.captionBold)
+              .foregroundStyle(Asset.Colors.goldDeep.color)
           }
         }
       }
     }
   }
 
+  // MARK: - 편지 말풍선 행
+
   private func threadRow(_ letter: ThreadLetter) -> some View {
     let isSent = letter.direction == .sent
-    return HStack {
-      if isSent { Spacer(minLength: 40) }
-      VStack(alignment: isSent ? .trailing : .leading, spacing: 4) {
-        Text(letter.title.isEmpty ? "편지" : letter.title)
-          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
-        Text(isSent ? "보냄" : "받음")
-          .fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
+    let cornerRadii = RectangleCornerRadii(
+      topLeading: MutterRadius.lg,
+      bottomLeading: isSent ? MutterRadius.lg : MutterRadius.sm,
+      bottomTrailing: isSent ? MutterRadius.sm : MutterRadius.lg,
+      topTrailing: MutterRadius.lg
+    )
+    return HStack(alignment: .bottom, spacing: 0) {
+      if isSent { Spacer(minLength: 60) }
+
+      VStack(alignment: isSent ? .trailing : .leading, spacing: 0) {
+        // 말풍선 본체
+        HStack(spacing: 10) {
+          MutterIcon(
+            isSent ? Asset.Images.envelopeOpen : Asset.Images.envelope,
+            size: 18
+          )
+          .foregroundStyle(isSent ? Asset.Colors.goldDeep.color : Asset.Colors.gold.color)
+
+          VStack(alignment: .leading, spacing: 3) {
+            Text(letter.title.isEmpty ? "편지" : letter.title)
+              .fonts(.bodyMediumBold)
+              .foregroundStyle(Asset.Colors.ink.color)
+              .lineLimit(2)
+
+            Text(letter.sentAt, style: .relative)
+              .fonts(.caption)
+              .foregroundStyle(Asset.Colors.inkFaint.color)
+          }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+          isSent ? Asset.Colors.goldSoft.color : Asset.Colors.surface.color,
+          in: UnevenRoundedRectangle(cornerRadii: cornerRadii)
+        )
+        .overlay(
+          Group {
+            if !isSent {
+              UnevenRoundedRectangle(cornerRadii: cornerRadii)
+                .strokeBorder(Asset.Colors.hairline.color, lineWidth: 0.5)
+            }
+          }
+        )
+        .shadows(.soft)
       }
-      .padding(14)
-      .background(isSent ? Asset.Colors.goldSoft.color : Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
+      .contentShape(Rectangle())
       .onTapGesture {
         if !isSent, let token = letter.token {
           model.closeThread()
           onOpen(token)
         }
       }
-      if !isSent { Spacer(minLength: 40) }
+
+      if !isSent { Spacer(minLength: 60) }
     }
   }
 
-  private var emptyState: some View {
-    VStack(spacing: 12) {
-      Asset.Images.emptyConnections.image.resizable().scaledToFit().frame(height: 120)
-      Text("주고받은 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
+  // MARK: - 하단 편지 쓰기 바
+
+  private func bottomBar(_ counterpart: Counterpart) -> some View {
+    VStack(spacing: 0) {
+      Divider()
+        .background(Asset.Colors.hairline.color)
+
+      let buttonTitle = counterpart.nickname.map { "\($0)에게 편지 쓰기" } ?? "편지 쓰기"
+      MutterButton(buttonTitle, icon: Asset.Images.compose) {
+        model.closeThread()
+        onReply(counterpart.userId)
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 16)
+      .padding(.bottom, 24)
     }
+    .background(Asset.Colors.surface.color)
+  }
+
+  // MARK: - 빈 상태
+
+  private var emptyState: some View {
+    VStack(spacing: 16) {
+      MutterIcon(Asset.Images.emptyConnections, size: 120)
+        .foregroundStyle(Asset.Colors.inkFaint.color)
+      Text("주고받은 편지가 없어요")
+        .fonts(.bodyLarge)
+        .foregroundStyle(Asset.Colors.inkSoft.color)
+      Text("연결된 사람에게 첫 편지를 써보세요")
+        .fonts(.caption)
+        .foregroundStyle(Asset.Colors.inkFaint.color)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .padding(.bottom, 60)
   }
 }
