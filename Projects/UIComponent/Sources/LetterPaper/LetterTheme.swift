@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// 편지 템플릿 테마(웹 `templates.ts`의 `TemplateTheme` 이식).
-/// 색은 전부 `Asset.Theme.*`(xcassets) — 디자인시스템 색(`Asset.Colors`)과 분리된
+/// 색은 전부 `Asset.Colors.<테마><역할>`(예: `Asset.Colors.springDayBg`, xcassets 평탄) —
 /// 테마별 콘텐츠 색이다. `id`는 웹/DB와 호환되는 문자열(Letter.templateId).
 public struct LetterTheme: Identifiable, Equatable {
   public let id: String
@@ -81,11 +81,11 @@ public extension LetterTheme {
     id: "classic-serif",
     name: "클래식 세리프",
     summary: "시대를 초월한 우아함. 손으로 쓴 편지의 감촉.",
-    background: Asset.Theme.ClassicSerif.bg.color,
-    foreground: Asset.Theme.ClassicSerif.fg.color,
-    muted: Asset.Theme.ClassicSerif.muted.color,
-    accent: Asset.Theme.ClassicSerif.accent.color,
-    border: Asset.Theme.ClassicSerif.border.color,
+    background: Asset.Colors.classicSerifBg.color,
+    foreground: Asset.Colors.classicSerifFg.color,
+    muted: Asset.Colors.classicSerifMuted.color,
+    accent: Asset.Colors.classicSerifAccent.color,
+    border: Asset.Colors.classicSerifBorder.color,
     fontDesign: .serif, bodySize: 17, headingSize: 22, lineHeightMultiplier: 1.85, cornerRadius: 4
   )
 
@@ -93,11 +93,11 @@ public extension LetterTheme {
     id: "modern-minimal",
     name: "모던 미니멀",
     summary: "여백이 말한다. 텍스트에만 집중.",
-    background: Asset.Theme.ModernMinimal.bg.color,
-    foreground: Asset.Theme.ModernMinimal.fg.color,
-    muted: Asset.Theme.ModernMinimal.muted.color,
-    accent: Asset.Theme.ModernMinimal.accent.color,
-    border: Asset.Theme.ModernMinimal.border.color,
+    background: Asset.Colors.modernMinimalBg.color,
+    foreground: Asset.Colors.modernMinimalFg.color,
+    muted: Asset.Colors.modernMinimalMuted.color,
+    accent: Asset.Colors.modernMinimalAccent.color,
+    border: Asset.Colors.modernMinimalBorder.color,
     fontDesign: .default, bodySize: 16, headingSize: 20, lineHeightMultiplier: 1.75, cornerRadius: 2
   )
 
@@ -105,11 +105,11 @@ public extension LetterTheme {
     id: "warm-craft",
     name: "따뜻한 크래프트",
     summary: "커피향 나는 브라운 톤. 오래된 카페의 감성.",
-    background: Asset.Theme.WarmCraft.bg.color,
-    foreground: Asset.Theme.WarmCraft.fg.color,
-    muted: Asset.Theme.WarmCraft.muted.color,
-    accent: Asset.Theme.WarmCraft.accent.color,
-    border: Asset.Theme.WarmCraft.border.color,
+    background: Asset.Colors.warmCraftBg.color,
+    foreground: Asset.Colors.warmCraftFg.color,
+    muted: Asset.Colors.warmCraftMuted.color,
+    accent: Asset.Colors.warmCraftAccent.color,
+    border: Asset.Colors.warmCraftBorder.color,
     fontDesign: .serif, bodySize: 16, headingSize: 21, lineHeightMultiplier: 1.8, cornerRadius: 6
   )
 
@@ -117,11 +117,11 @@ public extension LetterTheme {
     id: "night-sky",
     name: "밤하늘",
     summary: "깊은 남색 배경에 별빛 같은 문장들.",
-    background: Asset.Theme.NightSky.bg.color,
-    foreground: Asset.Theme.NightSky.fg.color,
-    muted: Asset.Theme.NightSky.muted.color,
-    accent: Asset.Theme.NightSky.accent.color,
-    border: Asset.Theme.NightSky.border.color,
+    background: Asset.Colors.nightSkyBg.color,
+    foreground: Asset.Colors.nightSkyFg.color,
+    muted: Asset.Colors.nightSkyMuted.color,
+    accent: Asset.Colors.nightSkyAccent.color,
+    border: Asset.Colors.nightSkyBorder.color,
     fontDesign: .serif, bodySize: 17, headingSize: 22, lineHeightMultiplier: 1.9, cornerRadius: 8
   )
 
@@ -129,11 +129,11 @@ public extension LetterTheme {
     id: "spring-day",
     name: "봄날",
     summary: "연분홍 벚꽃처럼 가볍고 설레는 마음.",
-    background: Asset.Theme.SpringDay.bg.color,
-    foreground: Asset.Theme.SpringDay.fg.color,
-    muted: Asset.Theme.SpringDay.muted.color,
-    accent: Asset.Theme.SpringDay.accent.color,
-    border: Asset.Theme.SpringDay.border.color,
+    background: Asset.Colors.springDayBg.color,
+    foreground: Asset.Colors.springDayFg.color,
+    muted: Asset.Colors.springDayMuted.color,
+    accent: Asset.Colors.springDayAccent.color,
+    border: Asset.Colors.springDayBorder.color,
     fontDesign: .default, bodySize: 16, headingSize: 21, lineHeightMultiplier: 1.8, cornerRadius: 12
   )
 
@@ -141,11 +141,11 @@ public extension LetterTheme {
     id: "vintage-typewriter",
     name: "빈티지 타자기",
     summary: "타자기 서체로 찍힌 진심. 아날로그의 온기.",
-    background: Asset.Theme.VintageTypewriter.bg.color,
-    foreground: Asset.Theme.VintageTypewriter.fg.color,
-    muted: Asset.Theme.VintageTypewriter.muted.color,
-    accent: Asset.Theme.VintageTypewriter.accent.color,
-    border: Asset.Theme.VintageTypewriter.border.color,
+    background: Asset.Colors.vintageTypewriterBg.color,
+    foreground: Asset.Colors.vintageTypewriterFg.color,
+    muted: Asset.Colors.vintageTypewriterMuted.color,
+    accent: Asset.Colors.vintageTypewriterAccent.color,
+    border: Asset.Colors.vintageTypewriterBorder.color,
     fontDesign: .monospaced, bodySize: 15, headingSize: 20, lineHeightMultiplier: 1.9, cornerRadius: 0
   )
 
@@ -153,11 +153,11 @@ public extension LetterTheme {
     id: "pure-space",
     name: "순수 여백",
     summary: "극도의 미니멀. 말 한마디가 전부인 편지.",
-    background: Asset.Theme.PureSpace.bg.color,
-    foreground: Asset.Theme.PureSpace.fg.color,
-    muted: Asset.Theme.PureSpace.muted.color,
-    accent: Asset.Theme.PureSpace.accent.color,
-    border: Asset.Theme.PureSpace.border.color,
+    background: Asset.Colors.pureSpaceBg.color,
+    foreground: Asset.Colors.pureSpaceFg.color,
+    muted: Asset.Colors.pureSpaceMuted.color,
+    accent: Asset.Colors.pureSpaceAccent.color,
+    border: Asset.Colors.pureSpaceBorder.color,
     fontDesign: .default, bodySize: 18, headingSize: 24, lineHeightMultiplier: 2.0, cornerRadius: 0
   )
 }
