@@ -1,19 +1,21 @@
 import Foundation
 import Network
-import Combine
 
-/// 네트워크 연결 상태를 관찰한다. `NWPathMonitor`를 Combine으로 노출.
-public final class NetworkMonitor: ObservableObject {
+/// 네트워크 연결 상태를 관찰한다. `NWPathMonitor`를 `@Observable`로 노출.
+/// (`@Observable`과 `@Published`/`ObservableObject`는 함께 못 쓴다 — `_isConnected` 합성 충돌.
+///  소비처는 `.environment(NetworkMonitor.shared)`로 주입하므로 `@Observable`만 사용한다.)
+@Observable
+public final class NetworkMonitor {
   public static let shared = NetworkMonitor()
 
-  @Published public private(set) var isConnected: Bool = true
+  public private(set) var isConnected: Bool = true
 
-  private let monitor = NWPathMonitor()
-  private let queue = DispatchQueue(label: "com.efreedom.mutter.networkmonitor")
+  @ObservationIgnored private let monitor = NWPathMonitor()
+  @ObservationIgnored private let queue = DispatchQueue(label: "com.efreedom.mutter.networkmonitor")
 
   private init() {
     monitor.pathUpdateHandler = { [weak self] path in
-      // pathUpdateHandler는 백그라운드 큐에서 호출 → @Published는 메인에서 갱신해야 한다.
+      // pathUpdateHandler는 백그라운드 큐에서 호출 → 상태는 메인에서 갱신한다.
       let connected = (path.status == .satisfied)
       Task { @MainActor in self?.isConnected = connected }
     }

@@ -4,6 +4,7 @@ import UserNotifications
 import AppFoundation
 import Domain
 import Infrastructure
+import UIComponent
 
 import GoogleSignIn
 import KakaoSDKCommon
@@ -16,7 +17,13 @@ struct MutterApp: App {
   
   var body: some Scene {
     WindowGroup {
-      MainView()
+      OverlayWindowView {
+        MainView()
+          .environment(NetworkMonitor.shared)
+          .onOpenURL { url in
+            OauthDeepLinkHandler.shared.handle(url: url)
+          }
+      }
     }
   }
 }
@@ -35,7 +42,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     // 전역(앱 전체 공유) 의존성만 1회 등록(SwiftUI body 이전). didFinishLaunching은 메인 스레드.
     MainActor.assumeIsolated {
       registerGlobalDependencies()
-      configureSocialSDKs()
+      configureGoogleInstance()
+      configureKakaoLoginInstance()
     }
     requestPushAuthorization(application)
     return true
@@ -43,15 +51,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
   /// 소셜 로그인 SDK 초기화 — 키가 있을 때만(Sensitive.xcconfig 미설정 시 조용히 건너뜀).
   @MainActor
-  private func configureSocialSDKs() {
+  private func configureGoogleInstance() {
     if let clientID = AppConfig.googleClientID {
       GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
     }
+   
+  }
+
+  private func configureKakaoLoginInstance() {
     if let appKey = AppConfig.kakaoAppKey {
       KakaoSDK.initSDK(appKey: appKey)
     }
   }
-
+  
   /// 서비스 로케이터엔 **진짜 전역인 것만** 등록한다(Mercury 패턴 — 세션 등).
   /// usecase/repository는 컨테이너에 넣지 않고 호출부(ViewWrapper·RootViewFactory)에서 생성자 주입한다.
   @MainActor
