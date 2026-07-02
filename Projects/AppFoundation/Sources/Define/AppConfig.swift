@@ -18,7 +18,7 @@ public enum AppConfig {
   public static var googleClientID: String? { optionalInfoString("GOOGLE_CLIENT_ID") }
 
   /// Kakao 네이티브 앱 키(없으면 nil). Sensitive.xcconfig에서 주입.
-  public static var kakaoAppKey: String? { optionalInfoString("KAKAO_APP_KEY") }
+  public static var kakaoAppKey: String? { optionalInfoString("KAKAO_AUTH_KEY") }
 
   private static func infoString(_ key: String) -> String {
     guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,

@@ -20,22 +20,6 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
-
-	<!-- Supabase 자격값: Sensitive.xcconfig(미추적)의 빌드 설정을 주입. 소스 하드코딩 금지. -->
-	<key>SUPABASE_URL</key>
-	<string>$(SUPABASE_URL)</string>
-	<key>SUPABASE_ANON_KEY</key>
-	<string>$(SUPABASE_ANON_KEY)</string>
-
-	<!-- 소셜 로그인 키: Sensitive.xcconfig에서 주입. 비면 소셜 로그인 자동 비활성. -->
-	<key>GOOGLE_CLIENT_ID</key>
-	<string>$(GOOGLE_CLIENT_ID)</string>
-	<key>KAKAO_APP_KEY</key>
-	<string>$(KAKAO_APP_KEY)</string>
-
-	<!-- 딥링크: 커스텀 스킴(mutter) + 소셜 OAuth 콜백(Google 역클라이언트ID · kakao{앱키}). -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -57,37 +41,43 @@
 			</array>
 		</dict>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLName</key>
 			<string>kakao</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>kakao$(KAKAO_APP_KEY)</string>
+				<string>kakao$(KAKAO_AUTH_KEY)</string>
 			</array>
 		</dict>
 	</array>
-
-	<!-- 카카오톡 앱 로그인 가능 여부 확인용 스킴. -->
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GOOGLE_CLIENT_ID</key>
+	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>KAKAO_AUTH_KEY</key>
+	<string>$(KAKAO_AUTH_KEY)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>kakaokompassauth</string>
 		<string>kakaotalk</string>
 		<string>kakaolink</string>
 	</array>
-
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>$(SUPABASE_ANON_KEY)</string>
+	<key>SUPABASE_URL</key>
+	<string>$(SUPABASE_URL)</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
-	<!-- 백그라운드: 음악 무중단(audio) + 푸시 수신(remote-notification). -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>remote-notification</string>
 	</array>
-
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>

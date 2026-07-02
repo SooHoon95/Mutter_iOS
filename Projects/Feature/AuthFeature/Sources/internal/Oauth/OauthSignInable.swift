@@ -3,8 +3,9 @@ import Foundation
 import Domain
 
 /// 소셜 로그인 제공자 종류(팩토리·UI용). Apple은 전용 자격증명 플로우.
-enum OauthProvider {
+enum OauthProvider: CaseIterable, Identifiable {
   case apple, google, kakao
+  var id: Self { self }
 }
 
 /// provider가 SDK 인증을 마치고 반환하는 자격증명 → Supabase 교환용.

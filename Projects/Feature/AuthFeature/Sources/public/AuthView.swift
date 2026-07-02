@@ -102,33 +102,21 @@ public struct AuthView: View {
   }
 
   // MARK: - Social (Google/Kakao/Apple — 콘솔 키는 Sensitive.xcconfig에서 주입)
+  // Mercury 패턴: provider별 버튼(SignInButtonView)을 allCases로 나열.
 
   private var socialSection: some View {
-    VStack(spacing: 10) {
+    VStack(spacing: 8) {
       Text("또는")
         .fonts(.caption)
         .foregroundStyle(Asset.Colors.inkFaint.color)
-      socialButton("Apple로 계속", .apple)
-      socialButton("Google로 계속", .google)
-      socialButton("카카오로 계속", .kakao)
+        .padding(.bottom, 2)
+      ForEach(OauthProvider.allCases) { provider in
+        SignInButtonView(type: provider) {
+          await model.signInSocial(provider)
+        }
+        .disabled(model.isLoading)
+      }
     }
-  }
-
-  private func socialButton(_ title: String, _ provider: OauthProvider) -> some View {
-    Button {
-      Task { await model.signInSocial(provider) }
-    } label: {
-      Text(title)
-        .fonts(.captionBold)
-        .foregroundStyle(Asset.Colors.ink.color)
-        .frame(maxWidth: .infinity, minHeight: 48)
-        .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
-        .overlay(
-          RoundedRectangle(cornerRadius: MutterRadius.md)
-            .stroke(Asset.Colors.inkFaint.color.opacity(0.3), lineWidth: 1)
-        )
-    }
-    .disabled(model.isLoading)
   }
 
   // MARK: - Helpers
