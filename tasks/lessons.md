@@ -2,7 +2,18 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
-### 2026-07-01 — [재발] 카탈로그 2개 회귀가 또 터짐 (claude_design 임포트가 Images.xcassets 재생성)
+### 2026-07-02 — [최종/근본해결] 에셋을 Mercury와 동일 구조로: 카탈로그명=네임스페이스 + 테마색 완전 평탄
+- 상황: 사용자가 "왜 Colors.xcassets 안에 Images를 욱여넣었냐"·"Theme이 왜 아직 Color 안에 있냐"·"Mercury 프로젝트랑 똑같이 만들어놔" 연속 지적. 아래 2026-07-01·06-30의 "카탈로그 1개 유지"는 임시방편이었다.
+- **Mercury의 정본 방식(그대로 채택)**: `Assets.stencil`은 **원본 그대로**(133행 `catalogs.count > 1`이면 카탈로그를 파일명 enum으로 래핑). 즉 **카탈로그 파일명 자체가 최상위 네임스페이스**가 된다. 안쪽은 provides-namespace 없는 그냥 정리 폴더(또는 루트 직접). ⇒ `Colors.xcassets → Asset.Colors.*`, `Images.xcassets → Asset.Images.*`.
+  - (중간에 스텐실을 평탄병합으로 고쳤다가 **되돌렸다** — Mercury와 동일하게 가려고 원본 유지가 맞다.)
+- **핵심 함정 재확인**: 카탈로그가 2개 이상이면 파일명 래핑이 켜지므로, `Colors.xcassets` **안에 또 `Colors/` provides-namespace 폴더**가 있으면 `Asset.Colors.Colors.*` 이중중첩이 된다. ⇒ **catalog 안엔 provides-namespace 래퍼 폴더를 두지 말고 colorset/imageset을 루트에 직접**(Mercury처럼). 하위 네임스페이스가 꼭 필요할 때만 provides-namespace 폴더 사용.
+- **테마색 완전 평탄화**: `Theme/<테마>/<역할>` 중첩(→ `Asset.Colors.Theme.SpringDay.bg`)을 폐기. 테마 7개가 역할 이름(bg/fg/accent/border/muted)을 공유해 충돌하므로, colorset을 `<테마><역할>`(예: `SpringDayBg.colorset`)로 리네임해 Colors 루트로 올림 ⇒ `Asset.Colors.springDayBg`. `Theme/` 폴더·네임스페이스 소멸. `LetterTheme.swift`가 유일 참조처(perl로 일괄 변환).
+- 결과: 카탈로그 **2개**(`Colors.xcassets`=색 전부[semantic+테마 평탄], `Images.xcassets`=이미지 전부[아이콘+소셜 `apple/google/kakao`]). 최상위 네임스페이스 **Colors·Images 딱 2개**(Mercury와 동일), 이중중첩 0, 빌드 그린.
+- **규칙**: 새 에셋은 **역할별 카탈로그(Colors/Images)의 루트에 직접** 추가(provides-namespace 래퍼 금지). 재생성 후 `grep 'Colors.Colors\|Images.Images'`(이중중첩) 0 + 빌드로 검증. 아래 "정확히 1개 카탈로그" 가드는 폐기. → [[mutter-build-progress]]
+- **곁다리(클린 재컴파일이 드러낸 잠복버그 2개)**: `NetworkMonitor`가 `@Observable`+`@Published`(`ObservableObject`) 혼용 → `_isConnected` 합성 충돌. **`@Observable`과 `@Published`는 같이 못 쓴다** — 소비처가 `.environment()`면 `@Observable`만 남기고 Combine 제거. / OAuth 소셜 버튼은 Mercury `Feature/Onboard`의 `SignInButtonView`+provider별 버튼을 이식하되 디자인토큰만 Mutter 것으로 매핑(`Asset.Colors.neutral`→`ink` 등), Naver 제외, 백엔드(Supabase) 유지.
+
+### 2026-07-01 — [재발·이후 폐기됨] 카탈로그 2개 회귀가 또 터짐 (claude_design 임포트가 Images.xcassets 재생성)
+> ⚠️ 이 항목의 "카탈로그 1개 유지" 조치·가드는 2026-07-02 스텐실 근본해결로 **폐기**됨(위 항목 참조). 역사 기록용으로 남김.
 - 상황: 디자인 MCP로 이미지를 임포트하는 과정에서 별도 `Images.xcassets`가 다시 생성됨 → 2026-06-30 함정 ③ 그대로 재발. `Asset.Colors.Colors.gold`로 밀려 `MutterGradient.swift` 등 전부 컴파일 실패(빌드가 `Asset.Colors.gold`부터 못 찾음). 원인은 stencil 133행 `{% if catalogs.count > 1 %}`가 카탈로그명 래퍼를 켜는 것 — 근본은 "카탈로그가 2개가 됐다".
 - 조치: `Images.xcassets`의 `Images/`·`Social/`를 `Colors.xcassets/`로 이동, `Images.xcassets` 삭제 → 다시 카탈로그 1개. (`Social/`엔 provides-namespace 추가.)
 - **가드(에셋 임포트/디자인 반영 직후 필수)**: `find Projects/*/Resources -name '*.xcassets' -type d` 가 **정확히 1개**인지 확인. 2개 이상이면 즉시 하나로 병합(분류는 provides-namespace 하위 폴더로). 임포트 도구가 새 카탈로그를 만드는 경향이 있으니 임포트 후 항상 검사한다. → [[mutter-build-progress]]
