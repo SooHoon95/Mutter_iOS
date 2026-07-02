@@ -2,15 +2,34 @@ import Combine
 import SwiftUI
 
 import AppFoundation
+import Domain
+import Infrastructure
 import Router
 import UIComponent
 
+import Viewer
+
+/// 딥링크 편지 토큰 — fullScreenCover item으로 사용(Identifiable).
+private struct DeeplinkToken: Identifiable {
+  let id: String
+  var token: String { id }
+}
+
 /// 앱 루트(Mercury `MainView` 패턴) — splash(loading) → signin → maintab 단계 전환.
-/// 세션 상태는 `SessionManagable` 스트림이 단일 소스. 딥링크는 로그인 여부와 무관하게 수신 라우트로 push.
+/// 세션 상태는 `SessionManagable` 스트림이 단일 소스.
+/// 딥링크 처리:
+///   - 로그인 완료 상태: 즉시 coordinator push.
+///   - 미로그인 / splash 대기 중:
+///     · 편지(/l/:token) → fullScreenCover로 미인증 뷰어 즉시 표시(수신자 무마찰).
+///     · 초대(/connect/:token) → pendingConnectToken에 보류, 로그인 완료 시 소비.
 struct MainView: View {
   @StateObject private var coordinator = NavigationCoordinator<FeatureRoute>()
   @State private var isSplashDone = false
   @State private var isUserLoggedIn = false
+  /// 미인증/splash 중 수신된 편지 딥링크 — fullScreenCover로 즉시 열람(EC-5.1).
+  @State private var pendingLetter: DeeplinkToken?
+  /// 미인증/splash 중 수신된 초대 딥링크 — 로그인 완료 시 소비(EC-5.2/5.5).
+  @State private var pendingConnectToken: String?
   @Inject private var sessionManager: SessionManagable
 
   var body: some View {
@@ -23,22 +42,47 @@ struct MainView: View {
       await sessionManager.refresh()
       isUserLoggedIn = sessionManager.isLoggedIn
       isSplashDone = true
+      // splash 완료 시점에 이미 로그인돼 있으면 보류 초대 토큰 소비(cold-start-logged-in, EC-5.5).
+      consumePendingConnectIfNeeded()
     }
     .onReceive(sessionManager.isLoggedInStream) { loggedIn in
       guard isSplashDone else { return }
       guard isUserLoggedIn != loggedIn else { return }
       if !loggedIn { coordinator.popToRoot() }
       isUserLoggedIn = loggedIn
+      // 로그인 완료 시 보류 초대 딥링크 소비(EC-5.2 — 우연 동작을 설계 보장으로).
+      if loggedIn { consumePendingConnectIfNeeded() }
     }
     .onOpenURL { url in
       // 소셜 OAuth 콜백이면 SDK가 소진, 아니면 앱 딥링크(수신 라우트)로 폴백.
       if OauthDeepLinkHandler.shared.handle(url: url) { return }
-      // 딥링크는 무계정 허용(수신 화면). 로그인 여부와 무관하게 수신 라우트로 push.
-      if let route = DeeplinkRouter.route(for: url) {
-        coordinator.push(route)
+      guard let deeplink = Deeplink(url: url) else { return }
+      switch deeplink {
+      case .letter(let token):
+        if isSplashDone && isUserLoggedIn {
+          // 로그인 완료 상태 — NavigationStack이 마운트돼 있으므로 바로 push.
+          coordinator.push(.viewer(.token(token, password: nil)))
+        } else {
+          // 미로그인 또는 splash 대기 중 — fullScreenCover로 미인증 뷰어 즉시 표시(EC-5.1).
+          pendingLetter = DeeplinkToken(id: token)
+        }
+      case .connect(let token):
+        if isSplashDone && isUserLoggedIn {
+          // 로그인 완료 상태 — 초대 화면 push.
+          coordinator.push(.connect(.invite(token: token)))
+        } else {
+          // 미로그인 또는 splash 대기 중 — 로그인 완료 후 소비(EC-5.2/5.5).
+          pendingConnectToken = token
+        }
       }
     }
+    // 미인증 편지 뷰어 — NavigationStack 마운트 여부와 무관하게 any-state에서 표시(EC-5.1).
+    .fullScreenCover(item: $pendingLetter) { item in
+      unauthenticatedViewerCover(token: item.token)
+    }
   }
+
+  // MARK: - Current View
 
   @ViewBuilder
   private func currentView() -> some View {
@@ -74,5 +118,39 @@ struct MainView: View {
           }
       }
     }
+  }
+
+  // MARK: - Unauthenticated Viewer Cover
+
+  /// 미인증 편지 뷰어 — inboxUsecase: nil(능력 부재). 닫기 버튼으로 dismiss.
+  @ViewBuilder
+  private func unauthenticatedViewerCover(token: String) -> some View {
+    ZStack(alignment: .topLeading) {
+      ViewerViewFactory(
+        deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
+        receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository(), catalog: CatalogRepository()),
+        inboxUsecase: nil,
+        audioUsecase: AudioUsecase(catalog: CatalogRepository())
+      ).makeView(.token(token, password: nil))
+
+      // 닫기 버튼 — 상단 좌측, 테마 일관성 유지(골드 소프트).
+      Button {
+        pendingLetter = nil
+      } label: {
+        MutterIcon(Asset.Images.back, size: 22)
+          .foregroundStyle(Asset.Colors.inkSoft.color)
+          .padding(16)
+      }
+    }
+  }
+
+  // MARK: - Pending Connect Consumption
+
+  /// 보류 초대 토큰을 소비해 connect 화면으로 push. 로그인 완료 + 토큰 있을 때만 동작.
+  private func consumePendingConnectIfNeeded() {
+    guard isUserLoggedIn, let token = pendingConnectToken else { return }
+    pendingConnectToken = nil
+    coordinator.push(.connect(.invite(token: token)))
   }
 }

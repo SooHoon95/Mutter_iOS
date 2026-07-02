@@ -172,10 +172,23 @@ final class ComposeModelData {
     }
   }
 
-  /// 답장 발송 — 저장 후 연결 상대에게 전송.
+  /// 답장 발송 — 저장 후, 대상이 현재 내 연결 상대면 링크 없이 직접 전송한다.
+  /// 대상이 비연결(과거 링크로만 주고받은 상대 등)이면 직접 발송은 NOT_CONNECTED로 실패하므로,
+  /// 전달 링크로 보내도록 시트를 연다(시트 기본 탭='전달 링크'). 웹 Create.tsx의 link 폴백과 동치.
   func sendReply() async {
     guard let recipientId = replyRecipientId else { return }
     guard let letterId = await save() else { return }
+    let connected = (try? await connectionUsecase.myConnections()) ?? []
+    guard connected.contains(where: { $0.userId == recipientId }) else {
+      // 비연결 상대 — 전달 링크로 폴백(연결 안 된 사람에게는 링크로만).
+      sentLetterId = letterId
+      issuedLink = nil
+      password = ""
+      usePassword = true
+      connections = connected
+      showSendSheet = true
+      return
+    }
     do {
       try await connectionUsecase.send(letterId: letterId, recipientId: recipientId)
       onDone()

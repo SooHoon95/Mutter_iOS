@@ -47,6 +47,7 @@ struct RootViewFactory {
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
         letterUsecase: LetterUsecase(repository: LetterRepository(), catalog: CatalogRepository()),
+        inboxUsecase: InboxUsecase(repository: InboxRepository()),
         audioUsecase: AudioUsecase(catalog: CatalogRepository())
       ).makeView(viewerRoute)
 

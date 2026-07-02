@@ -8,17 +8,21 @@ public struct ViewerViewFactory: ViewFactory {
   private let deliveryUsecase: DeliveryUsecasable
   private let receiptUsecase: ReceiptUsecasable
   private let letterUsecase: LetterUsecasable
+  /// nil이면 미인증 뷰어(능력 부재 = nil, Mercury DI 패턴).
+  private let inboxUsecase: InboxUsecasable?
   private let audioUsecase: AudioUsecasable
 
   public init(
     deliveryUsecase: DeliveryUsecasable,
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
+    inboxUsecase: InboxUsecasable?,
     audioUsecase: AudioUsecasable
   ) {
     self.deliveryUsecase = deliveryUsecase
     self.receiptUsecase = receiptUsecase
     self.letterUsecase = letterUsecase
+    self.inboxUsecase = inboxUsecase
     self.audioUsecase = audioUsecase
   }
 
@@ -37,6 +41,7 @@ public struct ViewerViewFactory: ViewFactory {
       deliveryUsecase: deliveryUsecase,
       receiptUsecase: receiptUsecase,
       letterUsecase: letterUsecase,
+      inboxUsecase: inboxUsecase,
       audioUsecase: audioUsecase
     )
   }

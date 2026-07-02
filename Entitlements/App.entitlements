@@ -4,13 +4,26 @@
 <dict>
 	<!--
 	  개발 단계(무료 개인 팀): capability 없음.
-	  무료 개인 팀은 Push Notifications / Sign in with Apple 를 프로비저닝하지 못한다(유료 전용).
-	  ▶ 배포 직전(유료 계정 생성 후) 아래를 다시 추가하고, App ID에 Push·Apple 로그인 capability를 켠다:
+	  무료 개인 팀은 Push Notifications / Sign in with Apple / Associated Domains 를
+	  프로비저닝하지 못한다(전부 유료 전용).
+	  ▶ 배포 직전(유료 계정 생성 후) 아래를 다시 추가하고, App ID에 각 capability를 켠다:
 
 	  <key>aps-environment</key>
 	  <string>$(APS_ENVIRONMENT)</string>
 	  <key>com.apple.developer.applesignin</key>
 	  <array><string>Default</string></array>
+
+	  ▶ Universal Links(초대/전달 링크를 앱으로 여는 네이티브 방식, 3rd-party 불필요):
+	    1) 아래 associated-domains 를 켠다(<도메인>을 실제 배포 도메인으로 교체).
+	    2) 도메인에 apple-app-site-association(AASA) 파일을 호스팅한다.
+	       (letter-app/public/.well-known/apple-app-site-association — TEAMID 교체 후 배포)
+	    3) 앱은 이미 /l/:token · /connect/:token 을 Deeplink.swift 에서 파싱한다.
+	    자세한 절차·체크리스트: docs/universal-links.md
+
+	  <key>com.apple.developer.associated-domains</key>
+	  <array>
+	    <string>applinks:<도메인></string>
+	  </array>
 	-->
 </dict>
 </plist>

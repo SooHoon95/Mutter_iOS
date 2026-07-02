@@ -33,6 +33,15 @@ final class ConnectionsModelData {
     }
   }
 
+  /// 초대 링크 취소 — 상대가 아직 수락하지 않은 경우 무효화 (EC-2.8).
+  func revokeInvite() async {
+    guard let token = inviteToken else { return }
+    await run {
+      try await connectionUsecase.revokeInvite(token: token)
+      inviteToken = nil
+    }
+  }
+
   func disconnect() async {
     await run {
       try await connectionUsecase.disconnect()

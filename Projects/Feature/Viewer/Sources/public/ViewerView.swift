@@ -13,6 +13,7 @@ public struct ViewerView: View {
     deliveryUsecase: DeliveryUsecasable,
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
+    inboxUsecase: InboxUsecasable?,
     audioUsecase: AudioUsecasable
   ) {
     _model = State(initialValue: ViewerModelData(
@@ -20,6 +21,7 @@ public struct ViewerView: View {
       deliveryUsecase: deliveryUsecase,
       receiptUsecase: receiptUsecase,
       letterUsecase: letterUsecase,
+      inboxUsecase: inboxUsecase,
       audioUsecase: audioUsecase
     ))
   }
@@ -161,7 +163,20 @@ public struct ViewerView: View {
         ScrollView {
           LetterPaperView(theme: theme, title: payload.title, text: payload.body)
             .frame(maxWidth: .infinity)
-            .padding(.bottom, 100)
+
+          // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
+          if model.canSaveToInbox && model.savedToInbox {
+            HStack(spacing: 6) {
+              MutterIcon(Asset.Images.check, size: 16)
+                .foregroundStyle(Asset.Colors.gold.color)
+              Text("받은 편지함에 저장됐어요")
+                .fonts(.caption)
+                .foregroundStyle(Asset.Colors.inkSoft.color)
+            }
+            .padding(.top, 8)
+          }
+
+          Color.clear.frame(height: 100)
         }
       }
     }

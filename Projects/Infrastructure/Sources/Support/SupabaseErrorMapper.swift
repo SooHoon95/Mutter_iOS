@@ -20,6 +20,8 @@ enum SupabaseErrorMapper {
     if message.contains("WRONG_PASSWORD") { return MutterError(.wrongPassword) }
     if message.contains("LINK_REVOKED") { return MutterError(.linkRevoked) }
     if message.contains("LINK_EXPIRED") { return MutterError(.linkExpired) }
+    if message.contains("NOT_CONNECTED") { return MutterError(.notConnected) }
+    if message.contains("INVITE_ALREADY_USED") { return MutterError(.inviteAlreadyUsed) }
     if message.contains("TOKEN_NOT_FOUND")
       || message.contains("LETTER_NOT_FOUND")
       || message.contains("NOT_FOUND") { return MutterError(.notFound) }

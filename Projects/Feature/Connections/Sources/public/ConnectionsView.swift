@@ -8,6 +8,7 @@ import UIComponent
 public struct ConnectionsView: View {
   @State private var model: ConnectionsModelData
   @State private var showDisconnectConfirm = false
+  @Environment(\.scenePhase) private var scenePhase
 
   /// 초대 링크 베이스(예: https://mutter.app). 합성 루트가 주입.
   private let inviteBaseURL: String
@@ -40,6 +41,10 @@ public struct ConnectionsView: View {
       }
     }
     .task { await model.load() }
+    // 앱 포그라운드 복귀 시 재로드 — 상대가 연결을 끊었을 때 최신 상태 반영 (EC-2.5).
+    .onChange(of: scenePhase) { _, newPhase in
+      if newPhase == .active { Task { await model.load() } }
+    }
     .confirmationDialog("연결을 해제할까요?", isPresented: $showDisconnectConfirm, titleVisibility: .visible) {
       Button("해제", role: .destructive) { Task { await model.disconnect() } }
       Button("취소", role: .cancel) {}
@@ -84,6 +89,11 @@ public struct ConnectionsView: View {
         }
         .padding(12)
         .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+
+        // 초대가 아직 수락되지 않은 경우 취소할 수 있다 (EC-2.8).
+        MutterButton("초대 취소", style: .ghost, isLoading: model.isLoading) {
+          Task { await model.revokeInvite() }
+        }
       } else {
         MutterButton("초대 링크 만들기", isLoading: model.isLoading) {
           Task { await model.createInvite() }

@@ -10,6 +10,10 @@ public enum MutterErrorDefine: Equatable {
   case linkRevoked
   case linkExpired
   case linkNotYetRevealed(Date)
+  /// 연결되지 않은 상대에게 편지를 보내려 할 때 (EC-3.2)
+  case notConnected
+  /// 이미 사용된 초대 링크 수락 시도 (EC-2.2)
+  case inviteAlreadyUsed
   case server(String)
   case unknown
 }

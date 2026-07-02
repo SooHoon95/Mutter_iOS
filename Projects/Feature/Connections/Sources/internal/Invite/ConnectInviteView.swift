@@ -33,7 +33,7 @@ struct ConnectInviteView: View {
     case .accepted:
       message(icon: Asset.Images.checkCircle, title: "연결됐어요", detail: "이제 서로에게 편지를 보낼 수 있어요.")
     case .failed(let text):
-      message(icon: Asset.Images.warning, title: "연결할 수 없어요", detail: text)
+      failed(text)
     }
   }
 
@@ -58,6 +58,14 @@ struct ConnectInviteView: View {
     if invite.viewerHasConnection { return "이미 다른 사람과 연결돼 있어요. 해제 후 다시 시도하세요." }
     if invite.inviterHasConnection { return "상대가 이미 다른 사람과 연결돼 있어요." }
     return "지금은 연결할 수 없어요."
+  }
+
+  /// 로드/수락 실패 상태 — 오류 메시지와 재시도 버튼 (EC-2.4).
+  private func failed(_ text: String) -> some View {
+    VStack(spacing: 16) {
+      message(icon: Asset.Images.warning, title: "연결할 수 없어요", detail: text)
+      MutterButton("다시 시도", style: .ghost) { Task { await model.load() } }
+    }
   }
 
   private func message(icon: ImageAsset, title: String, detail: String) -> some View {

@@ -44,7 +44,7 @@ public struct ProfileView: View {
       Button("삭제", role: .destructive) { Task { await model.deleteAccount() } }
       Button("취소", role: .cancel) {}
     } message: {
-      Text("편지와 연결이 모두 사라지며 되돌릴 수 없어요.")
+      Text("편지와 연결이 모두 사라지며 되돌릴 수 없어요. 상대가 보관한 편지도 함께 사라집니다.")
     }
   }
 

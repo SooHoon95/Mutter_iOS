@@ -12,6 +12,10 @@ public final class ConnectionUsecase: ConnectionUsecasable {
     try await repository.createInvite()
   }
 
+  public func revokeInvite(token: String) async throws {
+    try await repository.revokeInvite(token: token)
+  }
+
   public func invite(token: String) async throws -> ConnectInvite {
     try await repository.invite(token: token)
   }

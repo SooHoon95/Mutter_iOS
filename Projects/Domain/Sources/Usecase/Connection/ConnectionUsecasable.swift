@@ -4,6 +4,8 @@ import Foundation
 public protocol ConnectionUsecasable {
   /// 초대 토큰 생성 → 공유용 토큰 반환.
   func createInvite() async throws -> String
+  /// 생성한 초대 링크를 무효화한다 (EC-2.8).
+  func revokeInvite(token: String) async throws
   /// 초대 미리보기(수락 가능 여부 판단).
   func invite(token: String) async throws -> ConnectInvite
   /// 초대 수락(양쪽 미연결일 때만 — 서버에서 강제).

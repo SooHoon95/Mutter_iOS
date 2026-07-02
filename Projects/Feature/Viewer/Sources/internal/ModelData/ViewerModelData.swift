@@ -29,6 +29,9 @@ final class ViewerModelData {
   var password = ""
   /// 게이트(열기 ▶) 통과 여부.
   var isOpened = false
+  /// 받은함 저장 완료 여부(중복 탭 방지 + "저장됨" 표시).
+  /// 서버가 열람 시 자동 저장(0022) — 성공 로드 후 클라이언트가 true로 설정해 "저장됨" 표시.
+  var savedToInbox = false
 
   let player: LetterAudioPlayer
 
@@ -36,19 +39,31 @@ final class ViewerModelData {
   private let deliveryUsecase: DeliveryUsecasable
   private let receiptUsecase: ReceiptUsecasable
   private let letterUsecase: LetterUsecasable
+  /// nil이면 미인증(능력 부재 = nil, Mercury DI 패턴).
+  private let inboxUsecase: InboxUsecasable?
 
   init(
     source: Source,
     deliveryUsecase: DeliveryUsecasable,
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
+    inboxUsecase: InboxUsecasable?,
     audioUsecase: AudioUsecasable
   ) {
     self.source = source
     self.deliveryUsecase = deliveryUsecase
     self.receiptUsecase = receiptUsecase
     self.letterUsecase = letterUsecase
+    self.inboxUsecase = inboxUsecase
     self.player = LetterAudioPlayer(audioUsecase: audioUsecase)
+  }
+
+  /// "저장됨" 표시 노출 여부 — 토큰 수신 + 인증된 사용자(inboxUsecase != nil)일 때만.
+  /// 서버가 get_letter_by_token 사이드 이펙트로 자동 저장(마이그레이션 0022)하므로 버튼 불필요.
+  var canSaveToInbox: Bool {
+    guard inboxUsecase != nil else { return false }
+    if case .token = source { return true }
+    return false
   }
 
   func load() async {
@@ -81,6 +96,8 @@ final class ViewerModelData {
     state = .loading
     do {
       let payload = try await deliveryUsecase.open(token: token, password: password)
+      // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자라면 이미 저장됨.
+      if inboxUsecase != nil { savedToInbox = true }
       await present(payload)
     } catch let error as MutterError {
       switch error.define {

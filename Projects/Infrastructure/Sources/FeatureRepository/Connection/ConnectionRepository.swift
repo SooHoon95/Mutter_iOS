@@ -26,6 +26,17 @@ public final class ConnectionRepository: ConnectionRepositorable {
     }
   }
 
+  /// 초대 링크 무효화 — `revoke_connect_invite` RPC (EC-2.8).
+  public func revokeInvite(token: String) async throws {
+    do {
+      try await provider.client
+        .rpc("revoke_connect_invite", params: TokenParam(token: token))
+        .execute()
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
   public func invite(token: String) async throws -> ConnectInvite {
     do {
       let rows: [ConnectInviteRow] = try await provider.client
