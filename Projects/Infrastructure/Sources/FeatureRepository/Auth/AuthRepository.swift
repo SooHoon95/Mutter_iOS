@@ -57,21 +57,67 @@ public final class AuthRepository: AuthRepositorable {
   }
 
   public func signInSocial(provider socialProvider: SocialProvider, token: String) async throws -> Domain.Session {
-    let oidcProvider: OpenIDConnectCredentials.Provider
     switch socialProvider {
     case .google:
-      oidcProvider = .google
+      // 구글은 Supabase 내장 OIDC(idToken) 경로를 그대로 사용.
+      do {
+        let session = try await provider.client.auth.signInWithIdToken(
+          credentials: .init(provider: .google, idToken: token)
+        )
+        return domainSession(from: session)
+      } catch {
+        throw SupabaseErrorMapper.map(error)
+      }
     case .kakao:
-      // supabase-swift OIDC는 카카오 미지원 — Phase2에서 Kakao SDK + OAuth로 처리.
-      throw MutterError(.server("카카오 로그인은 준비 중이에요."))
+      // 카카오는 Supabase가 idToken을 직접 못 받으므로(내장 OIDC 미지원) 우리 백엔드를 경유한다.
+      return try await signInKakao(idToken: token)
+    }
+  }
+
+  /// 카카오 로그인 — 우리 Edge Function `kakao-login`에 카카오 idToken을 보내면
+  /// 서버가 검증·회원매핑 후 세션(access/refresh)을 발급한다. 그 토큰으로 `setSession`해
+  /// 로그인 상태를 확립하면 이후 자동 갱신은 SDK가 처리한다(Keychain 보관).
+  private func signInKakao(idToken: String) async throws -> Domain.Session {
+    struct Request: Encodable { let idToken: String }
+    struct Response: Decodable {
+      let accessToken: String
+      let refreshToken: String
+      let userId: String
+      enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case refreshToken = "refresh_token"
+        case userId = "user_id"
+      }
     }
     do {
-      let session = try await provider.client.auth.signInWithIdToken(
-        credentials: .init(provider: oidcProvider, idToken: token)
+      let res: Response = try await provider.client.functions.invoke(
+        "kakao-login",
+        options: FunctionInvokeOptions(body: Request(idToken: idToken))
+      )
+      let session = try await provider.client.auth.setSession(
+        accessToken: res.accessToken, refreshToken: res.refreshToken
       )
       return domainSession(from: session)
+    } catch let FunctionsError.httpError(_, data) {
+      // Edge Function이 코드화한 에러(EMAIL_CONFLICT_DIFFERENT_PROVIDER 등)를 사용자 메시지로 변환.
+      throw mapKakaoEdgeError(data)
     } catch {
       throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  private func mapKakaoEdgeError(_ data: Data) -> Error {
+    struct EdgeError: Decodable { let error: String }
+    let code = (try? JSONDecoder().decode(EdgeError.self, from: data))?.error
+    switch code {
+    case "EMAIL_CONFLICT_DIFFERENT_PROVIDER":
+      return MutterError(.server("이 이메일은 다른 로그인 방식으로 가입돼 있어요. 해당 방식으로 로그인해 주세요."))
+    case "EMAIL_UNAVAILABLE":
+      return MutterError(.server("카카오 이메일 제공에 동의해야 로그인할 수 있어요."))
+    case "INVALID_TOKEN":
+      return MutterError(.server("카카오 인증에 실패했어요. 다시 시도해 주세요."))
+    default:
+      return MutterError(.server("카카오 로그인에 실패했어요."))
     }
   }
 
