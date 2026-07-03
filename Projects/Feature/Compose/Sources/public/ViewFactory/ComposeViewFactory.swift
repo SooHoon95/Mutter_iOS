@@ -6,7 +6,6 @@ import Router
 /// 제작 화면 팩토리. ComposeRoute(.new/.edit/.reply)→ComposeView.
 public struct ComposeViewFactory: ViewFactory {
   private let letterUsecase: LetterUsecasable
-  private let catalogUsecase: CatalogUsecasable
   private let connectionUsecase: ConnectionUsecasable
   private let deliveryUsecase: DeliveryUsecasable
   private let audioUsecase: AudioUsecasable
@@ -15,7 +14,6 @@ public struct ComposeViewFactory: ViewFactory {
 
   public init(
     letterUsecase: LetterUsecasable,
-    catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
@@ -23,7 +21,6 @@ public struct ComposeViewFactory: ViewFactory {
     onDone: @escaping () -> Void
   ) {
     self.letterUsecase = letterUsecase
-    self.catalogUsecase = catalogUsecase
     self.connectionUsecase = connectionUsecase
     self.deliveryUsecase = deliveryUsecase
     self.audioUsecase = audioUsecase
@@ -46,7 +43,6 @@ public struct ComposeViewFactory: ViewFactory {
     ComposeView(
       mode: mode,
       letterUsecase: letterUsecase,
-      catalogUsecase: catalogUsecase,
       connectionUsecase: connectionUsecase,
       deliveryUsecase: deliveryUsecase,
       audioUsecase: audioUsecase,

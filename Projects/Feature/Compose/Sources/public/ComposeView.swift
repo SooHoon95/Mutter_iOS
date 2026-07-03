@@ -10,7 +10,6 @@ public struct ComposeView: View {
   init(
     mode: ComposeModelData.Mode,
     letterUsecase: LetterUsecasable,
-    catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
@@ -20,7 +19,6 @@ public struct ComposeView: View {
     _model = State(initialValue: ComposeModelData(
       mode: mode,
       letterUsecase: letterUsecase,
-      catalogUsecase: catalogUsecase,
       connectionUsecase: connectionUsecase,
       deliveryUsecase: deliveryUsecase,
       audioUsecase: audioUsecase,
@@ -127,31 +125,18 @@ public struct ComposeView: View {
         )
       }
 
-      // 무드 픽커 — CC0 트랙 칩.
-      ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 8) {
-          ForEach(model.tracks) { track in
-            MutterChip(track.title, icon: Asset.Images.note, selected: isSelected(track)) {
-              model.selectTrack(track)
-            }
-          }
-        }
-      }
-
       HStack(spacing: 8) {
         TextField("SoundCloud 링크 붙여넣기", text: $model.soundcloudURL)
           .textFieldStyle(.plain)
           .padding(10)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
-        Button("적용") { model.applySoundCloudURL() }
-          .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
+        Button(model.isApplyingSoundCloud ? "확인 중…" : "적용") {
+          Task { await model.applySoundCloudURL() }
+        }
+        .disabled(model.isApplyingSoundCloud)
+        .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
       }
     }
-  }
-
-  private func isSelected(_ track: Track) -> Bool {
-    if let cue = model.cue, cue.source == .hosted, cue.ref == track.url { return true }
-    return false
   }
 
   // MARK: - Actions

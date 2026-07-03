@@ -7,7 +7,7 @@ public struct Letter: Identifiable, Equatable {
   public var title: String
   public var body: String
   public var templateId: String
-  /// 음악 큐. nil이면 저장 시 무음0 원칙에 따라 기본 CC0로 채워진다(`LetterUsecasable.ensureCue`).
+  /// 음악 큐(SoundCloud). nil = 음악 없는 편지(무음 허용 — CC0 폴백 제거됨).
   public var cue: MusicCue?
 
   public init(id: String, title: String, body: String, templateId: String, cue: MusicCue? = nil) {

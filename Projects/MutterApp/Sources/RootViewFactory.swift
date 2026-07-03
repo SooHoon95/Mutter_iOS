@@ -33,11 +33,10 @@ struct RootViewFactory {
 
     case .compose(let composeRoute):
       ComposeViewFactory(
-        letterUsecase: LetterUsecase(repository: LetterRepository(), catalog: CatalogRepository()),
-        catalogUsecase: CatalogUsecase(repository: CatalogRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository()),
         connectionUsecase: ConnectionUsecase(repository: ConnectionRepository()),
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
-        audioUsecase: AudioUsecase(catalog: CatalogRepository()),
+        audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
         linkBaseURL: AppLink.baseURL,
         onDone: { coordinator.pop() }
       ).makeView(composeRoute)
@@ -46,9 +45,9 @@ struct RootViewFactory {
       ViewerViewFactory(
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
-        letterUsecase: LetterUsecase(repository: LetterRepository(), catalog: CatalogRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository()),
         inboxUsecase: InboxUsecase(repository: InboxRepository()),
-        audioUsecase: AudioUsecase(catalog: CatalogRepository())
+        audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository())
       ).makeView(viewerRoute)
 
     case .delivery(let letterId):

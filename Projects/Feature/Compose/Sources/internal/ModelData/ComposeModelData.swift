@@ -20,7 +20,6 @@ final class ComposeModelData {
   var templateId = LetterTheme.defaultTheme.id
   var cue: MusicCue?
   var soundcloudURL = ""
-  var tracks: [Track] = []
 
   var isSaving = false
   var errorMessage: String?
@@ -41,16 +40,15 @@ final class ComposeModelData {
   private var mode: Mode                     // 첫 저장 후 .edit로 승격(중복 생성 방지).
   private let replyRecipientId: String?      // 답장 대상 — mode 승격과 무관하게 isReply/발송 타깃 유지.
   private let letterUsecase: LetterUsecasable
-  private let catalogUsecase: CatalogUsecasable
   private let connectionUsecase: ConnectionUsecasable
   private let deliveryUsecase: DeliveryUsecasable
+  private let audioUsecase: AudioUsecasable
   private let linkBaseURL: String
   private let onDone: () -> Void
 
   init(
     mode: Mode,
     letterUsecase: LetterUsecasable,
-    catalogUsecase: CatalogUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
@@ -60,9 +58,9 @@ final class ComposeModelData {
     self.mode = mode
     if case .reply(let recipientId) = mode { self.replyRecipientId = recipientId } else { self.replyRecipientId = nil }
     self.letterUsecase = letterUsecase
-    self.catalogUsecase = catalogUsecase
     self.connectionUsecase = connectionUsecase
     self.deliveryUsecase = deliveryUsecase
+    self.audioUsecase = audioUsecase
     self.linkBaseURL = linkBaseURL
     self.player = LetterAudioPlayer(audioUsecase: audioUsecase)
     self.onDone = onDone
@@ -76,7 +74,6 @@ final class ComposeModelData {
   var isReply: Bool { replyRecipientId != nil }
 
   func load() async {
-    tracks = (try? await catalogUsecase.all()) ?? []
     if case .edit(let id) = mode, let letter = try? await letterUsecase.letter(id: id) {
       title = letter.title
       content = letter.body
@@ -89,29 +86,40 @@ final class ComposeModelData {
     templateId = theme.id
   }
 
-  func selectTrack(_ track: Track) {
-    cue = MusicCue.hosted(from: track)
-    soundcloudURL = ""
-  }
 
-  /// SoundCloud paste-URL을 큐로 적용. 형식(soundcloud.com 호스트)만 동기 검증하고,
-  /// 임베드 가능 여부(oEmbed)는 재생 시점에 확인되며 실패 시 CC0로 폴백한다(무음0).
-  func applySoundCloudURL() {
+  /// SC 검증 진행 중(적용 버튼 중복 탭 방지 + 로딩 표시).
+  var isApplyingSoundCloud = false
+  /// oEmbed가 알려준 트랙 제목(플레이어 바 라벨용).
+  private var appliedScTitle: String?
+
+  /// SoundCloud paste-URL을 큐로 적용 — **붙이는 시점에 oEmbed 검증**(웹 scOembed.ts 동형).
+  /// 단축링크(on.soundcloud.com)는 위젯이 직접 못 열므로 canonical URL로 변환해 저장하고,
+  /// 비공개·임베드 금지·삭제 트랙은 그 자리에서 거른다(발신자가 죽은 링크를 모른 채 보내는 것 방지).
+  func applySoundCloudURL() async {
     errorMessage = nil
     let trimmed = soundcloudURL.trimmingCharacters(in: .whitespaces)
-    guard !trimmed.isEmpty else { return }
-    guard Self.isValidSoundCloudURL(trimmed) else {
-      errorMessage = "SoundCloud 링크가 맞는지 확인해 주세요 (soundcloud.com 주소)."
-      return
+    guard !trimmed.isEmpty, !isApplyingSoundCloud else { return }
+    isApplyingSoundCloud = true
+    defer { isApplyingSoundCloud = false }
+
+    switch await audioUsecase.validateSoundCloud(url: trimmed) {
+    case .ok(let title, _, let canonicalUrl):
+      cue = MusicCue(source: .soundcloud, ref: canonicalUrl, startMs: 0)
+      appliedScTitle = title.isEmpty ? nil : title
+      soundcloudURL = ""   // 적용됨 — 입력칸을 비워 즉시 피드백.
+    case .fail(let reason):
+      errorMessage = Self.scErrorMessage(reason)
     }
-    cue = MusicCue(source: .soundcloud, ref: trimmed, startMs: 0)
-    soundcloudURL = ""   // 적용됨 — 입력칸을 비워 즉시 피드백.
   }
 
-  /// SoundCloud 공식 도메인만 허용(스트림 rip/프록시 금지 — 임베드 가능 URL 전제).
-  static func isValidSoundCloudURL(_ raw: String) -> Bool {
-    guard let host = URL(string: raw)?.host?.lowercased() else { return false }
-    return host == "soundcloud.com" || host.hasSuffix(".soundcloud.com")
+  static func scErrorMessage(_ reason: ScValidationFailReason) -> String {
+    switch reason {
+    case .invalidUrl: return "SoundCloud 링크가 맞는지 확인해 주세요 (soundcloud.com 주소)."
+    case .network: return "네트워크 연결을 확인하고 다시 시도해 주세요."
+    case .privateTrack: return "비공개이거나 지역 제한이 있는 트랙이에요. 다른 곡을 골라 주세요."
+    case .notFound: return "트랙을 찾을 수 없어요. 링크를 다시 확인해 주세요."
+    case .embedDisabled: return "이 트랙은 외부 재생이 허용되지 않아요. 다른 곡을 골라 주세요."
+    }
   }
 
   /// 현재 선택된 음악의 사용자용 이름(명사구). nil이면 미선택.
@@ -119,9 +127,9 @@ final class ComposeModelData {
     guard let cue else { return nil }
     switch cue.source {
     case .soundcloud:
-      return "SoundCloud 트랙"
+      return appliedScTitle.map { "‘\($0)’" } ?? "SoundCloud 트랙"
     case .hosted:
-      return tracks.first { $0.url == cue.ref }.map { "‘\($0.title)’" } ?? "기본 제공 음악"
+      return "기본 제공 음악"   // 레거시(웹에서 만든 편지) 표기 전용 — 신규 선택 경로 없음.
     }
   }
 

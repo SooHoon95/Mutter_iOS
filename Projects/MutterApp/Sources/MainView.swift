@@ -129,9 +129,9 @@ struct MainView: View {
       ViewerViewFactory(
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
-        letterUsecase: LetterUsecase(repository: LetterRepository(), catalog: CatalogRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository()),
         inboxUsecase: nil,
-        audioUsecase: AudioUsecase(catalog: CatalogRepository())
+        audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository())
       ).makeView(.token(token, password: nil))
 
       // 닫기 버튼 — 상단 좌측, 테마 일관성 유지(골드 소프트).

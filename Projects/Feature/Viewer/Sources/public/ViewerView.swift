@@ -147,8 +147,8 @@ public struct ViewerView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
 
-        // 음악 플레이어 바
-        if !payload.audioDisabled {
+        // 음악 플레이어 바 — 큐가 있고 재생 가능한 때만(무음 편지·재생 불가 시 숨김).
+        if !payload.audioDisabled, payload.cue != nil, !model.player.isUnavailable {
           MusicPlayerBar(
             title: payload.title.isEmpty ? "음악" : payload.title,
             author: nil,

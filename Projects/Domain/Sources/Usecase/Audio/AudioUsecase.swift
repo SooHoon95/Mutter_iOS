@@ -2,27 +2,23 @@ import Foundation
 
 import AppFoundation
 
-/// 오디오 유스케이스 구현. 카탈로그를 재사용해 기본 큐를 만든다(별도 repository 없음).
+/// 오디오 유스케이스 구현 — 음원은 SoundCloud 단일(CC0 번들 제거, 무음 허용).
 public final class AudioUsecase: AudioUsecasable {
-  private let catalog: CatalogRepositorable
+  private let soundCloud: SoundCloudRepositorable
 
-  public init(catalog: CatalogRepositorable) {
-    self.catalog = catalog
+  public init(soundCloud: SoundCloudRepositorable) {
+    self.soundCloud = soundCloud
   }
 
-  public func defaultCue() async throws -> MusicCue {
-    let tracks = try await catalog.all()
-    guard let first = tracks.first else {
-      throw MutterError(.server("기본 음악을 불러올 수 없어요."))
-    }
-    return MusicCue.hosted(from: first)
+  public func validateSoundCloud(url: String) async -> ScValidation {
+    await soundCloud.validate(url: url)
   }
 
   public func resolvePlayback(_ cue: MusicCue) throws -> TrackSourceSpec {
     switch cue.source {
     case .hosted:
-      // 호스팅 ref는 이식가능 상대경로(`/audio/x.m4a`) — 번들 파일로 우선 해석, 없으면 원격 URL.
-      guard let url = catalog.localAudioURL(for: cue.ref) ?? URL(string: cue.ref) else {
+      // 레거시 웹 편지 호환: 절대 URL만 재생(번들 카탈로그는 제거됨). 상대경로는 재생 불가 → 무음.
+      guard let url = URL(string: cue.ref), url.scheme != nil else {
         throw MutterError(.server("재생할 음원 주소가 올바르지 않아요."))
       }
       return .hosted(url: url, startMs: cue.startMs)
