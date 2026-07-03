@@ -27,9 +27,12 @@ public final class SoundCloudSource: TrackSource {
   private var isReady = false
   /// 재생 의도. READY 전에 play()가 와도 기억했다가 위젯 준비 시 자동 재생한다(레이스 방지).
   private var wantsPlay = false
+  /// 위젯이 PLAY 이벤트로 "실제 재생 시작"을 확인했는지. 워치독이 이 값으로 무음 재생을 감지한다.
+  private var didConfirmPlay = false
   private static let log = Logger(subsystem: "com.efreedom.mutter", category: "audio")
 
   public var onFinish: (() -> Void)?
+  public var onPlaybackStalled: (() -> Void)?
 
   public init(trackURL: URL, startMs: Int = 0) {
     self.trackURL = trackURL
@@ -57,8 +60,21 @@ public final class SoundCloudSource: TrackSource {
       Self.log.debug("SC play() 보류 — 위젯 준비 후 자동재생 예약")
       return
     }
+    issuePlay()
+  }
+
+  /// 재생 명령 + 무음 워치독. READY는 왔지만 PLAY 이벤트가 안 오면(트랙 임베드 불가·정책 차단 등)
+  /// 소리 없이 실패한 것 — stalled를 통지해 플레이어가 CC0로 폴백하게 한다(무음0).
+  private func issuePlay() {
     Self.log.debug("SC play() 실행")
+    didConfirmPlay = false
     controller.evaluateJavaScript("window.scPlay && window.scPlay();")
+    Task { @MainActor in
+      try? await Task.sleep(for: .seconds(4))
+      guard self.wantsPlay, !self.didConfirmPlay else { return }
+      Self.log.error("SC 재생 미확인(4s) — 위젯 무음 → 폴백 통지")
+      self.onPlaybackStalled?()
+    }
   }
 
   public func pause() {
@@ -112,8 +128,15 @@ public final class SoundCloudSource: TrackSource {
       if startMs > 0 { seek(toMs: startMs) }
       if wantsPlay {
         Self.log.debug("SC READY 후 보류된 재생 실행")
-        controller.evaluateJavaScript("window.scPlay && window.scPlay();")
+        issuePlay()
       }
+    case "play":
+      // 위젯이 실제 재생을 시작 — 워치독 해제.
+      didConfirmPlay = true
+      Self.log.debug("SC PLAY 확인 — 실제 재생 시작")
+    case "error":
+      Self.log.error("SC 위젯 ERROR 수신 → 폴백 통지")
+      onPlaybackStalled?()
     case "finish":
       onFinish?()
     default:
@@ -149,6 +172,8 @@ public final class SoundCloudSource: TrackSource {
           }
         }
         widget.bind(SC.Widget.Events.READY, function(){ post('ready'); });
+        widget.bind(SC.Widget.Events.PLAY, function(){ post('play'); });
+        widget.bind(SC.Widget.Events.ERROR, function(){ post('error'); });
         widget.bind(SC.Widget.Events.FINISH, function(){ post('finish'); });
         window.scPlay = function(){ widget.play(); };
         window.scPause = function(){ widget.pause(); };

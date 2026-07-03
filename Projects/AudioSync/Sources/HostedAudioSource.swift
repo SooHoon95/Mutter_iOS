@@ -3,6 +3,8 @@ import AVFoundation
 import MediaPlayer
 import os
 
+import AppFoundation
+
 /// 호스팅 오디오(CC0 폴백·Storage) 재생 — AVPlayer 기반.
 /// 백그라운드/잠금화면 재생을 위해 AVAudioSession(.playback) + 원격 명령(재생/일시정지)을 설정한다.
 /// (백그라운드 오디오는 MutterApp Info.plist의 UIBackgroundModes=audio 필요 — 합성 루트에서 설정.)
@@ -17,6 +19,8 @@ public final class HostedAudioSource: TrackSource {
   private static let log = Logger(subsystem: "com.efreedom.mutter", category: "audio")
 
   public var onFinish: (() -> Void)?
+  /// AVPlayer 항목이 재생 불가로 판명될 때 통지(번들 파일은 사실상 발생 안 함 — 원격 URL 대비).
+  public var onPlaybackStalled: (() -> Void)?
 
   public init(url: URL, startMs: Int = 0) {
     self.url = url
@@ -34,6 +38,11 @@ public final class HostedAudioSource: TrackSource {
 
     let fileOK = url.isFileURL ? FileManager.default.fileExists(atPath: url.path) : true
     Self.log.debug("Hosted load url=\(self.url.absoluteString, privacy: .public) isFile=\(self.url.isFileURL) exists=\(fileOK)")
+    if !fileOK {
+      // 번들 파일 부재 = 재생 불가 확정 — 조용히 무음으로 가지 말고 실패시켜 폴백을 태운다(무음0).
+      Self.log.error("Hosted 음원 파일 없음 → load 실패 처리(폴백 유도)")
+      throw MutterError(.server("음원 파일을 찾을 수 없어요."))
+    }
 
     let item = AVPlayerItem(url: url)
     let player = AVPlayer(playerItem: item)
