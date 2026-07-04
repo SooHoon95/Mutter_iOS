@@ -55,7 +55,7 @@ public struct MutterButton: View {
       .frame(maxWidth: .infinity, minHeight: 54)
       .background(background)
       .clipShape(RoundedRectangle(cornerRadius: MutterRadius.lg))
-      .applyIf(style == .primary && isEnabled) { $0.shadows(.gold) }
+      .applyIf(style == .primary && isEnabled) { $0.shadows(.shadowLow) }
     }
     .buttonStyle(PressableButtonStyle())
     .disabled(isLoading || !isEnabled)

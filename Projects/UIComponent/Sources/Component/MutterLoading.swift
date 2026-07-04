@@ -29,7 +29,7 @@ public struct MutterLoadingView: View {
           .tint(Asset.Colors.gold.color)
           .padding(24)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-          .shadows(.card)
+          .shadows(.shadowLow)
       }
       .transition(.opacity)
     }

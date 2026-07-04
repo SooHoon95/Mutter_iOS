@@ -46,6 +46,8 @@ struct IconGalleryView: View {
               }
             }
           }
+          
+          ShadowView()
 
           // 잉크색(기본 틴트) + 시맨틱색 틴트 확인
           HStack(spacing: 18) {

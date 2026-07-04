@@ -22,7 +22,7 @@ public struct MusicPlayerBar: View {
           .foregroundStyle(Asset.Colors.onGold.color)
           .frame(width: 44, height: 44)
           .background(MutterGradient.gold, in: Circle())
-          .shadows(.gold)
+          .shadows(.shadowLow)
       }
       .buttonStyle(PressableButtonStyle())
 
@@ -46,6 +46,6 @@ public struct MusicPlayerBar: View {
     .padding(.trailing, 14)
     .background(Asset.Colors.surface.color, in: Capsule())
     .overlay(Capsule().stroke(Asset.Colors.hairline.color, lineWidth: 1))
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 }

@@ -81,7 +81,7 @@ public struct MutterAlertView: View {
         .padding(24)
         .frame(maxWidth: 340)
         .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-        .shadows(.card)
+        .shadows(.shadowLow)
         .padding(.horizontal, 24)
         .scaleEffect(animate ? 1 : 0.85)
         .opacity(animate ? 1 : 0)

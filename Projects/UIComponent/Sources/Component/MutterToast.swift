@@ -90,7 +90,7 @@ private struct ToastRow: View {
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
     .background(Asset.Colors.ink.color, in: Capsule())
-    .shadows(.card)
+    .shadows(.shadowLow)
     .opacity(visible ? 1 : 0)
     .offset(y: visible ? 0 : 16)
     .task {
