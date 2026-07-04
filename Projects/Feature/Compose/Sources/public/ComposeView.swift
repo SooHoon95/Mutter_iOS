@@ -67,7 +67,7 @@ public struct ComposeView: View {
               RoundedRectangle(cornerRadius: 6)
                 .fill(theme.background)
                 .frame(width: 44, height: 44)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(
+                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(
                   theme.id == model.templateId ? Asset.Colors.gold.color : theme.border,
                   lineWidth: theme.id == model.templateId ? 2 : 1))
               Text(theme.name).fonts(.caption)

@@ -83,7 +83,7 @@ public struct ThreadsView: View {
       RoundedRectangle(cornerRadius: MutterRadius.lg)
         .strokeBorder(Asset.Colors.hairline.color, lineWidth: 0.5)
     )
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 
   // MARK: - 대화 시트 (단일 상대와의 편지 흐름)
@@ -183,7 +183,7 @@ public struct ThreadsView: View {
             }
           }
         )
-        .shadows(.soft)
+        .shadows(.shadowLow)
       }
       .contentShape(Rectangle())
       .onTapGesture {

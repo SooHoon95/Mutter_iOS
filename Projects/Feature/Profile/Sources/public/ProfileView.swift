@@ -112,7 +112,7 @@ public struct ProfileView: View {
       RoundedRectangle(cornerRadius: MutterRadius.xl)
         .strokeBorder(Asset.Colors.hairline.color, lineWidth: 0.5)
     )
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 
   // MARK: - 닉네임 인라인 편집 행

@@ -87,7 +87,7 @@ public struct InboxView: View {
     }
     .padding(16)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
-    .shadows(.card)
+    .shadows(.shadowMediumLow)
     .contentShape(Rectangle())
   }
 

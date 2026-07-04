@@ -64,7 +64,7 @@ public struct DeliveryView: View {
     }
     .padding(20)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 
   private func issuedLink(_ token: String) -> some View {

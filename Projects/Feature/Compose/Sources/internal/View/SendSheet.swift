@@ -14,6 +14,8 @@ struct SendSheet: View {
     var id: String { rawValue }
   }
   @State private var method: Method = .link
+  /// 링크 복사 완료 표시(잠시 체크 아이콘으로 전환). 시트는 닫지 않는다 — 닫기는 "완료"가 담당.
+  @State private var linkCopied = false
 
   var body: some View {
     ZStack(alignment: .bottom) {
@@ -92,7 +94,7 @@ struct SendSheet: View {
                 ? AnyView(
                     RoundedRectangle(cornerRadius: MutterRadius.lg)
                       .fill(Asset.Colors.surface.color)
-                      .shadows(.soft)
+                      .shadows(.shadowLow)
                   )
                 : AnyView(Color.clear)
             )
@@ -155,9 +157,9 @@ struct SendSheet: View {
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
           Button {
-            UIPasteboard.general.string = link
+            copyLink(link)
           } label: {
-            MutterIcon(Asset.Images.copy, size: 20)
+            MutterIcon(linkCopied ? Asset.Images.check : Asset.Images.copy, size: 20)
               .foregroundStyle(Asset.Colors.gold.color)
           }
         }
@@ -173,10 +175,16 @@ struct SendSheet: View {
         )
       }
 
-      // CTA 버튼
-      if model.issuedLink != nil {
-        MutterButton("링크 복사하기", icon: Asset.Images.copy, isLoading: false) {
-          UIPasteboard.general.string = model.issuedLink
+      // CTA 버튼 — 복사는 복사만(시트 유지 + 복사됨 피드백), 닫기는 "완료"로 분리.
+      if let link = model.issuedLink {
+        MutterButton(
+          linkCopied ? "복사됐어요" : "링크 복사하기",
+          icon: linkCopied ? Asset.Images.check : Asset.Images.copy,
+          isLoading: false
+        ) {
+          copyLink(link)
+        }
+        MutterButton("완료", style: .ghost) {
           model.finishSend()
         }
       } else {
@@ -250,10 +258,20 @@ struct SendSheet: View {
       RoundedRectangle(cornerRadius: MutterRadius.lg)
         .strokeBorder(Asset.Colors.hairline.color, lineWidth: 1)
     )
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 
   // MARK: - 공통 헬퍼
+
+  /// 링크 복사 + "복사됐어요" 피드백(2초 후 원복). 시트는 닫지 않는다.
+  private func copyLink(_ link: String) {
+    UIPasteboard.general.string = link
+    withAnimation(.easeInOut(duration: 0.15)) { linkCopied = true }
+    Task { @MainActor in
+      try? await Task.sleep(for: .seconds(2))
+      withAnimation(.easeInOut(duration: 0.15)) { linkCopied = false }
+    }
+  }
 
   private func sectionLabel(_ text: String) -> some View {
     Text(text)

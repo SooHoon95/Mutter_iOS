@@ -66,7 +66,7 @@ public struct ConnectionsView: View {
     }
     .padding(20)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 
   private var inviteCard: some View {
@@ -102,6 +102,6 @@ public struct ConnectionsView: View {
     }
     .padding(20)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-    .shadows(.soft)
+    .shadows(.shadowLow)
   }
 }

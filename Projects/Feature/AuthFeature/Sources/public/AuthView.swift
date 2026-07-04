@@ -43,7 +43,7 @@ public struct AuthView: View {
         }
         .padding(20)
         .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-        .shadows(.soft)
+        .shadows(.shadowLow)
 
         socialSection
 
