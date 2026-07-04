@@ -10,6 +10,8 @@ final class HomeModelData {
   struct LetterRow: Identifiable {
     let letter: Letter
     let openSummary: LetterOpenSummary?
+    /// 전달됨(보낸 편지) 여부 — false면 임시저장(작성 중).
+    let isSent: Bool
     var id: String { letter.id }
     var isOpened: Bool { (openSummary?.openCount ?? 0) > 0 }
   }
@@ -26,18 +28,22 @@ final class HomeModelData {
     self.receiptUsecase = receiptUsecase
   }
 
-  var sentCount: Int { rows.count }
-  var openedCount: Int { rows.filter(\.isOpened).count }
+  /// 보낸 편지(전달됨) — 통계·"보낸 편지" 탭.
+  var sentRows: [LetterRow] { rows.filter(\.isSent) }
+  /// 임시저장(미전달) — "임시저장" 탭. 탭하면 이어쓰기.
+  var draftRows: [LetterRow] { rows.filter { !$0.isSent } }
+  var sentCount: Int { sentRows.count }
+  var openedCount: Int { sentRows.filter(\.isOpened).count }
 
   func load() async {
     isLoading = true
     defer { isLoading = false }
-    async let lettersTask = letterUsecase.myLetters()
+    async let lettersTask = letterUsecase.myLettersWithStatus()
     async let opensTask = receiptUsecase.myLetterOpens()
     let letters = (try? await lettersTask) ?? []
     let opens = (try? await opensTask) ?? []
     let openMap = Dictionary(opens.map { ($0.letterId, $0) }, uniquingKeysWith: { first, _ in first })
-    rows = letters.map { LetterRow(letter: $0, openSummary: openMap[$0.id]) }
+    rows = letters.map { LetterRow(letter: $0.letter, openSummary: openMap[$0.letter.id], isSent: $0.isSent) }
   }
 
   /// 편지 삭제(임시저장 포함). 성공 시 목록에서 즉시 제거.

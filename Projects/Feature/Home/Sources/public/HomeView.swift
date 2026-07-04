@@ -2,25 +2,28 @@ import SwiftUI
 
 import Domain
 import UIComponent
+import Router
+
 
 /// 홈(우체통) 탭 — 골드 통계카드 + 새 편지 쓰기 + 최근 보낸 편지(읽음 배지). 디자인 시스템 반영.
 public struct HomeView: View {
+  /// 홈 세그먼트 — 보낸 편지(전달됨) vs 임시저장(작성 중).
+  private enum HomeTab: Hashable { case sent, draft }
+
+  @EnvironmentObject private var coordinator: NavigationCoordinator<FeatureRoute>
   @State private var model: HomeModelData
-  private let onCompose: () -> Void
-  private let onEdit: (String) -> Void
-  private let onPreview: (String) -> Void
+  @State private var selectedTab: HomeTab = .sent
 
   public init(
     letterUsecase: LetterUsecasable,
-    receiptUsecase: ReceiptUsecasable,
-    onCompose: @escaping () -> Void,
-    onEdit: @escaping (String) -> Void,
-    onPreview: @escaping (String) -> Void
+    receiptUsecase: ReceiptUsecasable
   ) {
-    _model = State(initialValue: HomeModelData(letterUsecase: letterUsecase, receiptUsecase: receiptUsecase))
-    self.onCompose = onCompose
-    self.onEdit = onEdit
-    self.onPreview = onPreview
+    self.model = HomeModelData(letterUsecase: letterUsecase, receiptUsecase: receiptUsecase)
+  }
+
+  /// 현재 탭에 보여줄 행.
+  private var displayRows: [HomeModelData.LetterRow] {
+    selectedTab == .sent ? model.sentRows : model.draftRows
   }
 
   public var body: some View {
@@ -28,16 +31,25 @@ public struct HomeView: View {
       Asset.Colors.ivory.color.ignoresSafeArea()
       VStack(alignment: .leading, spacing: 18) {
         statCard
-        MutterButton("새 편지 쓰기", icon: Asset.Images.compose) { onCompose() }
+        MutterButton("새 편지 쓰기", icon: Asset.Images.compose) {
+          coordinator.push(.compose(.new))
+        }
 
-        if model.rows.isEmpty && !model.isLoading {
-          emptyState
+        // 세그먼트 — 임시저장을 보낸 편지와 분리(통계·목록 혼입 방지).
+        Picker("", selection: $selectedTab) {
+          Text("보낸 편지").tag(HomeTab.sent)
+          Text("임시저장").tag(HomeTab.draft)
+        }
+        .pickerStyle(.segmented)
+
+        if displayRows.isEmpty && !model.isLoading {
+          emptyState(for: selectedTab)
           Spacer()
         } else {
-          sectionLabel("최근 보낸 편지")
           List {
-            ForEach(model.rows) { row in
+            ForEach(displayRows) { row in
               letterCard(row)
+                .shadows(.shadowMediumLow)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -47,12 +59,6 @@ public struct HomeView: View {
                   } label: {
                     Label("삭제", systemImage: "trash")
                   }
-                }
-                .swipeActions(edge: .leading) {
-                  Button { onEdit(row.letter.id) } label: {
-                    Label("이어쓰기", systemImage: "pencil")
-                  }
-                  .tint(Asset.Colors.gold.color)
                 }
             }
           }
@@ -85,37 +91,56 @@ public struct HomeView: View {
     .padding(.horizontal, 20)
     .padding(.vertical, 18)
     .background(MutterGradient.gold, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-    .shadows(.gold)
-  }
-
-  private func sectionLabel(_ text: String) -> some View {
-    Text(text)
-      .fonts(.captionBold)
-      .foregroundStyle(Asset.Colors.inkFaint.color)
-      .frame(maxWidth: .infinity, alignment: .leading)
+    .shadows(.shadowLow)
   }
 
   // MARK: - 편지 카드
 
   private func letterCard(_ row: HomeModelData.LetterRow) -> some View {
-    HStack(spacing: 12) {
-      MutterIcon(row.isOpened ? Asset.Images.envelopeOpen : Asset.Images.envelope, size: 22)
-        .foregroundStyle(row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
-      VStack(alignment: .leading, spacing: 4) {
-        Text(row.letter.title.isEmpty ? "제목 없는 편지" : row.letter.title)
-          .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
-        Text(row.openSummary.map { "\($0.openCount)번 열림" } ?? "아직 열리지 않음")
-          .fonts(.caption)
-          .foregroundStyle(row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
+    Button {
+      // 보낸 편지 → 뷰어, 임시저장 → 이어쓰기(작성 화면). 탭 자체가 이어쓰기 진입점.
+      if row.isSent {
+        coordinator.push(.viewer(.myLetter(letterId: row.letter.id)))
+      } else {
+        coordinator.push(.compose(.edit(letterId: row.letter.id)))
       }
-      Spacer()
-      readBadge(row.isOpened)
+    } label: {
+      HStack(spacing: 12) {
+        MutterIcon(
+          row.isSent ? (row.isOpened ? Asset.Images.envelopeOpen : Asset.Images.envelope) : Asset.Images.compose,
+          size: 22
+        )
+        .foregroundStyle(row.isSent && row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
+        VStack(alignment: .leading, spacing: 4) {
+          Text(row.letter.title.isEmpty ? "제목 없는 편지" : row.letter.title)
+            .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
+          Text(cardSubtitle(row))
+            .fonts(.caption)
+            .foregroundStyle(row.isSent && row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
+        }
+        Spacer()
+        if row.isSent { readBadge(row.isOpened) } else { draftBadge }
+      }
     }
     .padding(16)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
-    .shadows(.soft)
     .contentShape(Rectangle())
-    .onTapGesture { onPreview(row.letter.id) }
+  }
+
+  /// 카드 부제 — 보낸 편지는 열람 요약, 임시저장은 이어쓰기 안내.
+  private func cardSubtitle(_ row: HomeModelData.LetterRow) -> String {
+    if !row.isSent { return "작성 중 · 탭하면 이어쓰기" }
+    return row.openSummary.map { "\($0.openCount)번 열림" } ?? "아직 열리지 않음"
+  }
+
+  /// 임시저장 배지.
+  private var draftBadge: some View {
+    Text("작성 중")
+      .fonts(.caption)
+      .foregroundStyle(Asset.Colors.inkSoft.color)
+      .padding(.horizontal, 8)
+      .padding(.vertical, 4)
+      .background(Asset.Colors.warm100.color, in: Capsule())
   }
 
   private func readBadge(_ read: Bool) -> some View {
@@ -129,10 +154,11 @@ public struct HomeView: View {
     .background(read ? Asset.Colors.goldSoft.color : Asset.Colors.warm100.color, in: Capsule())
   }
 
-  private var emptyState: some View {
+  private func emptyState(for tab: HomeTab) -> some View {
     VStack(spacing: 12) {
       Asset.Images.emptySent.image.resizable().scaledToFit().frame(height: 120)
-      Text("아직 보낸 편지가 없어요").fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
+      Text(tab == .sent ? "아직 보낸 편지가 없어요" : "임시저장한 편지가 없어요")
+        .fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
     .frame(maxWidth: .infinity)
     .padding(.top, 40)
