@@ -7,6 +7,8 @@ import AudioSync
 /// 수신/열람 화면 — 무마찰 원칙: 링크→웹뷰 없이 네이티브로 "열기 ▶" 한 탭.
 public struct ViewerView: View {
   @State private var model: ViewerModelData
+  /// 뒤로가기 — 라우팅 레이어 modifier 대신 뷰어 내부 내비바가 직접 호출(MU-7).
+  private let onBack: () -> Void
 
   init(
     source: ViewerModelData.Source,
@@ -14,8 +16,10 @@ public struct ViewerView: View {
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
     inboxUsecase: InboxUsecasable?,
-    audioUsecase: AudioUsecasable
+    audioUsecase: AudioUsecasable,
+    onBack: @escaping () -> Void
   ) {
+    self.onBack = onBack
     _model = State(initialValue: ViewerModelData(
       source: source,
       deliveryUsecase: deliveryUsecase,
@@ -35,7 +39,34 @@ public struct ViewerView: View {
       }
       content
     }
+    // 뷰어는 시스템 내비바를 숨기고, 편지 테마색과 맞춘 내비바를 Component로 직접 얹는다(MU-7).
+    // 라우팅 레이어 modifier와 달리 여기선 model.state의 테마 배경/전경을 알 수 있다.
+    .toolbar(.hidden, for: .navigationBar)
+    .safeAreaInset(edge: .top, spacing: 0) {
+      MutterNavigationBar(
+        navColors.background,
+        nil,
+        foregroundColor: navColors.foreground,
+        leftButtons: { MutterBackButton(foregroundColor: navColors.foreground, action: onBack) },
+        rightButtons: { EmptyView() }
+      )
+    }
     .task { await model.load() }
+  }
+
+  /// 현재 상태의 배경/전경 — 내비바를 편지 테마(또는 스테이지 배경)와 정합시킨다.
+  /// 열람 중=편지지 테마, 열기 전(openGate)=warm50, 예약공개=다크(ink), 그 외=ivory.
+  private var navColors: (background: Color, foreground: Color) {
+    switch model.state {
+    case .ready(_, let theme):
+      return model.isOpened
+        ? (theme.background, theme.foreground)
+        : (Asset.Colors.warm50.color, Asset.Colors.ink.color)
+    case .revealPending:
+      return (Asset.Colors.ink.color, Asset.Colors.ivory.color)
+    default:
+      return (Asset.Colors.ivory.color, Asset.Colors.ink.color)
+    }
   }
 
   @ViewBuilder
@@ -78,7 +109,7 @@ public struct ViewerView: View {
             RoundedRectangle(cornerRadius: 28)
               .fill(MutterGradient.gold)
               .frame(width: 96, height: 96)
-              .shadows(.gold)
+              .shadows(.shadowLow)
             MutterIcon(Asset.Images.envelope, size: 46)
               .foregroundStyle(Asset.Colors.onGold.color)
           }
@@ -128,56 +159,43 @@ public struct ViewerView: View {
   // MARK: - Reader (Screen 5)
 
   private func reader(_ payload: LetterPayload, _ theme: LetterTheme) -> some View {
-    ZStack(alignment: .bottom) {
+    // 큐가 있고 재생 가능한 때만 하단 플레이어 표시(무음 편지·재생 불가 시 숨김).
+    let hasPlayer = !payload.audioDisabled && payload.cue != nil && !model.player.isUnavailable
+
+    return ZStack(alignment: .bottom) {
       theme.background.ignoresSafeArea()
 
-      VStack(spacing: 0) {
-        // 상단 바 — 뒤로가기(인터트) + 더보기(인터트, 액션 없음)
-        HStack {
-          Button(action: {}) {
-            MutterIcon(Asset.Images.back, size: 22)
-              .foregroundStyle(theme.foreground)
+      // 편지 본문 스크롤 — 화면 전체 높이. 상단 바는 라우팅 레이어의 MutterNavigationBar가 담당.
+      ScrollView {
+        LetterPaperView(theme: theme, title: payload.title, text: payload.body)
+          .frame(maxWidth: .infinity)
+
+        // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
+        if model.canSaveToInbox && model.savedToInbox {
+          HStack(spacing: 6) {
+            MutterIcon(Asset.Images.check, size: 16)
+              .foregroundStyle(Asset.Colors.gold.color)
+            Text("받은 편지함에 저장됐어요")
+              .fonts(.caption)
+              .foregroundStyle(Asset.Colors.inkSoft.color)
           }
-          Spacer()
-          Button(action: {}) {
-            MutterIcon(Asset.Images.more, size: 22)
-              .foregroundStyle(theme.foreground)
-          }
+          .padding(.top, 8)
         }
+
+        // 하단 고정 플레이어에 마지막 줄이 가려지지 않도록 여유 인셋(플레이어 있을 때만 크게).
+        Color.clear.frame(height: hasPlayer ? 96 : 40)
+      }
+
+      // 음악 플레이어 바 — 화면 최하단 고정 오버레이(safeArea 존중 — home indicator 위).
+      if hasPlayer {
+        MusicPlayerBar(
+          title: payload.cue?.title ?? "SoundCloud 트랙",
+          author: payload.cue?.author,
+          isPlaying: model.player.isPlaying,
+          onToggle: { model.player.toggle() }
+        )
         .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-
-        // 음악 플레이어 바 — 큐가 있고 재생 가능한 때만(무음 편지·재생 불가 시 숨김).
-        if !payload.audioDisabled, payload.cue != nil, !model.player.isUnavailable {
-          MusicPlayerBar(
-            title: payload.title.isEmpty ? "음악" : payload.title,
-            author: nil,
-            isPlaying: model.player.isPlaying,
-            onToggle: { model.player.toggle() }
-          )
-          .padding(.horizontal, 20)
-          .padding(.bottom, 12)
-        }
-
-        // 편지 본문 스크롤
-        ScrollView {
-          LetterPaperView(theme: theme, title: payload.title, text: payload.body)
-            .frame(maxWidth: .infinity)
-
-          // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
-          if model.canSaveToInbox && model.savedToInbox {
-            HStack(spacing: 6) {
-              MutterIcon(Asset.Images.check, size: 16)
-                .foregroundStyle(Asset.Colors.gold.color)
-              Text("받은 편지함에 저장됐어요")
-                .fonts(.caption)
-                .foregroundStyle(Asset.Colors.inkSoft.color)
-            }
-            .padding(.top, 8)
-          }
-
-          Color.clear.frame(height: 100)
-        }
+        .padding(.bottom, 12)
       }
     }
   }

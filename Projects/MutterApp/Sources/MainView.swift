@@ -125,24 +125,17 @@ struct MainView: View {
   /// 미인증 편지 뷰어 — inboxUsecase: nil(능력 부재). 닫기 버튼으로 dismiss.
   @ViewBuilder
   private func unauthenticatedViewerCover(token: String) -> some View {
-    ZStack(alignment: .topLeading) {
-      ViewerViewFactory(
-        deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
-        receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
-        letterUsecase: LetterUsecase(repository: LetterRepository()),
-        inboxUsecase: nil,
-        audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository())
-      ).makeView(.token(token, password: nil))
-
-      // 닫기 버튼 — 상단 좌측, 테마 일관성 유지(골드 소프트).
-      Button {
-        pendingLetter = nil
-      } label: {
-        MutterIcon(Asset.Images.back, size: 22)
-          .foregroundStyle(Asset.Colors.inkSoft.color)
-          .padding(16)
-      }
-    }
+    // 뒤로가기 = 커버 닫기(push 화면들과 내비바 UI 통일).
+    // 뒤로가기 = 커버 닫기. 뷰어가 내부에서 테마 정합 내비바를 직접 얹으므로(MU-7)
+    // 라우팅 레이어 modifier 없이 onBack만 주입한다.
+    ViewerViewFactory(
+      deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
+      receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
+      letterUsecase: LetterUsecase(repository: LetterRepository()),
+      inboxUsecase: nil,
+      audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
+      onBack: { pendingLetter = nil }
+    ).makeView(.token(token, password: nil))
   }
 
   // MARK: - Pending Connect Consumption
