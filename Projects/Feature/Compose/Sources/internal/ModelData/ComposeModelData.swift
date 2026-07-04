@@ -89,8 +89,6 @@ final class ComposeModelData {
 
   /// SC 검증 진행 중(적용 버튼 중복 탭 방지 + 로딩 표시).
   var isApplyingSoundCloud = false
-  /// oEmbed가 알려준 트랙 제목(플레이어 바 라벨용).
-  private var appliedScTitle: String?
 
   /// SoundCloud paste-URL을 큐로 적용 — **붙이는 시점에 oEmbed 검증**(웹 scOembed.ts 동형).
   /// 단축링크(on.soundcloud.com)는 위젯이 직접 못 열므로 canonical URL로 변환해 저장하고,
@@ -103,9 +101,15 @@ final class ComposeModelData {
     defer { isApplyingSoundCloud = false }
 
     switch await audioUsecase.validateSoundCloud(url: trimmed) {
-    case .ok(let title, _, let canonicalUrl):
-      cue = MusicCue(source: .soundcloud, ref: canonicalUrl, startMs: 0)
-      appliedScTitle = title.isEmpty ? nil : title
+    case .ok(let title, let author, let canonicalUrl):
+      // oEmbed title/author를 cue에 직접 저장 — 뷰어 플레이어 바가 트랙 제목을 표시하도록(MU-1).
+      cue = MusicCue(
+        source: .soundcloud,
+        ref: canonicalUrl,
+        startMs: 0,
+        title: title.isEmpty ? nil : title,
+        author: author.isEmpty ? nil : author
+      )
       soundcloudURL = ""   // 적용됨 — 입력칸을 비워 즉시 피드백.
     case .fail(let reason):
       errorMessage = Self.scErrorMessage(reason)
@@ -127,7 +131,7 @@ final class ComposeModelData {
     guard let cue else { return nil }
     switch cue.source {
     case .soundcloud:
-      return appliedScTitle.map { "‘\($0)’" } ?? "SoundCloud 트랙"
+      return cue.title.map { "‘\($0)’" } ?? "SoundCloud 트랙"
     case .hosted:
       return "기본 제공 음악"   // 레거시(웹에서 만든 편지) 표기 전용 — 신규 선택 경로 없음.
     }

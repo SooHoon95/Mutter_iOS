@@ -27,6 +27,34 @@ struct LetterRow: Decodable {
   }
 }
 
+/// get_my_letters_with_status RPC row — letters + is_sent(발송 파생). RPC가 컬럼명 id/is_sent 반환.
+struct LetterWithStatusRow: Decodable {
+  let id: String
+  let title: String
+  let paragraphs: [ParagraphDTO]
+  let templateId: String
+  let isSent: Bool
+
+  enum CodingKeys: String, CodingKey {
+    case id, title, paragraphs
+    case templateId = "template_id"
+    case isSent = "is_sent"
+  }
+
+  func toDomain() -> LetterWithStatus {
+    LetterWithStatus(
+      letter: Letter(
+        id: id,
+        title: title,
+        body: LetterContentCodec.body(from: paragraphs),
+        templateId: templateId,
+        cue: LetterContentCodec.cue(from: paragraphs)
+      ),
+      isSent: isSent
+    )
+  }
+}
+
 /// letters insert 페이로드(owner_id는 세션에서 주입).
 struct LetterInsertDTO: Encodable {
   let ownerId: String

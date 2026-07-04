@@ -26,6 +26,10 @@ public final class LetterUsecase: LetterUsecasable {
     try await repository.myLetters()
   }
 
+  public func myLettersWithStatus() async throws -> [LetterWithStatus] {
+    try await repository.myLettersWithStatus()
+  }
+
   public func delete(id: String) async throws {
     try await repository.delete(id: id)
   }

@@ -93,6 +93,21 @@ public final class LetterRepository: LetterRepositorable {
     }
   }
 
+  /// 내 편지 + 발송 여부 — security-definer RPC가 delivery_links/타인 inbox 존재를 서버에서 판정(0025).
+  /// 클라이언트에 교차 테이블 SELECT를 열지 않아 RLS 안전(supabase-data 패턴).
+  public func myLettersWithStatus() async throws -> [LetterWithStatus] {
+    _ = try currentUserId()   // 미인증 조기 차단(RPC도 auth.uid()를 강제).
+    do {
+      let rows: [LetterWithStatusRow] = try await provider.client
+        .rpc("get_my_letters_with_status")
+        .execute()
+        .value
+      return rows.map { $0.toDomain() }
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
   public func delete(id: String) async throws {
     do {
       try await provider.client

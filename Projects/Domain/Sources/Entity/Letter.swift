@@ -31,11 +31,17 @@ public struct MusicCue: Equatable {
   public let ref: String
   /// 시작 오프셋(ms). nil이면 0부터.
   public let startMs: Int?
+  /// 트랙 제목(oEmbed). nil = 레거시/웹 생성 편지 → 뷰어에서 "SoundCloud 트랙" 폴백.
+  public let title: String?
+  /// 트랙 작성자(oEmbed). 있으면 플레이어 바 subtitle.
+  public let author: String?
 
-  public init(source: Source, ref: String, startMs: Int? = nil) {
+  public init(source: Source, ref: String, startMs: Int? = nil, title: String? = nil, author: String? = nil) {
     self.source = source
     self.ref = ref
     self.startMs = startMs
+    self.title = title
+    self.author = author
   }
 }
 
@@ -78,5 +84,18 @@ public struct LetterPayload: Equatable {
     self.templateId = templateId
     self.cue = cue
     self.audioDisabled = audioDisabled
+  }
+}
+
+/// 홈 목록용 편지 + 발송 여부(운용 파생 상태). "발송됨"은 Letter의 본질 속성이 아니라
+/// delivery_links/타인 inbox 존재로 판정되는 파생값이라, Letter에 넣지 않고 별도 read-model로 둔다(클린 아키텍처).
+public struct LetterWithStatus: Equatable {
+  public let letter: Letter
+  /// 한 번이라도 전달됨(전달 링크 발급 또는 연결 상대 직접 발송). false = 임시저장.
+  public let isSent: Bool
+
+  public init(letter: Letter, isSent: Bool) {
+    self.letter = letter
+    self.isSent = isSent
   }
 }

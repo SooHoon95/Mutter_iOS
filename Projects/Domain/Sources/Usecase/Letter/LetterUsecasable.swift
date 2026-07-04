@@ -8,5 +8,7 @@ public protocol LetterUsecasable {
   func update(id: String, _ draft: LetterDraft) async throws
   func letter(id: String) async throws -> Letter?
   func myLetters() async throws -> [Letter]
+  /// 내 편지 + 발송 여부(홈 세그먼트: 보낸 편지 vs 임시저장 분리).
+  func myLettersWithStatus() async throws -> [LetterWithStatus]
   func delete(id: String) async throws
 }
