@@ -8,10 +8,13 @@ import UIComponent
 public struct DeliveryView: View {
   @State private var model: DeliveryModelData
   private let linkBaseURL: String
+  /// 이 편지를 뷰어로 미리보기(라우팅 레이어가 주입).
+  private let onPreview: () -> Void
 
-  public init(letterId: String, deliveryUsecase: DeliveryUsecasable, linkBaseURL: String) {
+  public init(letterId: String, deliveryUsecase: DeliveryUsecasable, linkBaseURL: String, onPreview: @escaping () -> Void) {
     _model = State(initialValue: DeliveryModelData(letterId: letterId, deliveryUsecase: deliveryUsecase))
     self.linkBaseURL = linkBaseURL
+    self.onPreview = onPreview
   }
 
   public var body: some View {
@@ -20,6 +23,8 @@ public struct DeliveryView: View {
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
           Text("링크로 보내기").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
+
+          MutterButton("편지 미리보기", style: .ghost) { onPreview() }
 
           issueCard
           if let token = model.lastIssuedToken { issuedLink(token) }

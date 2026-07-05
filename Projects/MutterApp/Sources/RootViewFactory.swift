@@ -61,7 +61,8 @@ struct RootViewFactory {
       DeliveryView(
         letterId: letterId,
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
-        linkBaseURL: AppLink.baseURL
+        linkBaseURL: AppLink.baseURL,
+        onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) }
       )
       .mutterNavigationBar("전달 링크", onBack: { coordinator.pop() })
 

@@ -98,9 +98,10 @@ public struct HomeView: View {
 
   private func letterCard(_ row: HomeModelData.LetterRow) -> some View {
     Button {
-      // 보낸 편지 → 뷰어, 임시저장 → 이어쓰기(작성 화면). 탭 자체가 이어쓰기 진입점.
+      // 보낸 편지 → 링크 관리(발급된 링크 목록·무효화·새 발급, 미리보기는 그 안 버튼).
+      // 임시저장 → 이어쓰기(작성 화면). 탭 자체가 이어쓰기 진입점.
       if row.isSent {
-        coordinator.push(.viewer(.myLetter(letterId: row.letter.id)))
+        coordinator.push(.delivery(letterId: row.letter.id))
       } else {
         coordinator.push(.compose(.edit(letterId: row.letter.id)))
       }
