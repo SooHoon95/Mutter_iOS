@@ -11,12 +11,28 @@ import Domain
 final class SessionManager: SessionManagable {
   private let authUsecase: AuthUsecasable
   private let subject = CurrentValueSubject<Bool, Never>(false)
+  private var cancellables = Set<AnyCancellable>()
 
   var isLoggedInStream: AnyPublisher<Bool, Never> { subject.eraseToAnyPublisher() }
   var isLoggedIn: Bool { subject.value }
 
   init(authUsecase: AuthUsecasable) {
     self.authUsecase = authUsecase
+    observeUnauthorized()
+  }
+
+  /// 서버가 세션을 401(JWT 만료/무효)로 거부하면(데이터 레이어가 방송) 로그아웃해 온보딩으로 되돌린다.
+  /// 이미 미로그인 상태면 무시한다(로그인 시도 중의 오류에 오작동하지 않도록).
+  private func observeUnauthorized() {
+    NotificationCenter.default
+      .publisher(for: SessionInvalidation.didDetectUnauthorized)
+      .sink { [weak self] _ in
+        Task { @MainActor in
+          guard let self, self.subject.value else { return }
+          await self.signOut()
+        }
+      }
+      .store(in: &cancellables)
   }
 
   func refresh() async {
