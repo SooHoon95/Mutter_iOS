@@ -79,6 +79,22 @@ final class ComposeModelData {
       content = letter.body
       templateId = letter.templateId
       cue = letter.cue
+      await backfillCueTitleIfNeeded()
+    }
+  }
+
+  /// 이어쓰기로 열 때, 제목 없이 저장된 레거시 SC 큐를 oEmbed로 보강한다.
+  /// 제작자 화면이라 무마찰 예외(수신 뷰어와 달리 재검증 허용) — 다음 저장 때 제목이 지속돼 자가치유된다.
+  private func backfillCueTitleIfNeeded() async {
+    guard let current = cue, current.source == .soundcloud, current.title == nil else { return }
+    if case .ok(let title, let author, _) = await audioUsecase.validateSoundCloud(url: current.ref) {
+      cue = MusicCue(
+        source: current.source,
+        ref: current.ref,
+        startMs: current.startMs,
+        title: title.isEmpty ? nil : title,
+        author: author.isEmpty ? nil : author
+      )
     }
   }
 
@@ -108,7 +124,8 @@ final class ComposeModelData {
         ref: canonicalUrl,
         startMs: 0,
         title: title.isEmpty ? nil : title,
-        author: author.isEmpty ? nil : author
+        author: author.isEmpty ? nil : author,
+        sourceUrl: trimmed   // 원본 붙인 공개 URL — 웹 뷰어 출처 링크용(canonical ref는 API JSON).
       )
       soundcloudURL = ""   // 적용됨 — 입력칸을 비워 즉시 피드백.
     case .fail(let reason):

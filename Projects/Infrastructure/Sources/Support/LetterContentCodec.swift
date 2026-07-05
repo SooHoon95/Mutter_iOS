@@ -7,9 +7,10 @@ struct MusicCueDTO: Codable {
   let sourceType: String
   let ref: String
   let startMs: Int?
-  /// oEmbed 트랙 제목/작성자(신규). optional이라 기존 jsonb(필드 없음)는 nil로 안전 디코드.
+  /// oEmbed 트랙 제목/작성자 + 원본 공개 URL(신규). optional이라 기존 jsonb(필드 없음)는 nil로 안전 디코드.
   let title: String?
   let author: String?
+  let sourceUrl: String?
 }
 
 /// 단락 jsonb(웹 Paragraph). `paragraphs` JSONB 배열의 요소.
@@ -42,7 +43,8 @@ enum LetterContentCodec {
       ref: dto.ref,
       startMs: dto.startMs,
       title: dto.title,
-      author: dto.author
+      author: dto.author,
+      sourceUrl: dto.sourceUrl
     )
   }
 
@@ -65,6 +67,6 @@ enum LetterContentCodec {
   }
 
   private static func toDTO(_ cue: MusicCue) -> MusicCueDTO {
-    MusicCueDTO(sourceType: cue.source.rawValue, ref: cue.ref, startMs: cue.startMs, title: cue.title, author: cue.author)
+    MusicCueDTO(sourceType: cue.source.rawValue, ref: cue.ref, startMs: cue.startMs, title: cue.title, author: cue.author, sourceUrl: cue.sourceUrl)
   }
 }

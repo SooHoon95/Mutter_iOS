@@ -35,13 +35,16 @@ public struct MusicCue: Equatable {
   public let title: String?
   /// 트랙 작성자(oEmbed). 있으면 플레이어 바 subtitle.
   public let author: String?
+  /// 발신자가 붙인 원본 공개 트랙 URL(출처 표기용). ref는 재생용 canonical(api URL)이라 출처엔 부적합.
+  public let sourceUrl: String?
 
-  public init(source: Source, ref: String, startMs: Int? = nil, title: String? = nil, author: String? = nil) {
+  public init(source: Source, ref: String, startMs: Int? = nil, title: String? = nil, author: String? = nil, sourceUrl: String? = nil) {
     self.source = source
     self.ref = ref
     self.startMs = startMs
     self.title = title
     self.author = author
+    self.sourceUrl = sourceUrl
   }
 }
 
