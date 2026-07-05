@@ -11,6 +11,7 @@ public struct ComposeViewFactory: ViewFactory {
   private let audioUsecase: AudioUsecasable
   private let linkBaseURL: String
   private let onDone: () -> Void
+  private let onBack: () -> Void
 
   public init(
     letterUsecase: LetterUsecasable,
@@ -18,7 +19,8 @@ public struct ComposeViewFactory: ViewFactory {
     deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
     linkBaseURL: String,
-    onDone: @escaping () -> Void
+    onDone: @escaping () -> Void,
+    onBack: @escaping () -> Void
   ) {
     self.letterUsecase = letterUsecase
     self.connectionUsecase = connectionUsecase
@@ -26,28 +28,31 @@ public struct ComposeViewFactory: ViewFactory {
     self.audioUsecase = audioUsecase
     self.linkBaseURL = linkBaseURL
     self.onDone = onDone
+    self.onBack = onBack
   }
 
   public func makeView(_ route: ComposeRoute) -> some View {
     switch route {
     case .new:
-      composeView(mode: .new)
+      composeView(mode: .new, title: "편지 쓰기")
     case .edit(let id):
-      composeView(mode: .edit(id))
+      composeView(mode: .edit(id), title: "이어쓰기")
     case .reply(let recipientId):
-      composeView(mode: .reply(recipientId))
+      composeView(mode: .reply(recipientId), title: "답장")
     }
   }
 
-  private func composeView(mode: ComposeModelData.Mode) -> ComposeView {
+  private func composeView(mode: ComposeModelData.Mode, title: String) -> ComposeView {
     ComposeView(
       mode: mode,
+      navTitle: title,
       letterUsecase: letterUsecase,
       connectionUsecase: connectionUsecase,
       deliveryUsecase: deliveryUsecase,
       audioUsecase: audioUsecase,
       linkBaseURL: linkBaseURL,
-      onDone: onDone
+      onDone: onDone,
+      onBack: onBack
     )
   }
 }

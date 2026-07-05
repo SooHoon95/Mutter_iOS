@@ -7,16 +7,22 @@ import Router
 public struct ConnectViewFactory: ViewFactory {
   private let connectionUsecase: ConnectionUsecasable
   private let onAccepted: () -> Void
+  private let onBack: () -> Void
 
-  public init(connectionUsecase: ConnectionUsecasable, onAccepted: @escaping () -> Void) {
+  public init(
+    connectionUsecase: ConnectionUsecasable,
+    onAccepted: @escaping () -> Void,
+    onBack: @escaping () -> Void
+  ) {
     self.connectionUsecase = connectionUsecase
     self.onAccepted = onAccepted
+    self.onBack = onBack
   }
 
   public func makeView(_ route: ConnectRoute) -> some View {
     switch route {
     case .invite(let token):
-      ConnectInviteView(token: token, connectionUsecase: connectionUsecase, onAccepted: onAccepted)
+      ConnectInviteView(token: token, connectionUsecase: connectionUsecase, onAccepted: onAccepted, onBack: onBack)
     }
   }
 }

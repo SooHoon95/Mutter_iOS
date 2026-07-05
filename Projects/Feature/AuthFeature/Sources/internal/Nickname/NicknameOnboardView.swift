@@ -3,7 +3,7 @@ import SwiftUI
 import Domain
 import UIComponent
 
-/// 닉네임 온보딩 화면(가입 직후).
+/// 닉네임 온보딩 화면(가입 직후). pre-app 루트 단계라 navbar/뒤로가기 없음(push 안 됨, 되돌아갈 곳 없음).
 struct NicknameOnboardView: View {
   @State private var model: NicknameModelData
 

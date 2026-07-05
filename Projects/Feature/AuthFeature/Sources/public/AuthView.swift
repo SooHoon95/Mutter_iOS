@@ -4,6 +4,7 @@ import Domain
 import UIComponent
 
 /// 로그인 화면 — 이메일 매직코드(가입 겸용) + 비밀번호. 수신 무마찰 원칙상 가볍게.
+/// pre-auth 루트 화면이라 navbar/뒤로가기 없음(항상 AuthViewWrapper로만 표시, push 안 됨).
 public struct AuthView: View {
   @State private var model: AuthModelData
 

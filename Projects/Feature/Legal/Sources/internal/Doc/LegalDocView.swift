@@ -6,18 +6,38 @@ import UIComponent
 struct LegalDocView: View {
   let title: String
   let text: String
+  private let onBack: () -> Void
+
+  init(title: String, text: String, onBack: @escaping () -> Void) {
+    self.title = title
+    self.text = text
+    self.onBack = onBack
+  }
 
   var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-      ScrollView {
-        VStack(alignment: .leading, spacing: 16) {
-          Text(title).fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
-          Text(text).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkMid.color)
+
+      // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
+      VStack(spacing: 0) {
+        MutterNavigationBar(
+          Asset.Colors.ivory.color,
+          title,
+          foregroundColor: Asset.Colors.ink.color,
+          leftButtons: { MutterBackButton(action: onBack) },
+          rightButtons: { EmptyView() }
+        )
+
+        ScrollView {
+          VStack(alignment: .leading, spacing: 16) {
+            Text(title).fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
+            Text(text).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkMid.color)
+          }
+          .padding(24)
+          .frame(maxWidth: 600, alignment: .leading)
         }
-        .padding(24)
-        .frame(maxWidth: 600, alignment: .leading)
       }
     }
+    .toolbar(.hidden, for: .navigationBar)
   }
 }

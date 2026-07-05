@@ -28,8 +28,9 @@ public struct MutterNavigationBar<LeftContent: View, RightContent: View>: View {
   }
 
   public var body: some View {
+    // Mercury 패턴: 배경은 풀폭, 좌/우 버튼만 내부 패딩(바 자체엔 horizontal 패딩 없음 —
+    // 안 그러면 배경이 안쪽으로 밀려 양옆에 띠가 생긴다).
     ZStack {
-      backgroundColor
       if let title {
         Text(title)
           .fonts(titleFont)
@@ -40,16 +41,17 @@ public struct MutterNavigationBar<LeftContent: View, RightContent: View>: View {
       HStack(spacing: 0) {
         leftButtons
           .frame(minWidth: 28, minHeight: 28)
+          .padding(.leading, 16)
         Spacer(minLength: 0)
         rightButtons
           .frame(minWidth: 28, minHeight: 28)
+          .padding(.trailing, 16)
       }
     }
-    .padding(.horizontal, 16)
     .frame(height: 52)
     .frame(maxWidth: .infinity)
     .contentShape(Rectangle())
-    .background(Asset.Colors.surface.color)
+    .background(backgroundColor ?? Asset.Colors.surface.color)
   }
 }
 
@@ -111,21 +113,3 @@ public struct MutterBackButton: View {
   }
 }
 
-// MARK: - 화면 부착 모디파이어
-
-public extension View {
-  /// push된 화면 상단에 커스텀 내비바(뒤로가기 + 타이틀)를 얹고 시스템 내비바를 숨긴다.
-  /// `safeAreaInset`이라 본문 레이아웃을 밀지 않고 안전영역만 확장한다.
-  func mutterNavigationBar(backgroundColor: Color? = Asset.Colors.ivory.color, _ title: String? = nil, onBack: @escaping () -> Void) -> some View {
-    self
-      .toolbar(.hidden, for: .navigationBar)
-      .safeAreaInset(edge: .top, spacing: 0) {
-        MutterNavigationBar(
-          backgroundColor,
-          title,
-          leftButtons: { MutterBackButton(action: onBack) },
-          rightButtons: { EmptyView() }
-        )
-      }
-  }
-}

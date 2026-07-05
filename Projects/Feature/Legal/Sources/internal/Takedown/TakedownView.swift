@@ -6,20 +6,35 @@ import UIComponent
 /// 권리침해 신고 폼.
 struct TakedownView: View {
   @State private var model: TakedownModelData
+  private let onBack: () -> Void
 
-  init(takedownUsecase: TakedownUsecasable) {
+  init(takedownUsecase: TakedownUsecasable, onBack: @escaping () -> Void) {
+    self.onBack = onBack
     _model = State(initialValue: TakedownModelData(takedownUsecase: takedownUsecase))
   }
 
   var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-      if model.submitted {
-        submittedView
-      } else {
-        form
+
+      // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
+      VStack(spacing: 0) {
+        MutterNavigationBar(
+          Asset.Colors.ivory.color,
+          "문의하기",
+          foregroundColor: Asset.Colors.ink.color,
+          leftButtons: { MutterBackButton(action: onBack) },
+          rightButtons: { EmptyView() }
+        )
+
+        if model.submitted {
+          submittedView
+        } else {
+          form
+        }
       }
     }
+    .toolbar(.hidden, for: .navigationBar)
   }
 
   private var form: some View {

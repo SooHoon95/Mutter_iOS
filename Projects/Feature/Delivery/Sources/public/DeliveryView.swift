@@ -8,36 +8,60 @@ import UIComponent
 public struct DeliveryView: View {
   @State private var model: DeliveryModelData
   private let linkBaseURL: String
+  private let navTitle: String
   /// 이 편지를 뷰어로 미리보기(라우팅 레이어가 주입).
   private let onPreview: () -> Void
+  private let onBack: () -> Void
 
-  public init(letterId: String, deliveryUsecase: DeliveryUsecasable, linkBaseURL: String, onPreview: @escaping () -> Void) {
+  public init(
+    letterId: String,
+    deliveryUsecase: DeliveryUsecasable,
+    linkBaseURL: String,
+    navTitle: String,
+    onPreview: @escaping () -> Void,
+    onBack: @escaping () -> Void
+  ) {
     _model = State(initialValue: DeliveryModelData(letterId: letterId, deliveryUsecase: deliveryUsecase))
     self.linkBaseURL = linkBaseURL
+    self.navTitle = navTitle
     self.onPreview = onPreview
+    self.onBack = onBack
   }
 
   public var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          Text("링크로 보내기").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
-          MutterButton("편지 미리보기", style: .ghost) { onPreview() }
+      // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
+      VStack(spacing: 0) {
+        MutterNavigationBar(
+          Asset.Colors.ivory.color,
+          navTitle,
+          foregroundColor: Asset.Colors.ink.color,
+          leftButtons: { MutterBackButton(action: onBack) },
+          rightButtons: { EmptyView() }
+        )
 
-          issueCard
-          if let token = model.lastIssuedToken { issuedLink(token) }
-          if !model.links.isEmpty { existingLinks }
+        ScrollView {
+          VStack(alignment: .leading, spacing: 20) {
+            Text("링크로 보내기").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
-          if let message = model.errorMessage {
-            Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+            MutterButton("편지 미리보기", style: .ghost) { onPreview() }
+
+            issueCard
+            if let token = model.lastIssuedToken { issuedLink(token) }
+            if !model.links.isEmpty { existingLinks }
+
+            if let message = model.errorMessage {
+              Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+            }
           }
+          .padding(24)
+          .frame(maxWidth: 560)
         }
-        .padding(24)
-        .frame(maxWidth: 560)
       }
     }
+    .toolbar(.hidden, for: .navigationBar)
     .task { await model.load() }
   }
 

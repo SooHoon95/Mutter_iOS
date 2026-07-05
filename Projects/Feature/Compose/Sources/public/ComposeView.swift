@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 import Domain
 import UIComponent
@@ -6,16 +7,22 @@ import UIComponent
 /// 편지 제작 화면 — 편지지(테마) + 본문 + 음악 1곡 + 저장/발송.
 public struct ComposeView: View {
   @State private var model: ComposeModelData
+  private let navTitle: String
+  private let onBack: () -> Void
 
   init(
     mode: ComposeModelData.Mode,
+    navTitle: String,
     letterUsecase: LetterUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
     audioUsecase: AudioUsecasable,
     linkBaseURL: String,
-    onDone: @escaping () -> Void
+    onDone: @escaping () -> Void,
+    onBack: @escaping () -> Void
   ) {
+    self.navTitle = navTitle
+    self.onBack = onBack
     _model = State(initialValue: ComposeModelData(
       mode: mode,
       letterUsecase: letterUsecase,
@@ -36,24 +43,52 @@ public struct ComposeView: View {
       }
       Asset.Colors.ivory.color.ignoresSafeArea()
 
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          templatePicker
-          paper
-          musicSection
-          if let message = model.errorMessage {
-            Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+      // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
+      VStack(spacing: 0) {
+        MutterNavigationBar(
+          Asset.Colors.ivory.color,
+          navTitle,
+          foregroundColor: Asset.Colors.ink.color,
+          leftButtons: { MutterBackButton(action: onBack) },
+          rightButtons: { EmptyView() }
+        )
+
+        ScrollView {
+          VStack(alignment: .leading, spacing: 20) {
+            templatePicker
+            paper
+            musicSection
+            if let message = model.errorMessage {
+              Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
+            }
+            actions
           }
-          actions
+          .padding(20)
+          .frame(maxWidth: 600)
         }
-        .padding(20)
-        .frame(maxWidth: 600)
+        // 스크롤을 아래로 끌면 키보드가 함께 내려간다(대화형 dismiss).
+        .scrollDismissesKeyboard(.interactively)
+      }
+    }
+    .toolbar(.hidden, for: .navigationBar)
+    // 키보드 위 '완료' 버튼 — 어떤 입력(제목·본문·SC 링크)에서든 명시적으로 내린다.
+    .toolbar {
+      ToolbarItemGroup(placement: .keyboard) {
+        Spacer()
+        Button("완료") { dismissKeyboard() }
+          .fonts(.bodyMediumBold)
+          .foregroundStyle(Asset.Colors.goldDeep.color)
       }
     }
     .task { await model.load() }
     .sheet(isPresented: $model.showSendSheet) {
       SendSheet(model: model)
     }
+  }
+
+  /// 현재 포커스된 입력의 키보드를 내린다(전역 first responder 해제).
+  private func dismissKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
   }
 
   // MARK: - Template

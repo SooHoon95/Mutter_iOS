@@ -6,8 +6,15 @@ import UIComponent
 /// 초대 수락 화면.
 struct ConnectInviteView: View {
   @State private var model: ConnectInviteModelData
+  private let onBack: () -> Void
 
-  init(token: String, connectionUsecase: ConnectionUsecasable, onAccepted: @escaping () -> Void) {
+  init(
+    token: String,
+    connectionUsecase: ConnectionUsecasable,
+    onAccepted: @escaping () -> Void,
+    onBack: @escaping () -> Void
+  ) {
+    self.onBack = onBack
     _model = State(initialValue: ConnectInviteModelData(
       token: token, connectionUsecase: connectionUsecase, onAccepted: onAccepted
     ))
@@ -16,10 +23,23 @@ struct ConnectInviteView: View {
   var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-      content
-        .padding(24)
-        .frame(maxWidth: 420)
+
+      // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
+      VStack(spacing: 0) {
+        MutterNavigationBar(
+          Asset.Colors.ivory.color,
+          "초대",
+          foregroundColor: Asset.Colors.ink.color,
+          leftButtons: { MutterBackButton(action: onBack) },
+          rightButtons: { EmptyView() }
+        )
+
+        content
+          .padding(24)
+          .frame(maxWidth: 420)
+      }
     }
+    .toolbar(.hidden, for: .navigationBar)
     .task { await model.load() }
   }
 
