@@ -3,27 +3,21 @@
 <plist version="1.0">
 <dict>
 	<!--
-	  개발 단계(무료 개인 팀): capability 없음.
-	  무료 개인 팀은 Push Notifications / Sign in with Apple / Associated Domains 를
-	  프로비저닝하지 못한다(전부 유료 전용).
-	  ▶ 배포 직전(유료 계정 생성 후) 아래를 다시 추가하고, App ID에 각 capability를 켠다:
+	  Universal Links — /l/:token(편지 전달) · /connect/:token(1:1 연결)을 앱으로 연다.
+	  AASA: https://letter-app-nine-kohl.vercel.app/.well-known/apple-app-site-association
+	  URL 파싱은 Deeplink.swift(/l/ → .letter, /connect/ → .connect)가 이미 처리한다.
 
-	  <key>aps-environment</key>
-	  <string>$(APS_ENVIRONMENT)</string>
-	  <key>com.apple.developer.applesignin</key>
-	  <array><string>Default</string></array>
-
-	  ▶ Universal Links(초대/전달 링크를 앱으로 여는 네이티브 방식, 3rd-party 불필요):
-	    1) 아래 associated-domains 를 켠다(<도메인>을 실제 배포 도메인으로 교체).
-	    2) 도메인에 apple-app-site-association(AASA) 파일을 호스팅한다.
-	       (letter-app/public/.well-known/apple-app-site-association — TEAMID 교체 후 배포)
-	    3) 앱은 이미 /l/:token · /connect/:token 을 Deeplink.swift 에서 파싱한다.
-	    자세한 절차·체크리스트: docs/universal-links.md
-
-	  <key>com.apple.developer.associated-domains</key>
-	  <array>
-	    <string>applinks:<도메인></string>
-	  </array>
+	  ▶ 함께 해야 하는 포털 작업(코드 밖):
+	    Apple Developer → Identifiers → App ID(com.efreedom.mutter) → Associated Domains capability ON.
+	  ▶ '?mode=developer'는 개발/테스트 중 Apple CDN(AASA) 캐시를 우회한다.
+	    App Store 배포 빌드에서는 이 접미사를 제거한다.
+	  ▶ Push/Sign in with Apple가 필요해지면 아래를 추가하고 App ID에도 capability를 켠다:
+	      <key>aps-environment</key><string>$(APS_ENVIRONMENT)</string>
+	      <key>com.apple.developer.applesignin</key><array><string>Default</string></array>
 	-->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:letter-app-nine-kohl.vercel.app?mode=developer</string>
+	</array>
 </dict>
 </plist>
