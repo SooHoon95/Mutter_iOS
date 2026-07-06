@@ -6,11 +6,15 @@ public struct LetterPaperView: View {
   private let theme: LetterTheme
   private let title: String?
   private let text: String
+  /// 스크롤 진입 시 단락을 한 줄씩(위에서 아래로) 페이드-하강으로 드러내는 연출.
+  /// 음악이 있는 편지를 연 뒤에만 켠다(무음/열기 전은 즉시 표시). 웹 Paginated.revealOnScroll과 동형.
+  private let revealOnScroll: Bool
 
-  public init(theme: LetterTheme, title: String? = nil, text: String) {
+  public init(theme: LetterTheme, title: String? = nil, text: String, revealOnScroll: Bool = false) {
     self.theme = theme
     self.title = title
     self.text = text
+    self.revealOnScroll = revealOnScroll
   }
 
   /// 빈 줄 기준 단락 분리(웹과 동일한 문단 호흡).
@@ -27,13 +31,42 @@ public struct LetterPaperView: View {
         Text(title).letterHeading(theme)
       }
       ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-        Text(paragraph).letterBody(theme)
+        if revealOnScroll {
+          RevealingParagraph(text: paragraph, theme: theme)
+        } else {
+          Text(paragraph).letterBody(theme)
+        }
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(28)
     .background(theme.background)
     .overlay(LetterPaperTexture(theme: theme))
+  }
+}
+
+// MARK: - Reveal 연출 단락
+
+/// 스크롤로 화면에 들어오면 "위에서 아래로" 페이드-하강하며 한 번 나타나는 단락.
+/// 한 번 나타나면 유지한다(스크롤 왕복 재생 없음). reduce motion이면 즉시 표시.
+private struct RevealingParagraph: View {
+  let text: String
+  let theme: LetterTheme
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var revealed = false
+
+  var body: some View {
+    // reduce motion: 연출 없이 즉시 표시. 그 외엔 나타나기 전까지 숨긴 채 위로 살짝 올려둔다.
+    let hidden = !revealed && !reduceMotion
+    Text(text)
+      .letterBody(theme)
+      .opacity(hidden ? 0 : 1)
+      .offset(y: hidden ? -12 : 0)
+      .onScrollVisibilityChange(threshold: 0.1) { visible in
+        if visible && !revealed {
+          withAnimation(.easeOut(duration: 0.6)) { revealed = true }
+        }
+      }
   }
 }
 

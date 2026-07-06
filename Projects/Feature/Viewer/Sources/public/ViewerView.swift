@@ -161,13 +161,15 @@ public struct ViewerView: View {
   private func reader(_ payload: LetterPayload, _ theme: LetterTheme) -> some View {
     // 큐가 있고 재생 가능한 때만 하단 플레이어 표시(무음 편지·재생 불가 시 숨김).
     let hasPlayer = !payload.audioDisabled && payload.cue != nil && !model.player.isUnavailable
+    // 음악이 있는 편지면 본문을 스크롤 reveal로 연출한다(웹 hasMusic과 동형 — 큐 존재 기준).
+    let hasMusic = !payload.audioDisabled && payload.cue != nil
 
     return ZStack(alignment: .bottom) {
       theme.background.ignoresSafeArea()
 
       // 편지 본문 스크롤 — 화면 전체 높이. 상단 바는 라우팅 레이어의 MutterNavigationBar가 담당.
       ScrollView {
-        LetterPaperView(theme: theme, title: payload.title, text: payload.body)
+        LetterPaperView(theme: theme, title: payload.title, text: payload.body, revealOnScroll: hasMusic)
           .frame(maxWidth: .infinity)
 
         // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
