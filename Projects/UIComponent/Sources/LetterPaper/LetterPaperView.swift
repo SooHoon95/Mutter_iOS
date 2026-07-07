@@ -30,9 +30,9 @@ public struct LetterPaperView: View {
       if let title, !title.isEmpty {
         Text(title).letterHeading(theme)
       }
-      ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
+      ForEach(Array(paragraphs.enumerated()), id: \.offset) { index, paragraph in
         if revealOnScroll {
-          RevealingParagraph(text: paragraph, theme: theme)
+          RevealingParagraph(text: paragraph, theme: theme, index: index)
         } else {
           Text(paragraph).letterBody(theme)
         }
@@ -52,8 +52,13 @@ public struct LetterPaperView: View {
 private struct RevealingParagraph: View {
   let text: String
   let theme: LetterTheme
+  /// 문단 순서 — 동시에 보이는 단락들이 위→아래로 계단식 등장하도록 지연에 사용.
+  let index: Int
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var revealed = false
+
+  /// 계단식 지연 — 그룹(6) 단위로 순환해 상한(≈0.3s)을 유지한다(스크롤 진입 단락의 과도한 지연 방지).
+  private var staggerDelay: Double { Double(index % 6) * 0.06 }
 
   var body: some View {
     // reduce motion: 연출 없이 즉시 표시. 그 외엔 나타나기 전까지 숨긴 채 위로 살짝 올려둔다.
@@ -64,7 +69,7 @@ private struct RevealingParagraph: View {
       .offset(y: hidden ? -12 : 0)
       .onScrollVisibilityChange(threshold: 0.1) { visible in
         if visible && !revealed {
-          withAnimation(.easeOut(duration: 0.6)) { revealed = true }
+          withAnimation(.easeOut(duration: 0.6).delay(staggerDelay)) { revealed = true }
         }
       }
   }
