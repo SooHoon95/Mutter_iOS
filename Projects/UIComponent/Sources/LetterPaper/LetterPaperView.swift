@@ -45,12 +45,12 @@ public struct LetterPaperView: View {
         // 스크롤 reveal: 제목도 첫 줄로 나타난다(스크롤 전엔 숨김). 문단 간격은 바깥 VStack(20),
         // 문단 내 줄 간격은 안쪽 VStack. 전체 줄에 연속 인덱스로 위→아래 계단식.
         if let title, !title.isEmpty {
-          RevealingLine(text: title, theme: theme, index: 0, isHeading: true)
+          RevealingLine(text: title, theme: theme, isHeading: true)
         }
         ForEach(revealGroups) { group in
           VStack(alignment: .leading, spacing: theme.bodyLineSpacing) {
             ForEach(group.lines) { line in
-              RevealingLine(text: line.text, theme: theme, index: line.id + 1)
+              RevealingLine(text: line.text, theme: theme)
             }
           }
         }
@@ -90,15 +90,10 @@ private struct RevealGroup: Identifiable {
 private struct RevealingLine: View {
   let text: String
   let theme: LetterTheme
-  /// 전역 줄 인덱스 — 동시에 보이는 줄들이 위→아래로 계단식 등장하도록 지연에 사용.
-  let index: Int
   /// 제목 줄이면 heading 타이포로 렌더.
   var isHeading: Bool = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var revealed = false
-
-  /// 계단식 지연 — 12줄 단위로 순환해 상한(≈0.55s)을 유지한다(스크롤 진입 줄의 과도한 지연 방지).
-  private var staggerDelay: Double { Double(index % 12) * 0.05 }
 
   var body: some View {
     styledText
@@ -107,9 +102,11 @@ private struct RevealingLine: View {
       .opacity(revealed ? 1 : 0)
       // reduce motion: 이동 없이 페이드만. 그 외엔 위(-10)에서 아래로 내려오며 나타남.
       .offset(y: (revealed || reduceMotion) ? 0 : -10)
+      // 각 줄은 화면에 들어오는 "그 순간" 재생 → 위→아래 자연 순서 보장.
+      // (인덱스 기반 계단식 지연은 순서를 뒤집어 아래 줄이 먼저 나오던 문제가 있어 제거.)
       .onScrollVisibilityChange(threshold: 0.05) { visible in
         if visible && !revealed {
-          withAnimation(.easeOut(duration: 0.5).delay(staggerDelay)) { revealed = true }
+          withAnimation(.easeOut(duration: 0.5)) { revealed = true }
         }
       }
   }
