@@ -168,23 +168,29 @@ public struct ViewerView: View {
       // 편지 본문 스크롤 — 화면 전체 높이. 상단 바는 라우팅 레이어의 MutterNavigationBar가 담당.
       // 열람 화면에선 항상 스크롤 reveal 연출(음악 유무 무관, 웹과 동일). 계단식 등장.
       ScrollView {
-        LetterPaperView(theme: theme, title: payload.title, text: payload.body, revealOnScroll: true)
-          .frame(maxWidth: .infinity)
+        VStack(spacing: 0) {
+          // 처음엔 "스크롤 해주세요"만 한 화면 가득 — 편지(제목 포함)를 아래로 밀어내
+          // 스크롤해야 한 줄씩 뷰포트에 들어오며 나타나게 한다(웹과 동일).
+          ScrollPromptView(foreground: theme.foreground)
 
-        // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
-        if model.canSaveToInbox && model.savedToInbox {
-          HStack(spacing: 6) {
-            MutterIcon(Asset.Images.check, size: 16)
-              .foregroundStyle(Asset.Colors.gold.color)
-            Text("받은 편지함에 저장됐어요")
-              .fonts(.caption)
-              .foregroundStyle(Asset.Colors.inkSoft.color)
+          LetterPaperView(theme: theme, title: payload.title, text: payload.body, revealOnScroll: true)
+            .frame(maxWidth: .infinity)
+
+          // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
+          if model.canSaveToInbox && model.savedToInbox {
+            HStack(spacing: 6) {
+              MutterIcon(Asset.Images.check, size: 16)
+                .foregroundStyle(Asset.Colors.gold.color)
+              Text("받은 편지함에 저장됐어요")
+                .fonts(.caption)
+                .foregroundStyle(Asset.Colors.inkSoft.color)
+            }
+            .padding(.top, 8)
           }
-          .padding(.top, 8)
-        }
 
-        // 하단 고정 플레이어에 마지막 줄이 가려지지 않도록 여유 인셋(플레이어 있을 때만 크게).
-        Color.clear.frame(height: hasPlayer ? 96 : 40)
+          // 하단 고정 플레이어에 마지막 줄이 가려지지 않도록 여유 인셋(플레이어 있을 때만 크게).
+          Color.clear.frame(height: hasPlayer ? 96 : 40)
+        }
       }
 
       // 음악 플레이어 바 — 화면 최하단 고정 오버레이(safeArea 존중 — home indicator 위).
@@ -271,4 +277,26 @@ public struct ViewerView: View {
     formatter.dateFormat = "M월 d일 a h시"
     return formatter
   }()
+}
+
+// MARK: - 스크롤 안내 인트로
+
+/// 열람 첫 화면을 가득 채우는 "스크롤 해주세요" 안내 — 편지를 아래로 밀어내 스크롤을 유도한다.
+/// containerRelativeFrame으로 스크롤 컨테이너 한 화면 높이를 차지한다(iOS 17+).
+private struct ScrollPromptView: View {
+  let foreground: Color
+
+  var body: some View {
+    VStack(spacing: 12) {
+      Text("스크롤 해주세요")
+        .fonts(.bodyMedium)
+        .foregroundStyle(foreground.opacity(0.7))
+      Image(systemName: "chevron.down")
+        .font(.system(size: 20, weight: .semibold))
+        .foregroundStyle(foreground.opacity(0.6))
+        .symbolEffect(.bounce, options: .repeating)
+    }
+    .frame(maxWidth: .infinity)
+    .containerRelativeFrame(.vertical)
+  }
 }

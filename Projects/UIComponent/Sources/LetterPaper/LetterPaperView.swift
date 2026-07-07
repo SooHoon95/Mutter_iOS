@@ -25,15 +25,40 @@ public struct LetterPaperView: View {
       .filter { !$0.isEmpty }
   }
 
+  /// reveal용 줄 그룹 — 각 단락을 개행(\n) 기준 줄로 쪼개고, 전체 줄에 연속 인덱스를 부여한다
+  /// (위→아래 계단식 지연 계산용). 웹 Paginated의 [data-reveal-line]과 동형.
+  private var revealGroups: [RevealGroup] {
+    var global = 0
+    return paragraphs.enumerated().map { pIndex, para in
+      let lines = para.components(separatedBy: "\n").map { line -> RevealLine in
+        let item = RevealLine(id: global, text: line)
+        global += 1
+        return item
+      }
+      return RevealGroup(id: pIndex, lines: lines)
+    }
+  }
+
   public var body: some View {
     VStack(alignment: .leading, spacing: 20) {
-      if let title, !title.isEmpty {
-        Text(title).letterHeading(theme)
-      }
-      ForEach(Array(paragraphs.enumerated()), id: \.offset) { index, paragraph in
-        if revealOnScroll {
-          RevealingParagraph(text: paragraph, theme: theme, index: index)
-        } else {
+      if revealOnScroll {
+        // 스크롤 reveal: 제목도 첫 줄로 나타난다(스크롤 전엔 숨김). 문단 간격은 바깥 VStack(20),
+        // 문단 내 줄 간격은 안쪽 VStack. 전체 줄에 연속 인덱스로 위→아래 계단식.
+        if let title, !title.isEmpty {
+          RevealingLine(text: title, theme: theme, index: 0, isHeading: true)
+        }
+        ForEach(revealGroups) { group in
+          VStack(alignment: .leading, spacing: theme.bodyLineSpacing) {
+            ForEach(group.lines) { line in
+              RevealingLine(text: line.text, theme: theme, index: line.id + 1)
+            }
+          }
+        }
+      } else {
+        if let title, !title.isEmpty {
+          Text(title).letterHeading(theme)
+        }
+        ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
           Text(paragraph).letterBody(theme)
         }
       }
@@ -45,33 +70,56 @@ public struct LetterPaperView: View {
   }
 }
 
-// MARK: - Reveal 연출 단락
+// MARK: - reveal 줄 모델
 
-/// 스크롤로 화면에 들어오면 "위에서 아래로" 페이드-하강하며 한 번 나타나는 단락.
-/// 한 번 나타나면 유지한다(스크롤 왕복 재생 없음). reduce motion이면 즉시 표시.
-private struct RevealingParagraph: View {
+private struct RevealLine: Identifiable {
+  let id: Int  // 전역 줄 인덱스(계단식 지연에 사용)
+  let text: String
+}
+
+private struct RevealGroup: Identifiable {
+  let id: Int  // 문단 인덱스
+  let lines: [RevealLine]
+}
+
+// MARK: - Reveal 연출 줄
+
+/// 스크롤로 화면에 들어오면 "위에서 아래로" 페이드-하강하며 한 번 나타나는 한 줄.
+/// 한 번 나타나면 유지한다(스크롤 왕복 재생 없음). 웹 .revealMode .line과 동형.
+/// reduce motion이면 이동은 빼고 페이드만(연출은 유지).
+private struct RevealingLine: View {
   let text: String
   let theme: LetterTheme
-  /// 문단 순서 — 동시에 보이는 단락들이 위→아래로 계단식 등장하도록 지연에 사용.
+  /// 전역 줄 인덱스 — 동시에 보이는 줄들이 위→아래로 계단식 등장하도록 지연에 사용.
   let index: Int
+  /// 제목 줄이면 heading 타이포로 렌더.
+  var isHeading: Bool = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var revealed = false
 
-  /// 계단식 지연 — 그룹(6) 단위로 순환해 상한(≈0.3s)을 유지한다(스크롤 진입 단락의 과도한 지연 방지).
-  private var staggerDelay: Double { Double(index % 6) * 0.06 }
+  /// 계단식 지연 — 12줄 단위로 순환해 상한(≈0.55s)을 유지한다(스크롤 진입 줄의 과도한 지연 방지).
+  private var staggerDelay: Double { Double(index % 12) * 0.05 }
 
   var body: some View {
-    // reduce motion: 연출 없이 즉시 표시. 그 외엔 나타나기 전까지 숨긴 채 위로 살짝 올려둔다.
-    let hidden = !revealed && !reduceMotion
-    Text(text)
-      .letterBody(theme)
-      .opacity(hidden ? 0 : 1)
-      .offset(y: hidden ? -12 : 0)
-      .onScrollVisibilityChange(threshold: 0.1) { visible in
+    styledText
+      // 짧은 줄도 왼쪽 정렬 폭을 유지(가운데로 쏠리지 않게).
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .opacity(revealed ? 1 : 0)
+      // reduce motion: 이동 없이 페이드만. 그 외엔 위(-10)에서 아래로 내려오며 나타남.
+      .offset(y: (revealed || reduceMotion) ? 0 : -10)
+      .onScrollVisibilityChange(threshold: 0.05) { visible in
         if visible && !revealed {
-          withAnimation(.easeOut(duration: 0.6).delay(staggerDelay)) { revealed = true }
+          withAnimation(.easeOut(duration: 0.5).delay(staggerDelay)) { revealed = true }
         }
       }
+  }
+
+  @ViewBuilder private var styledText: some View {
+    if isHeading {
+      Text(text).letterHeading(theme)
+    } else {
+      Text(text.isEmpty ? " " : text).letterBody(theme)
+    }
   }
 }
 
