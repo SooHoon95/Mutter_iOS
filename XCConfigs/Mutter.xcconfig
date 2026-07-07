@@ -9,10 +9,12 @@ SWIFT_VERSION = 5.9
 TARGETED_DEVICE_FAMILY = 1
 OTHER_LDFLAGS = $(inherited) -ObjC
 CODE_SIGN_STYLE = Automatic
-// 개발: 비워서 Xcode가 네 개인(무료) 팀을 쓰게 함.
-// Xcode → Mutter 타깃 → Signing & Capabilities에서 본인 Personal Team 선택.
-// (매 tuist generate 후 재선택이 귀찮으면 여기에 개인 Team ID를 박아라.)
-DEVELOPMENT_TEAM =
+// 유료 Apple Developer 팀(4QCSG92KD9). Associated Domains(Universal Links)는 유료 팀에서만
+// 프로비저닝된다 — 무료 개인 팀("SuHun Choi")은 지원하지 않는다(빌드 서명 에러 원인).
+// 포털: Identifiers → App ID(com.efreedom.mutter) → Associated Domains capability도 ON이어야
+// Automatic 서명이 이 entitlement를 포함한 프로비저닝 프로파일을 자동 생성한다.
+// (Team ID는 비밀이 아니다 — 배포 앱·AASA에 공개된다.)
+DEVELOPMENT_TEAM = 4QCSG92KD9
 CODE_SIGNING_REQUIRED = YES
 CODE_SIGNING_ALLOWED = YES
 VERSIONING_SYSTEM = Apple Generic
