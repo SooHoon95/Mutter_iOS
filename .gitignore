@@ -67,6 +67,9 @@ Sensitive.xcconfig*
 fastlane/portal.json
 fastlane/.env.default
 
+# Firebase 설정 — 클라이언트 키지만 GitHub secret scanning에 걸리므로 커밋 안 함. 로컬/CI에서 각자 주입.
+GoogleService-Info.plist
+
 
 Gemfile.lock
 Tuist/.DS_Store
