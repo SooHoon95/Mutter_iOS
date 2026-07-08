@@ -8,6 +8,6 @@ public protocol ConnectionRepositorable {
   func invite(token: String) async throws -> ConnectInvite
   func accept(token: String) async throws
   func myConnections() async throws -> [Connection]
-  func disconnect() async throws
+  func disconnect(otherUserId: String) async throws
   func send(letterId: String, recipientId: String) async throws
 }

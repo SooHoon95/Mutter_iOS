@@ -74,10 +74,10 @@ public final class ConnectionRepository: ConnectionRepositorable {
     }
   }
 
-  public func disconnect() async throws {
+  public func disconnect(otherUserId: String) async throws {
     do {
       try await provider.client
-        .rpc("disconnect_connection")
+        .rpc("disconnect_connection", params: DisconnectParams(otherUser: otherUserId))
         .execute()
     } catch {
       throw SupabaseErrorMapper.map(error)

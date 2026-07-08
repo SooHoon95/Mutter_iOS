@@ -3,11 +3,11 @@ import Foundation
 import AppFoundation
 import Domain
 
-/// 연결 탭 — 독점 1:1 연결 상태, 초대 링크 생성, 연결 해제.
+/// 연결 탭 — N:N 연결 목록, 초대 링크 생성, 특정 연결 해제.
 @MainActor
 @Observable
 final class ConnectionsModelData {
-  var connection: Connection?
+  var connections: [Connection] = []
   var inviteToken: String?
   var isLoading = false
   var errorMessage: String?
@@ -18,12 +18,12 @@ final class ConnectionsModelData {
     self.connectionUsecase = connectionUsecase
   }
 
-  var isConnected: Bool { connection != nil }
+  var hasConnections: Bool { !connections.isEmpty }
 
   func load() async {
     isLoading = true
     defer { isLoading = false }
-    connection = (try? await connectionUsecase.myConnections())?.first
+    connections = (try? await connectionUsecase.myConnections()) ?? []
   }
 
   /// 초대 토큰 생성 → 공유 링크는 `/connect/<token>`.
@@ -42,11 +42,11 @@ final class ConnectionsModelData {
     }
   }
 
-  func disconnect() async {
+  /// 특정 상대와의 연결 해제(N:N).
+  func disconnect(otherUserId: String) async {
     await run {
-      try await connectionUsecase.disconnect()
-      connection = nil
-      inviteToken = nil
+      try await connectionUsecase.disconnect(otherUserId: otherUserId)
+      connections.removeAll { $0.userId == otherUserId }
     }
   }
 

@@ -28,8 +28,8 @@ public final class ConnectionUsecase: ConnectionUsecasable {
     try await repository.myConnections()
   }
 
-  public func disconnect() async throws {
-    try await repository.disconnect()
+  public func disconnect(otherUserId: String) async throws {
+    try await repository.disconnect(otherUserId: otherUserId)
   }
 
   public func send(letterId: String, recipientId: String) async throws {

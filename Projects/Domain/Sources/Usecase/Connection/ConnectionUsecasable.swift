@@ -11,8 +11,8 @@ public protocol ConnectionUsecasable {
   /// 초대 수락(양쪽 미연결일 때만 — 서버에서 강제).
   func accept(token: String) async throws
   func myConnections() async throws -> [Connection]
-  /// 연결 해제(편지·받은함은 보존).
-  func disconnect() async throws
+  /// 연결 해제(특정 상대 — 편지·받은함은 보존). N:N이라 대상 지정 필수.
+  func disconnect(otherUserId: String) async throws
   /// 연결된 상대에게 편지 발송(전달 토큰은 구현부에서 생성).
   func send(letterId: String, recipientId: String) async throws
 }

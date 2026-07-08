@@ -61,3 +61,12 @@ struct SendToConnectionParams: Encodable {
     case token = "p_token"
   }
 }
+
+/// disconnect_connection RPC 파라미터 — 해제할 상대(N:N이라 대상 지정 필수).
+struct DisconnectParams: Encodable {
+  let otherUser: String
+
+  enum CodingKeys: String, CodingKey {
+    case otherUser = "p_other_user"
+  }
+}

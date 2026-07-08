@@ -4,10 +4,10 @@ import UIKit
 import Domain
 import UIComponent
 
-/// 연결 탭 — 독점 1:1 연결 상태 / 초대 링크 / 해제.
+/// 연결 탭 — N:N 연결 목록 / 초대 링크 / 특정 연결 해제.
 public struct ConnectionsView: View {
   @State private var model: ConnectionsModelData
-  @State private var showDisconnectConfirm = false
+  @State private var disconnectTarget: Connection?
   @Environment(\.scenePhase) private var scenePhase
 
   /// 초대 링크 베이스(예: https://mutter.app). 합성 루트가 주입.
@@ -26,11 +26,10 @@ public struct ConnectionsView: View {
           Text("연결")
             .fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
-          if model.isConnected {
-            connectedCard
-          } else {
-            inviteCard
+          if !model.connections.isEmpty {
+            connectionsCard
           }
+          inviteCard
 
           if let message = model.errorMessage {
             Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
@@ -45,35 +44,47 @@ public struct ConnectionsView: View {
     .onChange(of: scenePhase) { _, newPhase in
       if newPhase == .active { Task { await model.load() } }
     }
-    .confirmationDialog("연결을 해제할까요?", isPresented: $showDisconnectConfirm, titleVisibility: .visible) {
-      Button("해제", role: .destructive) { Task { await model.disconnect() } }
+    .confirmationDialog(
+      "연결을 해제할까요?",
+      isPresented: Binding(get: { disconnectTarget != nil }, set: { if !$0 { disconnectTarget = nil } }),
+      titleVisibility: .visible,
+      presenting: disconnectTarget
+    ) { target in
+      Button("해제", role: .destructive) { Task { await model.disconnect(otherUserId: target.userId) } }
       Button("취소", role: .cancel) {}
-    } message: {
+    } message: { _ in
       Text("편지와 받은함은 남지만 서로에게 더는 보낼 수 없어요.")
     }
   }
 
-  private var connectedCard: some View {
+  /// 연결된 사람 목록(N:N). 각 행에서 개별 해제.
+  private var connectionsCard: some View {
     VStack(alignment: .leading, spacing: 16) {
-      HStack(spacing: 12) {
-        MutterIcon(Asset.Images.connect, size: 22).foregroundStyle(Asset.Colors.gold.color)
-        Text(model.connection?.nickname ?? "연결된 사람")
-          .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
+      Text("연결된 사람")
+        .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
+      ForEach(model.connections) { connection in
+        HStack(spacing: 12) {
+          MutterIcon(Asset.Images.connect, size: 22).foregroundStyle(Asset.Colors.gold.color)
+          Text(connection.nickname ?? "연결된 사람")
+            .fonts(.bodyMedium).foregroundStyle(Asset.Colors.ink.color)
+          Spacer()
+          Button("해제") { disconnectTarget = connection }
+            .fonts(.caption)
+            .foregroundStyle(Asset.Colors.goldDeep.color)
+        }
       }
-      Text("이 사람과 1:1로 연결돼 있어요.")
-        .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
-      MutterButton("연결 해제", style: .ghost) { showDisconnectConfirm = true }
     }
     .padding(20)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
     .shadows(.shadowLow)
   }
 
+  /// 초대 링크 — N:N이라 연결이 있어도 항상 노출(더 연결하기).
   private var inviteCard: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text("아직 연결된 사람이 없어요")
+      Text(model.connections.isEmpty ? "아직 연결된 사람이 없어요" : "다른 사람과 더 연결하기")
         .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
-      Text("초대 링크를 보내 한 사람과 연결하세요.")
+      Text("초대 링크를 보내 연결하세요.")
         .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
 
       if let token = model.inviteToken {
