@@ -11,13 +11,21 @@
 	    Apple Developer → Identifiers → App ID(com.efreedom.mutter) → Associated Domains capability ON.
 	  ▶ '?mode=developer'는 개발/테스트 중 Apple CDN(AASA) 캐시를 우회한다.
 	    App Store 배포 빌드에서는 이 접미사를 제거한다.
-	  ▶ Push/Sign in with Apple가 필요해지면 아래를 추가하고 App ID에도 capability를 켠다:
+	  ▶ Push가 필요해지면 아래를 추가하고 App ID에도 capability를 켠다:
 	      <key>aps-environment</key><string>$(APS_ENVIRONMENT)</string>
-	      <key>com.apple.developer.applesignin</key><array><string>Default</string></array>
 	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:letter-app-nine-kohl.vercel.app?mode=developer</string>
+	</array>
+	<!-- Sign in with Apple. 함께 해야 하는 코드 밖 작업:
+	     · 포털: Identifiers → App ID(com.efreedom.mutter) → "Sign in with Apple" capability ON
+	       (자동 서명이면 Xcode가 대신 켜주기도 한다).
+	     · Supabase: Authentication → Providers → Apple 활성 + Client IDs에 com.efreedom.mutter 추가
+	       (네이티브 idToken 플로우는 Client ID만 있으면 됨 — Services ID/secret은 웹 리다이렉트용). -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
 	</array>
 </dict>
 </plist>
