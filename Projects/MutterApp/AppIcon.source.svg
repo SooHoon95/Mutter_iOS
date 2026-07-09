@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Mutter app icon">
+  <defs>
+    <!-- 웜 아이보리 배경 (Ivory #FFFDF2 → 아주 옅은 블러시 하단) -->
+    <linearGradient id="bg" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#FFFDF4"/>
+      <stop offset="1" stop-color="#FBF1F5"/>
+    </linearGradient>
+    <!-- 편지 뒤 은은한 파스텔 광채 -->
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.58">
+      <stop offset="0" stop-color="#FBC4D9" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#FBC4D9" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 시그니처 파스텔 블러시: MutterGradient.gold 그대로 (peach → pink → lavender, 135°) -->
+    <linearGradient id="foil" x1="0.05" y1="0.05" x2="0.95" y2="0.95">
+      <stop offset="0" stop-color="#FFE0C7"/>
+      <stop offset="0.5" stop-color="#FBC4D9"/>
+      <stop offset="1" stop-color="#D9C6F5"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="26" flood-color="#C79BC9" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <!-- 풀블리드 불투명 배경: 모서리는 iOS가 자체 마스킹 -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+
+  <!-- 편지 위로 떠오르는 빔 연결 8분음표 2개 (딥 플럼 onGold로 대비) -->
+  <g stroke="#4A2038" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M497 424 V270"/>
+    <path d="M657 400 V246"/>
+    <path d="M497 274 L657 250" stroke-width="30"/>
+  </g>
+  <ellipse cx="465" cy="428" rx="44" ry="34" fill="#4A2038" transform="rotate(-18 465 428)"/>
+  <ellipse cx="625" cy="404" rx="44" ry="34" fill="#4A2038" transform="rotate(-18 625 404)"/>
+
+  <!-- 스파클: 피치 + 라벤더로 파스텔 삼색 호응 -->
+  <circle cx="742" cy="300" r="17" fill="#D9C6F5"/>
+  <circle cx="360" cy="330" r="12" fill="#FFD3B0"/>
+
+  <!-- 파스텔 블러시 편지(봉투) -->
+  <g filter="url(#soft)">
+    <rect x="252" y="470" width="520" height="332" rx="52" fill="url(#foil)"/>
+    <!-- 봉투 플랩 V선 (딥 플럼, 은은하게) -->
+    <path d="M272 508 L491 648 a44 38 0 0 0 42 0 L752 508"
+          fill="none" stroke="#4A2038" stroke-opacity="0.42"
+          stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
