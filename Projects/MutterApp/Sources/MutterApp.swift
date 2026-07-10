@@ -1,5 +1,6 @@
 import SwiftUI
 import UserNotifications
+import Combine
 
 import AppFoundation
 import Domain
@@ -38,6 +39,10 @@ struct MutterApp: App {
 /// 다음 단계: `push_tokens` 스키마 확정 후 FCM 토큰을 `PushTokenService`로 Supabase에 등록
 /// (Mercury `FcmTokenUsecase.sendFcmToken` 패턴).
 final class AppDelegate: NSObject, UIApplicationDelegate {
+  /// 마지막으로 받은 FCM 등록 토큰(로그인 전 도착 대비 캐시).
+  private var latestFcmToken: String?
+  private var cancellables = Set<AnyCancellable>()
+
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -75,6 +80,26 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     Messaging.messaging().delegate = self
     UNUserNotificationCenter.current().delegate = self
     requestPushAuthorization(application)
+
+    // 로그인 시점에 캐시된 FCM 토큰을 서버에 등록(토큰 도착·로그인 순서 무관).
+    MutterContainer.shared.resolve(SessionManagable.self).isLoggedInStream
+      .filter { $0 }
+      .sink { [weak self] _ in self?.syncPushToken() }
+      .store(in: &cancellables)
+  }
+
+  /// 로그인 상태이고 FCM 토큰이 있으면 push_tokens에 등록(upsert_push_token RPC).
+  private func syncPushToken() {
+    guard let token = latestFcmToken else { return }
+    guard MutterContainer.shared.resolve(SessionManagable.self).isLoggedIn else { return }
+    Task {
+      let deviceId = await MainActor.run { UIDevice.current.identifierForVendor?.uuidString }
+      do {
+        try await PushTokenUsecase(repository: PushTokenRepository()).register(token: token, deviceId: deviceId)
+      } catch {
+        print("[Push] FCM 토큰 등록 실패: \(error.localizedDescription)")
+      }
+    }
   }
 
   /// 서비스 로케이터엔 **진짜 전역인 것만** 등록한다(Mercury 패턴 — 세션 등).
@@ -127,8 +152,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 // MARK: - FCM 등록 토큰 수신 (Mercury 패턴)
 extension AppDelegate: MessagingDelegate {
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-    // 다음 단계: push_tokens 스키마 확정 후 PushTokenService로 Supabase에 등록
-    // (Mercury FcmTokenUsecase.sendFcmToken 패턴).
-    print("[Push] FCM registration token: \(fcmToken ?? "nil")")
+    guard let fcmToken else { return }
+    latestFcmToken = fcmToken
+    syncPushToken() // 로그인 상태면 즉시 등록, 아니면 로그인 스트림이 나중에 등록
   }
 }

@@ -27,5 +27,10 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<!-- Push 알림(FCM/APNs). dev 빌드=development.
+	     ⚠️ App Store/TestFlight 아카이브 시 production으로 바꿀 것.
+	     함께(코드 밖): 포털 App ID(com.efreedom.mutter)에 Push Notifications capability ON. -->
+	<key>aps-environment</key>
+	<string>development</string>
 </dict>
 </plist>
