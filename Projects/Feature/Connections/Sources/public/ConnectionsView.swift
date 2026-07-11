@@ -88,14 +88,19 @@ public struct ConnectionsView: View {
         .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
 
       if let token = model.inviteToken {
-        let link = "\(inviteBaseURL)/connect/\(token)"
-        HStack {
+        // from=app — 앱 발급 링크. 수신자에게 앱이 없으면 웹 랜딩이 App Store로 안내(웹 발급은 웹 폴백).
+        let link = "\(inviteBaseURL)/connect/\(token)?from=app"
+        HStack(spacing: 16) {
           Text(link).fonts(.caption).foregroundStyle(Asset.Colors.inkMid.color).lineLimit(1)
           Spacer()
           Button {
             UIPasteboard.general.string = link
           } label: {
             MutterIcon(Asset.Images.copy, size: 20).foregroundStyle(Asset.Colors.gold.color)
+          }
+          // 네이티브 공유 시트 — 메시지·카톡 등으로 초대 링크 바로 전달(복사 병기).
+          ShareLink(item: link) {
+            MutterIcon(Asset.Images.share, size: 20).foregroundStyle(Asset.Colors.gold.color)
           }
         }
         .padding(12)
