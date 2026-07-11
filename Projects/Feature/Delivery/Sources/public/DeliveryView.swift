@@ -127,6 +127,12 @@ public struct DeliveryView: View {
           }
           Spacer()
           if !link.revoked {
+            // 링크 유실 대비 — 발급된 링크를 다시 복사해 전달할 수 있게.
+            Button {
+              UIPasteboard.general.string = "\(linkBaseURL)/l/\(link.token)"
+            } label: {
+              MutterIcon(Asset.Images.copy, size: 18).foregroundStyle(Asset.Colors.gold.color)
+            }
             Button("무효화") { Task { await model.revoke(link.token) } }
               .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
           }

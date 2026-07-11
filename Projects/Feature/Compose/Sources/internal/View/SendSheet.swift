@@ -92,7 +92,8 @@ struct SendSheet: View {
             .background(
               method == tab
                 ? AnyView(
-                    RoundedRectangle(cornerRadius: MutterRadius.lg)
+                    // 컨테이너가 Capsule이라 선택 배경도 Capsule로 맞춘다(동심 라운딩).
+                    Capsule()
                       .fill(Asset.Colors.surface.color)
                       .shadows(.shadowLow)
                   )

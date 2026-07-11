@@ -199,6 +199,7 @@ public struct ViewerView: View {
           title: payload.cue?.title ?? "SoundCloud 트랙",
           author: payload.cue?.author,
           isPlaying: model.player.isPlaying,
+          sourceURL: payload.cue?.sourceUrl.flatMap { URL(string: $0) },
           onToggle: { model.player.toggle() }
         )
         .padding(.horizontal, 20)

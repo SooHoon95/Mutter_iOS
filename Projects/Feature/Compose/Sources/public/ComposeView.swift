@@ -156,6 +156,7 @@ public struct ComposeView: View {
         MusicPlayerBar(
           title: model.appliedCueLabel ?? "선택된 음악",
           isPlaying: model.player.isPlaying,
+          sourceURL: model.cue?.sourceUrl.flatMap { URL(string: $0) },
           onToggle: { Task { await model.previewAudio() } }
         )
       }

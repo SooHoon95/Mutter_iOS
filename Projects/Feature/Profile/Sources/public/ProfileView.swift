@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 import Domain
 import UIComponent
@@ -8,7 +9,9 @@ public struct ProfileView: View {
   @State private var model: ProfileModelData
   @State private var showDeleteConfirm = false
   @State private var isEditingNickname = false
+  @State private var mailFallbackToast = false
   @FocusState private var nicknameFocused: Bool
+  @Environment(\.openURL) private var openURL
 
   public init(
     profileUsecase: ProfileUsecasable,
@@ -40,6 +43,7 @@ public struct ProfileView: View {
     }
     .task { await model.load() }
     .toastIfNeeded($model.savedToast, text: "저장했어요")
+    .toastIfNeeded($mailFallbackToast, text: "메일 앱이 없어 이메일 주소를 복사했어요")
     .confirmationDialog("계정을 삭제할까요?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
       Button("삭제", role: .destructive) { Task { await model.deleteAccount() } }
       Button("취소", role: .cancel) {}
@@ -211,8 +215,31 @@ public struct ProfileView: View {
 
   // MARK: - 액션 버튼
 
+  private let contactEmail = "dkehskeh@gmail.com"
+
+  /// 문의 메일 URL — 제목에 반드시 "Mutter" 포함(요구사항). mailto로 기본 메일 앱을 연다.
+  private var contactMailURL: URL? {
+    let subject = "[Mutter] 문의사항"
+    let body = "문의 내용을 적어주세요.\n\n———\n(원활한 답변을 위해 앱 버전/기기 정보를 함께 남겨주시면 좋아요.)"
+    let allowed = CharacterSet.alphanumerics
+    let s = subject.addingPercentEncoding(withAllowedCharacters: allowed) ?? ""
+    let b = body.addingPercentEncoding(withAllowedCharacters: allowed) ?? ""
+    return URL(string: "mailto:\(contactEmail)?subject=\(s)&body=\(b)")
+  }
+
   private var actionButtons: some View {
     VStack(spacing: 8) {
+      MutterButton("문의하기", style: .ghost) {
+        guard let url = contactMailURL else { return }
+        openURL(url) { accepted in
+          if !accepted {
+            // 메일 앱이 없거나 못 열면 이메일 주소를 복사해 문의 경로를 남긴다.
+            UIPasteboard.general.string = contactEmail
+            mailFallbackToast = true
+          }
+        }
+      }
+
       MutterButton("로그아웃", style: .ghost) {
         Task { await model.signOut() }
       }
