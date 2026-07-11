@@ -13,44 +13,51 @@ public struct AuthView: View {
   }
 
   public var body: some View {
-    ZStack {
-      Asset.Colors.ivory.color.ignoresSafeArea()
+    GeometryReader { geo in
+      ZStack {
+        Asset.Colors.ivory.color.ignoresSafeArea()
 
-      VStack(spacing: 24) {
-        Spacer()
+        // 작은 화면(mini/SE)·키보드에서 컨텐츠가 잘리지 않도록 ScrollView로 감싼다.
+        // minHeight=화면높이 → 여백 있으면 Spacer가 중앙 정렬, 넘치면 스크롤.
+        ScrollView(showsIndicators: false) {
+          VStack(spacing: 24) {
+            Spacer(minLength: 0)
 
-        VStack(spacing: 8) {
-          Asset.Images.onboardingLogo.image
-            .resizable()
-            .scaledToFit()
-            .frame(height: 300)
-        }
+            // 로고는 작은 화면에서 축소한다(고정 300pt는 mini/SE에서 넘침).
+            Asset.Images.onboardingLogo.image
+              .resizable()
+              .scaledToFit()
+              .frame(height: min(300, geo.size.height * 0.33))
 
-        VStack(spacing: 12) {
-          switch model.step {
-          case .enterEmail: emailStep
-          case .enterCode: codeStep
-          case .enterPassword: passwordStep
+            VStack(spacing: 12) {
+              switch model.step {
+              case .enterEmail: emailStep
+              case .enterCode: codeStep
+              case .enterPassword: passwordStep
+              }
+
+              if let message = model.errorMessage {
+                Text(message)
+                  .fonts(.caption)
+                  .foregroundStyle(Asset.Colors.goldDeep.color)
+                  .multilineTextAlignment(.center)
+              }
+            }
+            .padding(20)
+            .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
+            .shadows(.shadowLow)
+
+            socialSection
+
+            Spacer(minLength: 0)
           }
-
-          if let message = model.errorMessage {
-            Text(message)
-              .fonts(.caption)
-              .foregroundStyle(Asset.Colors.goldDeep.color)
-              .multilineTextAlignment(.center)
-          }
+          .padding(.horizontal, 24)
+          .frame(maxWidth: 420)
+          .frame(maxWidth: .infinity)
+          .frame(minHeight: geo.size.height)
         }
-        .padding(20)
-        .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
-        .shadows(.shadowLow)
-
-        socialSection
-
-        Spacer()
-        Spacer()
+        .scrollDismissesKeyboard(.interactively)
       }
-      .padding(.horizontal, 24)
-      .frame(maxWidth: 420)
     }
   }
 

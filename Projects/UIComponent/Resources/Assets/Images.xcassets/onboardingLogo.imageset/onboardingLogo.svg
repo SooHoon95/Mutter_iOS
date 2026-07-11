@@ -1,48 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500" role="img" aria-label="Mutter — 음악에 마음을 얹어">
   <defs>
     
-    <radialGradient id="mo-bg" cx="0.5" cy="1" r="1.05">
-      <stop offset="0" stop-color="#FBF3F8"></stop>
-      <stop offset="0.55" stop-color="#FFFDF2"></stop>
-    </radialGradient>
-    <linearGradient id="mo-foil" x1="0.05" y1="0.05" x2="0.95" y2="0.95">
+    <linearGradient id="iv-foil" x1="0.05" y1="0.05" x2="0.95" y2="0.95">
       <stop offset="0" stop-color="#FFE0C7"></stop>
       <stop offset="0.5" stop-color="#FBC4D9"></stop>
       <stop offset="1" stop-color="#D9C6F5"></stop>
     </linearGradient>
-    <linearGradient id="mo-rule" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#C77BAE" stop-opacity="0"></stop>
-      <stop offset="0.5" stop-color="#C77BAE" stop-opacity="0.6"></stop>
-      <stop offset="1" stop-color="#C77BAE" stop-opacity="0"></stop>
+    <linearGradient id="iv-word" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E3A9CF"></stop>
+      <stop offset="0.52" stop-color="#C77BAE"></stop>
+      <stop offset="1" stop-color="#8E4E7E"></stop>
     </linearGradient>
-    <filter id="mo-soft" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#8E4E7E" flood-opacity="0.28"></feDropShadow>
+    <filter id="iv-soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#8E4E7E" flood-opacity="0.30"></feDropShadow>
     </filter>
   </defs>
 
-  <rect width="500" height="500" fill="url(#mo-bg)"></rect>
+  
+  <rect width="500" height="500" fill="#FFFDF2"></rect>
 
   
-  <g transform="translate(135,8) scale(0.224)">
-    <g stroke="#4A2038" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none">
-      <path d="M497 424 V270"></path>
-      <path d="M657 400 V246"></path>
-      <path d="M497 274 L657 250" stroke-width="30"></path>
+  <g transform="translate(148,26) scale(0.2)">
+    <g filter="url(#iv-soft)">
+      <rect x="250" y="430" width="524" height="350" rx="54" fill="url(#iv-foil)"></rect>
+      <path d="M268 470 L487 612 a46 40 0 0 0 50 0 L756 470" fill="none" stroke="#4A2038" stroke-opacity="0.55" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"></path>
     </g>
-    <ellipse cx="465" cy="428" rx="44" ry="34" fill="#4A2038" transform="rotate(-18 465 428)"></ellipse>
-    <ellipse cx="625" cy="404" rx="44" ry="34" fill="#4A2038" transform="rotate(-18 625 404)"></ellipse>
-    <circle cx="742" cy="300" r="17" fill="#D9C6F5"></circle>
-    <circle cx="360" cy="330" r="12" fill="#FFD3B0"></circle>
-    <g filter="url(#mo-soft)">
-      <rect x="252" y="470" width="520" height="332" rx="52" fill="url(#mo-foil)"></rect>
-      <path d="M272 508 L491 648 a44 38 0 0 0 42 0 L752 508" fill="none" stroke="#4A2038" stroke-opacity="0.42" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"></path>
-    </g>
+    <g fill="none" stroke="#6E561A" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"><path d="M560 360 V250 l150 -34 v100"></path></g>
+    <ellipse cx="540" cy="362" rx="34" ry="28" fill="#6E561A"></ellipse>
+    <ellipse cx="690" cy="328" rx="34" ry="28" fill="#6E561A"></ellipse>
+    <circle cx="772" cy="250" r="20" fill="#C77BAE"></circle>
+    <circle cx="470" cy="300" r="14" fill="#C77BAE"></circle>
   </g>
 
   
-  <text class="wm" x="250" y="378" text-anchor="middle" font-size="98" letter-spacing="-3" fill="#3A2034">Mutter</text>
+  <text class="wm" x="250" y="322" text-anchor="middle" font-size="82" letter-spacing="-2" fill="url(#iv-word)">Mutter</text>
 
   
-  <rect x="190" y="452" width="120" height="1.4" fill="url(#mo-rule)"></rect>
-  <text class="tag" x="250" y="484" text-anchor="middle" font-size="16" letter-spacing="0.5" fill="#8E4E7E">음악에 마음을 얹어</text>
+  <rect x="228" y="350" width="44" height="1.2" fill="#8E4E7E" fill-opacity="0.4"></rect>
+  <text class="tag" x="250" y="384" text-anchor="middle" font-size="17" letter-spacing="0.3" fill="#6E6555">음악에 마음을 얹어</text>
 </svg>
