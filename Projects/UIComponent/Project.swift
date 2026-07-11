@@ -5,7 +5,8 @@ let project = Project.framework(
   name: "UIComponent",
   platform: .iOS,
   dependencies: [
-    .appFoundation
+    .appFoundation,
+    .lottie
   ],
   testDependencies: [],
   resourceSynthesizers: [

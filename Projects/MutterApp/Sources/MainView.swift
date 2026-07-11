@@ -39,8 +39,11 @@ struct MainView: View {
     .animation(.easeInOut(duration: 0.25), value: isSplashDone)
     .environmentObject(coordinator)
     .task {
+      // Lottie 스플래시가 최소 1회 재생되도록 최소 노출시간 확보(세션 확인이 즉시 끝나도 플래시 방지).
+      let minSplash = Task { try? await Task.sleep(nanoseconds: 2_000_000_000) }
       await sessionManager.refresh()
       isUserLoggedIn = sessionManager.isLoggedIn
+      await minSplash.value
       isSplashDone = true
       // splash 완료 시점에 이미 로그인돼 있으면 보류 초대 토큰 소비(cold-start-logged-in, EC-5.5).
       consumePendingConnectIfNeeded()
@@ -87,11 +90,8 @@ struct MainView: View {
   @ViewBuilder
   private func currentView() -> some View {
     if !isSplashDone {
-      // 세션 확인 대기(추후 CustomSplash로 교체 가능한 지점).
-      ZStack {
-        Asset.Colors.ivory.color.ignoresSafeArea()
-        ProgressView().tint(Asset.Colors.gold.color)
-      }
+      // Lottie 스플래시(Mercury CustomSplash 패턴). 세션 확인 + 최소 재생시간 후 dismiss.
+      MutterSplashView()
     } else if !isUserLoggedIn {
       AuthViewWrapperView(onComplete: { Task { await sessionManager.refresh() } })
     } else {

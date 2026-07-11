@@ -20,12 +20,10 @@ public struct AuthView: View {
         Spacer()
 
         VStack(spacing: 8) {
-          Text("Mutter")
-            .fonts(.display)
-            .foregroundStyle(Asset.Colors.ink.color)
-          Text("연출되는 편지")
-            .fonts(.bodyMedium)
-            .foregroundStyle(Asset.Colors.inkSoft.color)
+          Asset.Images.onboardingLogo.image
+            .resizable()
+            .scaledToFit()
+            .frame(height: 300)
         }
 
         VStack(spacing: 12) {
