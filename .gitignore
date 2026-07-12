@@ -70,6 +70,13 @@ fastlane/.env.default
 # Firebase 설정 — 클라이언트 키지만 GitHub secret scanning에 걸리므로 커밋 안 함. 로컬/CI에서 각자 주입.
 GoogleService-Info.plist
 
+# 코드 서명 / App Store Connect API 키 — 절대 커밋 금지(유출 시 배포 권한 탈취).
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+fastlane/*.p8
+
 
 Gemfile.lock
 Tuist/.DS_Store

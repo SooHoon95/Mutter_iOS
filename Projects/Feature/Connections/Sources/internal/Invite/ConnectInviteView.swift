@@ -33,10 +33,13 @@ struct ConnectInviteView: View {
           leftButtons: { MutterBackButton(action: onBack) },
           rightButtons: { EmptyView() }
         )
-
+        Spacer()
+        
         content
           .padding(24)
           .frame(maxWidth: 420)
+        
+        Spacer()
       }
     }
     .toolbar(.hidden, for: .navigationBar)

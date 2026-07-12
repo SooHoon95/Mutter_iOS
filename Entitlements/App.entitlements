@@ -16,7 +16,7 @@
 	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:letter-app-nine-kohl.vercel.app?mode=developer</string>
+		<string>applinks:letter-app-nine-kohl.vercel.app</string>
 	</array>
 	<!-- Sign in with Apple. 함께 해야 하는 코드 밖 작업:
 	     · 포털: Identifiers → App ID(com.efreedom.mutter) → "Sign in with Apple" capability ON
@@ -27,10 +27,10 @@
 	<array>
 		<string>Default</string>
 	</array>
-	<!-- Push 알림(FCM/APNs). dev 빌드=development.
-	     ⚠️ App Store/TestFlight 아카이브 시 production으로 바꿀 것.
+	<!-- Push 알림(FCM/APNs). 값은 빌드 구성이 주입한다($(APS_ENVIRONMENT)):
+	     Debug/Stage=development · Release=production (XCConfigs/*.xcconfig). 수동 변경 불필요.
 	     함께(코드 밖): 포털 App ID(com.efreedom.mutter)에 Push Notifications capability ON. -->
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>$(APS_ENVIRONMENT)</string>
 </dict>
 </plist>

@@ -1,0 +1,116 @@
+# Fastfile — Mutter iOS 배포 자동화 (Tuist + SwiftUI)
+#
+# Tuist 프로젝트라 .xcworkspace/.xcodeproj는 "생성물"이다 → build 전에 반드시 `tuist generate`.
+# 서명은 자동(CODE_SIGN_STYLE=Automatic, DEVELOPMENT_TEAM=4QCSG92KD9)이고,
+# -allowProvisioningUpdates로 배포 프로파일을 자동 생성/다운로드한다(match 불필요).
+# 빌드 번호는 Tuist 재생성에 안 지워지도록 파일이 아닌 xcargs로 주입한다.
+#
+# ── 사전 준비 (최초 1회) ──────────────────────────────────────────────────────
+# 1) 의존성:            프로젝트 루트에서 `bundle install`
+# 2) App Store Connect에 앱 레코드 생성(번들ID: com.efreedom.mutter)
+# 3) 인증 — 둘 중 하나:
+#    (A) App Store Connect API 키(권장 — 2FA 없이 자동화):
+#        App Store Connect → 사용자 및 접근 → 통합 → App Store Connect API → 키 생성(App Manager+)
+#        → AuthKey_XXXX.p8 다운로드(1회만!) → 아래 env 주입(.p8는 절대 커밋 금지):
+#          export ASC_KEY_ID=XXXXXXXXXX
+#          export ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+#          export ASC_KEY_PATH="$HOME/keys/AuthKey_XXXX.p8"
+#    (B) API 키 없이 = Appfile의 Apple ID(dkehskeh@gmail.com)로 로그인(2FA 코드 입력 필요).
+#
+# ── 실행 ─────────────────────────────────────────────────────────────────────
+#   bundle exec fastlane build     # 아카이브만(서명 확인용, 업로드 안 함)
+#   bundle exec fastlane beta      # TestFlight 업로드(내부 테스트)
+#   bundle exec fastlane release   # App Store 업로드(심사 제출은 옵션)
+
+default_platform(:ios)
+
+WORKSPACE    = "Mutter.xcworkspace"
+SCHEME       = "Mutter"
+APP_ID       = "com.efreedom.mutter"
+PROJECT_ROOT = File.expand_path("..", __dir__)
+
+platform :ios do
+  # App Store Connect API 키. env가 모두 있으면 키 객체를, 없으면 nil을 반환한다.
+  # nil이면 각 액션이 Appfile의 Apple ID 로그인으로 폴백한다.
+  def asc_api_key
+    return nil unless ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_PATH"]
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_PATH"],
+      duration: 1200
+    )
+  end
+
+  # Tuist: 의존성 설치 + 프로젝트 생성(빌드 전 필수). 생성물은 매번 새로 만든다.
+  desc "Tuist로 워크스페이스/프로젝트 재생성"
+  lane :generate do
+    Dir.chdir(PROJECT_ROOT) do
+      sh("mise exec -- tuist install")
+      sh("mise exec -- tuist generate --no-open")
+    end
+  end
+
+  # 공통 아카이브. next_build를 CURRENT_PROJECT_VERSION으로 주입해 매 업로드 고유 빌드번호 보장.
+  def archive(next_build)
+    build_app(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      output_name: "Mutter.ipa",
+      clean: true,
+      xcargs: "-allowProvisioningUpdates CURRENT_PROJECT_VERSION=#{next_build}"
+    )
+  end
+
+  desc "아카이브만 — 서명/빌드 점검용(업로드 없음)"
+  lane :build do
+    generate
+    archive(1)
+    UI.success("아카이브 완료 → #{PROJECT_ROOT}/build/Mutter.ipa")
+  end
+
+  desc "TestFlight 업로드 (내부 배포)"
+  lane :beta do
+    api_key = asc_api_key
+    generate
+    # 다음 빌드 번호 = TestFlight 최신 + 1 (최초 업로드면 1).
+    next_build = latest_testflight_build_number(
+      api_key: api_key, app_identifier: APP_ID, initial_build_number: 0
+    ) + 1
+    UI.important("빌드 번호: #{next_build}")
+    archive(next_build)
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: APP_ID,
+      skip_waiting_for_build_processing: true
+    )
+    UI.success("TestFlight 업로드 완료 (빌드 #{next_build}). 처리 후 내부 테스터에 노출됩니다.")
+  end
+
+  desc "App Store 업로드. 심사 자동제출은 submit_for_review:true로."
+  lane :release do
+    api_key = asc_api_key
+    generate
+    next_build = latest_testflight_build_number(
+      api_key: api_key, app_identifier: APP_ID, initial_build_number: 0
+    ) + 1
+    UI.important("빌드 번호: #{next_build}")
+    archive(next_build)
+    # 메타데이터/스크린샷은 우선 App Store Connect 웹에서 관리(skip). fastlane으로 관리하려면
+    # `fastlane deliver init` 후 skip_metadata/skip_screenshots를 false로.
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: APP_ID,
+      submit_for_review: false,   # true면 심사 자동 제출
+      automatic_release: false,   # 승인 후 수동 출시
+      skip_screenshots: true,
+      skip_metadata: true,
+      precheck_include_in_app_purchases: false,
+      force: true                 # HTML 미리보기 확인 프롬프트 생략
+    )
+    UI.success("App Store 업로드 완료 (빌드 #{next_build}). App Store Connect에서 메타데이터 후 제출하세요.")
+  end
+end
