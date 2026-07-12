@@ -113,4 +113,28 @@ platform :ios do
     )
     UI.success("App Store 업로드 완료 (빌드 #{next_build}). App Store Connect에서 메타데이터 후 제출하세요.")
   end
+
+  # 재빌드/재업로드 없이, 이미 처리 완료된 최신 빌드를 심사에 제출한다.
+  # 전제: (1) 업로드한 빌드의 Apple 처리 완료, (2) ASC 버전 메타데이터/스크린샷/연령등급 완료.
+  # 수출 규정·IDFA 질문은 submission_information으로 자동 응답한다.
+  desc "이미 올라간 빌드를 심사 제출(재빌드 없음)"
+  lane :submit do
+    api_key = asc_api_key
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: APP_ID,
+      submit_for_review: true,
+      automatic_release: false,     # 승인 후 수동 출시
+      skip_binary_upload: true,     # 재업로드 안 함 — 이미 올라간 빌드 사용
+      skip_screenshots: true,
+      skip_metadata: true,
+      precheck_include_in_app_purchases: false,
+      force: true,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        add_id_info_uses_idfa: false
+      }
+    )
+    UI.success("심사 제출 완료 — App Store Connect에서 상태를 확인하세요.")
+  end
 end

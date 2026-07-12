@@ -3,7 +3,9 @@ import ProjectDescriptionHelpers
 
 let project = Project.app(
   name: "Mutter",
-  destinations: .iOS,
+  // iPhone 전용(포트레이트·UIRequiresFullScreen). `.iOS`는 iPad를 포함해 UIDeviceFamily=[1,2]가
+  // 되어 App Store가 iPad 아이콘(167×167)을 요구 → 업로드 거부(90023). iPhone으로 한정한다.
+  destinations: [.iPhone],
   platform: .iOS,
   dependencies: [
     .feature(target: "AuthFeature"),
