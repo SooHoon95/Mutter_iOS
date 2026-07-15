@@ -83,7 +83,7 @@ public struct ViewerView: View {
     case .failed(let message):
       stage(Asset.Colors.ivory.color) {
         VStack(spacing: 8) {
-          Text("편지를 열 수 없어요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
+          Text(L10n.viewerErrorCantOpen).fonts(.title).foregroundStyle(Asset.Colors.ink.color)
           Text(message).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
         }
       }
@@ -116,26 +116,26 @@ public struct ViewerView: View {
 
           VStack(spacing: 8) {
             // 발신자 캡션 (LetterPayload에 sender 필드 없음 — 중립 문구 사용)
-            Text("편지가 도착했어요")
+            Text(L10n.viewerArrived)
               .fonts(.caption)
               .foregroundStyle(Asset.Colors.inkSoft.color)
 
             // 편지 제목
-            Text(payload.title.isEmpty ? "소중한 편지" : payload.title)
+            Text(payload.title.isEmpty ? L10n.viewerUntitled : payload.title)
               .fonts(.titleLarge)
               .foregroundStyle(Asset.Colors.ink.color)
               .multilineTextAlignment(.center)
           }
 
           // 안내 문구
-          Text("음악과 함께 천천히 읽어보세요.\n편지를 열면 바로 시작됩니다.")
+          Text(L10n.viewerSubtitle)
             .fonts(.bodyMedium)
             .foregroundStyle(Asset.Colors.inkSoft.color)
             .multilineTextAlignment(.center)
             .lineSpacing(4)
 
           // 열기 CTA
-          MutterButton("편지 열기", icon: Asset.Images.play) {
+          MutterButton(L10n.viewerOpen, icon: Asset.Images.play) {
             Task { await model.open() }
           }
           .frame(minWidth: 200, maxWidth: 280)
@@ -144,7 +144,7 @@ public struct ViewerView: View {
           HStack(spacing: 5) {
             MutterIcon(Asset.Images.check, size: 14)
               .foregroundStyle(Asset.Colors.inkFaint.color)
-            Text("설치 없이 바로 열려요")
+            Text(L10n.viewerNoInstall)
               .fonts(.caption)
               .foregroundStyle(Asset.Colors.inkFaint.color)
           }
@@ -181,7 +181,7 @@ public struct ViewerView: View {
             HStack(spacing: 6) {
               MutterIcon(Asset.Images.check, size: 16)
                 .foregroundStyle(Asset.Colors.gold.color)
-              Text("받은 편지함에 저장됐어요")
+              Text(L10n.viewerSavedToInbox)
                 .fonts(.caption)
                 .foregroundStyle(Asset.Colors.inkSoft.color)
             }
@@ -196,7 +196,7 @@ public struct ViewerView: View {
       // 음악 플레이어 바 — 화면 최하단 고정 오버레이(safeArea 존중 — home indicator 위).
       if hasPlayer {
         MusicPlayerBar(
-          title: payload.cue?.title ?? "SoundCloud 트랙",
+          title: payload.cue?.title ?? L10n.viewerSoundcloudTrack,
           author: payload.cue?.author,
           isPlaying: model.player.isPlaying,
           sourceURL: payload.cue?.sourceUrl.flatMap { URL(string: $0) },
@@ -223,23 +223,23 @@ public struct ViewerView: View {
         }
 
         VStack(spacing: 6) {
-          Text("암호가 걸린 편지예요")
+          Text(L10n.viewerLockedTitle)
             .fonts(.title)
             .foregroundStyle(Asset.Colors.ink.color)
-          Text("발신자가 설정한 암호를 입력해 주세요")
+          Text(L10n.viewerLockedSubtitle)
             .fonts(.bodyMedium)
             .foregroundStyle(Asset.Colors.inkSoft.color)
         }
 
         // 암호 입력 필드
-        SecureField("암호", text: $model.password)
+        SecureField(L10n.commonPassword, text: $model.password)
           .textFieldStyle(.plain)
           .fonts(.bodyMedium)
           .foregroundStyle(Asset.Colors.ink.color)
           .padding(14)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
 
-        MutterButton("열기", isEnabled: !model.password.isEmpty) {
+        MutterButton(L10n.viewerOpenShort, isEnabled: !model.password.isEmpty) {
           Task { await model.submitPassword() }
         }
       }
@@ -254,8 +254,8 @@ public struct ViewerView: View {
     stage(Asset.Colors.ink.color) {
       VStack(spacing: 12) {
         MutterIcon(Asset.Images.lock, size: 28).foregroundStyle(Asset.Colors.gold.color)
-        Text("아직 열 수 없는 편지예요").fonts(.title).foregroundStyle(Asset.Colors.ivory.color)
-        Text(Self.dateFormatter.string(from: date) + "에 열려요")
+        Text(L10n.viewerNotYetTitle).fonts(.title).foregroundStyle(Asset.Colors.ivory.color)
+        Text(L10n.viewerNotYetAt(Self.dateFormatter.string(from: date)))
           .fonts(.bodyMedium).foregroundStyle(Asset.Colors.goldSoft.color)
       }
       .padding(32)
@@ -289,7 +289,7 @@ private struct ScrollPromptView: View {
 
   var body: some View {
     VStack(spacing: 12) {
-      Text("스크롤 해주세요")
+      Text(L10n.viewerScroll)
         .fonts(.bodyMedium)
         .foregroundStyle(foreground.opacity(0.7))
       Image(systemName: "chevron.down")

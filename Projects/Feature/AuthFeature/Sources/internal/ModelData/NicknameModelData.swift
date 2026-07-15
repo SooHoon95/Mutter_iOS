@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 가입 후 닉네임 온보딩 상태/로직.
 @MainActor
@@ -31,7 +32,7 @@ final class NicknameModelData {
       try await profileUsecase.updateNickname(nickname)
       onComplete()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "닉네임을 저장하지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorNicknameSave
     }
   }
 }

@@ -120,7 +120,7 @@
 "home.tab.sent" = "Sent";
 "home.tab.draft" = "Drafts";
 "home.sentCount" = "Sent Letters";
-"home.sentStat" = "%1$d sent · %2$d read";
+"home.sentUnit" = "sent · %d read";
 "home.opened" = "Opened %d times";
 "home.notOpened" = "Not opened yet";
 "home.draftInProgress" = "Draft · tap to continue";

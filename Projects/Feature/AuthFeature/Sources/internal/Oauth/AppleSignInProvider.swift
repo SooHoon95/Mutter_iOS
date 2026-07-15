@@ -4,6 +4,7 @@ import UIKit
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// Apple 로그인 — ASAuthorization + nonce → id_token → Supabase `signInApple(idToken:nonce:)`.
 @MainActor
@@ -49,7 +50,7 @@ extension AppleSignInProvider: ASAuthorizationControllerDelegate {
       let tokenData = credential.identityToken,
       let idToken = String(data: tokenData, encoding: .utf8)
     else {
-      continuation?.resume(throwing: MutterError(.server("Apple 토큰을 받지 못했어요.")))
+      continuation?.resume(throwing: MutterError(.server(L10n.authErrorAppleToken)))
       continuation = nil
       return
     }

@@ -75,7 +75,7 @@ public struct ComposeView: View {
     .toolbar {
       ToolbarItemGroup(placement: .keyboard) {
         Spacer()
-        Button("완료") { dismissKeyboard() }
+        Button(L10n.commonDone) { dismissKeyboard() }
           .fonts(.bodyMediumBold)
           .foregroundStyle(Asset.Colors.goldDeep.color)
       }
@@ -119,7 +119,7 @@ public struct ComposeView: View {
 
   private var paper: some View {
     VStack(alignment: .leading, spacing: 12) {
-      TextField("제목", text: $model.title)
+      TextField(L10n.composeTitlePlaceholder, text: $model.title)
         .font(.system(size: model.theme.headingSize, weight: .semibold, design: model.theme.fontDesign))
         .foregroundStyle(model.theme.foreground)
 
@@ -130,7 +130,7 @@ public struct ComposeView: View {
         .scrollContentBackground(.hidden)
         .overlay(alignment: .topLeading) {
           if model.content.isEmpty {
-            Text("마음을 담아 적어보세요…")
+            Text(L10n.composeBodyPlaceholder)
               .font(.system(size: model.theme.bodySize, design: model.theme.fontDesign))
               .foregroundStyle(model.theme.muted)
               .padding(.top, 8).padding(.leading, 5)
@@ -147,14 +147,14 @@ public struct ComposeView: View {
 
   private var musicSection: some View {
     VStack(alignment: .leading, spacing: 12) {
-      Text("함께 흐를 음악 · 한 곡")
+      Text(L10n.composeMusicSection)
         .fonts(.captionBold).foregroundStyle(Asset.Colors.inkFaint.color)
         .frame(maxWidth: .infinity, alignment: .leading)
 
       // 선택된 곡 — 골드 플레이어 바(미리듣기).
       if model.cue != nil {
         MusicPlayerBar(
-          title: model.appliedCueLabel ?? "선택된 음악",
+          title: model.appliedCueLabel ?? L10n.composeMusicSelected,
           isPlaying: model.player.isPlaying,
           sourceURL: model.cue?.sourceUrl.flatMap { URL(string: $0) },
           onToggle: { Task { await model.previewAudio() } }
@@ -162,11 +162,11 @@ public struct ComposeView: View {
       }
 
       HStack(spacing: 8) {
-        TextField("SoundCloud 링크 붙여넣기", text: $model.soundcloudURL)
+        TextField(L10n.composeSoundcloudPlaceholder, text: $model.soundcloudURL)
           .textFieldStyle(.plain)
           .padding(10)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
-        Button(model.isApplyingSoundCloud ? "확인 중…" : "적용") {
+        Button(model.isApplyingSoundCloud ? L10n.composeApplying : L10n.composeApply) {
           Task { await model.applySoundCloudURL() }
         }
         .disabled(model.isApplyingSoundCloud)
@@ -180,17 +180,17 @@ public struct ComposeView: View {
   private var actions: some View {
     VStack(spacing: 10) {
       if model.isReply {
-        MutterButton("답장 보내기", isLoading: model.isSaving) {
+        MutterButton(L10n.composeReplySend, isLoading: model.isSaving) {
           Task { await model.sendReply() }
         }
-        MutterButton("임시 저장", style: .secondary, isLoading: model.isSaving) {
+        MutterButton(L10n.composeDraft, style: .secondary, isLoading: model.isSaving) {
           Task { await model.saveAndClose() }
         }
       } else {
-        MutterButton("저장하고 보내기", isLoading: model.isSaving) {
+        MutterButton(L10n.composeSaveAndSend, isLoading: model.isSaving) {
           Task { await model.saveAndOpenSend() }
         }
-        MutterButton("임시 저장", style: .secondary, isLoading: model.isSaving) {
+        MutterButton(L10n.composeDraft, style: .secondary, isLoading: model.isSaving) {
           Task { await model.saveAndClose() }
         }
       }

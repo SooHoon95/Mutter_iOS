@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 import KakaoSDKAuth
 import KakaoSDKUser
@@ -15,7 +16,7 @@ struct KakaoSignInProvider: OauthSignInable {
       let handler: (OAuthToken?, Error?) -> Void = { token, error in
         if let error { cont.resume(throwing: error); return }
         guard let token else {
-          cont.resume(throwing: MutterError(.server("카카오 로그인에 실패했어요."))); return
+          cont.resume(throwing: MutterError(.server(L10n.authErrorKakaoFailed))); return
         }
         cont.resume(returning: token)
       }
@@ -26,7 +27,7 @@ struct KakaoSignInProvider: OauthSignInable {
       }
     }
     guard let idToken = token.idToken else {
-      throw MutterError(.server("카카오 id_token이 없어요. (개발자 콘솔에서 OpenID Connect 활성 필요)"))
+      throw MutterError(.server(L10n.authErrorKakaoNoIdToken))
     }
     return .social(provider: .kakao, token: idToken)
   }

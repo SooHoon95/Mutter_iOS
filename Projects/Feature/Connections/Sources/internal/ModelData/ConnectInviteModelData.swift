@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 초대 수락 화면 상태/로직(/connect/:token).
 @MainActor
@@ -31,7 +32,7 @@ final class ConnectInviteModelData {
       let invite = try await connectionUsecase.invite(token: token)
       state = .ready(invite)
     } catch {
-      state = .failed((error as? MutterError)?.userMessage ?? "초대를 불러올 수 없어요.")
+      state = .failed((error as? MutterError)?.userMessage ?? L10n.errorInviteLoad)
     }
   }
 
@@ -41,7 +42,7 @@ final class ConnectInviteModelData {
       state = .accepted
       onAccepted()
     } catch {
-      state = .failed((error as? MutterError)?.userMessage ?? "수락에 실패했어요.")
+      state = .failed((error as? MutterError)?.userMessage ?? L10n.errorInviteAccept)
     }
   }
 }

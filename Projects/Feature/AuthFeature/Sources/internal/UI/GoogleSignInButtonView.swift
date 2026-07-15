@@ -11,7 +11,7 @@ struct GoogleSignInButtonView: View {
       Task { await completion() }
     } label: {
       ZStack {
-        Text("Google로 계속")
+        Text(L10n.authGoogle)
           .fonts(.bodyMedium)
           .foregroundStyle(Asset.Colors.ink.color)
         HStack(spacing: 0) {

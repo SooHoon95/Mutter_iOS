@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 프로필 탭 상태/로직 — 닉네임 수정, 로그아웃, 계정 삭제.
 @MainActor
@@ -60,7 +61,7 @@ final class ProfileModelData {
     do {
       try await operation()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "잠시 후 다시 시도해 주세요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }
   }
 }

@@ -11,7 +11,7 @@ struct AppleSignInButton: View {
       Task { await completion() }
     } label: {
       ZStack {
-        Text("Apple로 계속")
+        Text(L10n.authApple)
           .fonts(.bodyMedium)
           .foregroundStyle(.white)
         HStack(spacing: 0) {

@@ -65,11 +65,11 @@ public struct AuthView: View {
 
   private var emailStep: some View {
     VStack(spacing: 12) {
-      field("이메일", text: $model.email, keyboard: .emailAddress)
-      MutterButton("코드 받기", isLoading: model.isLoading, isEnabled: model.isEmailValid) {
+      field(L10n.authEmail, text: $model.email, keyboard: .emailAddress)
+      MutterButton(L10n.authGetCode, isLoading: model.isLoading, isEnabled: model.isEmailValid) {
         Task { await model.requestCode() }
       }
-      MutterButton("비밀번호로 로그인", style: .ghost) {
+      MutterButton(L10n.authLoginWithPassword, style: .ghost) {
         model.switchToPassword()
       }
     }
@@ -77,15 +77,15 @@ public struct AuthView: View {
 
   private var codeStep: some View {
     VStack(spacing: 12) {
-      Text("\(model.email)로 보낸 6자리 코드를 입력하세요")
+      Text(L10n.authCodeSent(model.email))
         .fonts(.caption)
         .foregroundStyle(Asset.Colors.inkSoft.color)
         .multilineTextAlignment(.center)
-      field("인증 코드", text: $model.code, keyboard: .numberPad)
-      MutterButton("확인", isLoading: model.isLoading, isEnabled: !model.code.isEmpty) {
+      field(L10n.authCodeField, text: $model.code, keyboard: .numberPad)
+      MutterButton(L10n.commonConfirm, isLoading: model.isLoading, isEnabled: !model.code.isEmpty) {
         Task { await model.verifyCode() }
       }
-      MutterButton("이메일 다시 입력", style: .ghost) {
+      MutterButton(L10n.authReenterEmail, style: .ghost) {
         model.backToEmail()
       }
     }
@@ -93,15 +93,15 @@ public struct AuthView: View {
 
   private var passwordStep: some View {
     VStack(spacing: 12) {
-      field("이메일", text: $model.email, keyboard: .emailAddress)
-      SecureField("비밀번호", text: $model.password)
+      field(L10n.authEmail, text: $model.email, keyboard: .emailAddress)
+      SecureField(L10n.authPassword, text: $model.password)
         .textFieldStyle(.plain)
         .padding(14)
         .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
-      MutterButton("로그인", isLoading: model.isLoading, isEnabled: model.isEmailValid && !model.password.isEmpty) {
+      MutterButton(L10n.authLogin, isLoading: model.isLoading, isEnabled: model.isEmailValid && !model.password.isEmpty) {
         Task { await model.signInWithPassword() }
       }
-      MutterButton("코드로 로그인", style: .ghost) {
+      MutterButton(L10n.authLoginWithCode, style: .ghost) {
         model.backToEmail()
       }
     }
@@ -112,7 +112,7 @@ public struct AuthView: View {
 
   private var socialSection: some View {
     VStack(spacing: 8) {
-      Text("또는")
+      Text(L10n.commonOr)
         .fonts(.caption)
         .foregroundStyle(Asset.Colors.inkFaint.color)
         .padding(.bottom, 2)

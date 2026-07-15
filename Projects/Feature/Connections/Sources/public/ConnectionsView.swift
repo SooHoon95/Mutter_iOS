@@ -23,7 +23,7 @@ public struct ConnectionsView: View {
       Asset.Colors.ivory.color.ignoresSafeArea()
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
-          Text("연결")
+          Text(L10n.connectionsTitle)
             .fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
           if !model.connections.isEmpty {
@@ -45,30 +45,30 @@ public struct ConnectionsView: View {
       if newPhase == .active { Task { await model.load() } }
     }
     .confirmationDialog(
-      "연결을 해제할까요?",
+      L10n.connectionsDisconnectConfirm,
       isPresented: Binding(get: { disconnectTarget != nil }, set: { if !$0 { disconnectTarget = nil } }),
       titleVisibility: .visible,
       presenting: disconnectTarget
     ) { target in
-      Button("해제", role: .destructive) { Task { await model.disconnect(otherUserId: target.userId) } }
-      Button("취소", role: .cancel) {}
+      Button(L10n.connectionsDisconnect, role: .destructive) { Task { await model.disconnect(otherUserId: target.userId) } }
+      Button(L10n.commonCancel, role: .cancel) {}
     } message: { _ in
-      Text("편지와 받은함은 남지만 서로에게 더는 보낼 수 없어요.")
+      Text(L10n.connectionsDisconnectDetail)
     }
   }
 
   /// 연결된 사람 목록(N:N). 각 행에서 개별 해제.
   private var connectionsCard: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text("연결된 사람")
+      Text(L10n.connectionsConnected)
         .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
       ForEach(model.connections) { connection in
         HStack(spacing: 12) {
           MutterIcon(Asset.Images.connect, size: 22).foregroundStyle(Asset.Colors.gold.color)
-          Text(connection.nickname ?? "연결된 사람")
+          Text(connection.nickname ?? L10n.connectionsPersonFallback)
             .fonts(.bodyMedium).foregroundStyle(Asset.Colors.ink.color)
           Spacer()
-          Button("해제") { disconnectTarget = connection }
+          Button(L10n.connectionsDisconnect) { disconnectTarget = connection }
             .fonts(.caption)
             .foregroundStyle(Asset.Colors.goldDeep.color)
         }
@@ -82,9 +82,9 @@ public struct ConnectionsView: View {
   /// 초대 링크 — N:N이라 연결이 있어도 항상 노출(더 연결하기).
   private var inviteCard: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text(model.connections.isEmpty ? "아직 연결된 사람이 없어요" : "다른 사람과 더 연결하기")
+      Text(model.connections.isEmpty ? L10n.connectionsEmpty : L10n.connectionsMore)
         .fonts(.bodyLargeBold).foregroundStyle(Asset.Colors.ink.color)
-      Text("초대 링크를 보내 연결하세요.")
+      Text(L10n.connectionsInviteHint)
         .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
 
       if let token = model.inviteToken {
@@ -107,11 +107,11 @@ public struct ConnectionsView: View {
         .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
 
         // 초대가 아직 수락되지 않은 경우 취소할 수 있다 (EC-2.8).
-        MutterButton("초대 취소", style: .ghost, isLoading: model.isLoading) {
+        MutterButton(L10n.connectionsInviteCancel, style: .ghost, isLoading: model.isLoading) {
           Task { await model.revokeInvite() }
         }
       } else {
-        MutterButton("초대 링크 만들기", isLoading: model.isLoading) {
+        MutterButton(L10n.connectionsInviteCreate, isLoading: model.isLoading) {
           Task { await model.createInvite() }
         }
       }

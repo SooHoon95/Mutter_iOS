@@ -9,9 +9,15 @@ struct SendSheet: View {
   @Bindable var model: ComposeModelData
 
   enum Method: String, CaseIterable, Identifiable {
-    case link = "전달 링크"
-    case connection = "연결된 사람"
+    case link = "link"
+    case connection = "connection"
     var id: String { rawValue }
+    var title: String {
+      switch self {
+      case .link: return L10n.sendMethodLink
+      case .connection: return L10n.sendMethodConnection
+      }
+    }
   }
   @State private var method: Method = .link
   /// 링크 복사 완료 표시(잠시 체크 아이콘으로 전환). 시트는 닫지 않는다 — 닫기는 "완료"가 담당.
@@ -80,7 +86,7 @@ struct SendSheet: View {
         Button {
           withAnimation(.easeInOut(duration: 0.18)) { method = tab }
         } label: {
-          Text(tab.rawValue)
+          Text(tab.title)
             .fonts(.bodyMediumBold)
             .foregroundStyle(
               method == tab
@@ -116,10 +122,10 @@ struct SendSheet: View {
         MutterIcon(Asset.Images.lock, size: 20)
           .foregroundStyle(Asset.Colors.gold.color)
         VStack(alignment: .leading, spacing: 2) {
-          Text("암호 보호")
+          Text(L10n.sendPasswordTitle)
             .fonts(.bodyMediumBold)
             .foregroundStyle(Asset.Colors.ink.color)
-          Text("기본값이 프라이버시예요")
+          Text(L10n.sendPasswordSubtitle)
             .fonts(.caption)
             .foregroundStyle(Asset.Colors.inkSoft.color)
         }
@@ -138,7 +144,7 @@ struct SendSheet: View {
 
       // 암호 입력 필드 (암호 보호 ON 시)
       if model.usePassword {
-        SecureField("암호", text: $model.password)
+        SecureField(L10n.commonPassword, text: $model.password)
           .textFieldStyle(.plain)
           .fonts(.bodyMedium)
           .padding(12)
@@ -179,18 +185,18 @@ struct SendSheet: View {
       // CTA 버튼 — 복사는 복사만(시트 유지 + 복사됨 피드백), 닫기는 "완료"로 분리.
       if let link = model.issuedLink {
         MutterButton(
-          linkCopied ? "복사됐어요" : "링크 복사하기",
+          linkCopied ? L10n.sendCopied : L10n.sendCopyLink,
           icon: linkCopied ? Asset.Images.check : Asset.Images.copy,
           isLoading: false
         ) {
           copyLink(link)
         }
-        MutterButton("완료", style: .ghost) {
+        MutterButton(L10n.commonDone, style: .ghost) {
           model.finishSend()
         }
       } else {
         MutterButton(
-          "링크 발급",
+          L10n.sendIssueLink,
           icon: Asset.Images.link,
           isLoading: model.isIssuing,
           isEnabled: model.canIssueLink
@@ -206,12 +212,12 @@ struct SendSheet: View {
   private var connectionSection: some View {
     VStack(alignment: .leading, spacing: 12) {
       if model.connections.isEmpty {
-        sectionLabel("아직 연결된 사람이 없어요")
-        Text("'전달 링크'로 보내거나, 사람들 탭에서 연결을 맺어보세요.")
+        sectionLabel(L10n.sendNoConnections)
+        Text(L10n.sendNoConnectionsDetail)
           .fonts(.caption)
           .foregroundStyle(Asset.Colors.inkSoft.color)
       } else {
-        sectionLabel("연결된 사람에게 바로 보내기")
+        sectionLabel(L10n.sendToConnections)
         ForEach(model.connections) { connection in
           connectionRow(connection)
         }
@@ -233,7 +239,7 @@ struct SendSheet: View {
 
       // 이름 + 시간
       VStack(alignment: .leading, spacing: 2) {
-        Text(connection.nickname ?? "이름 없는 친구")
+        Text(connection.nickname ?? L10n.sendUnnamedFriend)
           .fonts(.bodyLargeBold)
           .foregroundStyle(Asset.Colors.ink.color)
         Text(connection.connectedAt, style: .relative)

@@ -2,6 +2,7 @@ import SwiftUI
 
 import Domain
 import Router
+import UIComponent
 
 /// 제작 화면 팩토리. ComposeRoute(.new/.edit/.reply)→ComposeView.
 public struct ComposeViewFactory: ViewFactory {
@@ -34,11 +35,11 @@ public struct ComposeViewFactory: ViewFactory {
   public func makeView(_ route: ComposeRoute) -> some View {
     switch route {
     case .new:
-      composeView(mode: .new, title: "편지 쓰기")
+      composeView(mode: .new, title: L10n.composeNavNew)
     case .edit(let id):
-      composeView(mode: .edit(id), title: "이어쓰기")
+      composeView(mode: .edit(id), title: L10n.composeNavEdit)
     case .reply(let recipientId):
-      composeView(mode: .reply(recipientId), title: "답장")
+      composeView(mode: .reply(recipientId), title: L10n.composeNavReply)
     }
   }
 

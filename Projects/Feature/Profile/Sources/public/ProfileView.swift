@@ -42,13 +42,13 @@ public struct ProfileView: View {
       }
     }
     .task { await model.load() }
-    .toastIfNeeded($model.savedToast, text: "저장했어요")
-    .toastIfNeeded($mailFallbackToast, text: "메일 앱이 없어 이메일 주소를 복사했어요")
-    .confirmationDialog("계정을 삭제할까요?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-      Button("삭제", role: .destructive) { Task { await model.deleteAccount() } }
-      Button("취소", role: .cancel) {}
+    .toastIfNeeded($model.savedToast, text: L10n.profileSavedToast)
+    .toastIfNeeded($mailFallbackToast, text: L10n.profileMailFallback)
+    .confirmationDialog(L10n.profileDeleteConfirm, isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+      Button(L10n.commonDelete, role: .destructive) { Task { await model.deleteAccount() } }
+      Button(L10n.commonCancel, role: .cancel) {}
     } message: {
-      Text("편지와 연결이 모두 사라지며 되돌릴 수 없어요. 상대가 보관한 편지도 함께 사라집니다.")
+      Text(L10n.profileDeleteDetail)
     }
   }
 
@@ -67,7 +67,7 @@ public struct ProfileView: View {
       }
 
       // 닉네임
-      Text(model.nickname.isEmpty ? "닉네임" : model.nickname)
+      Text(model.nickname.isEmpty ? L10n.commonNickname : model.nickname)
         .fonts(.display)
         .foregroundStyle(Asset.Colors.ink.color)
     }
@@ -84,7 +84,7 @@ public struct ProfileView: View {
       } else {
         settingsRow(
           icon: Asset.Images.person,
-          label: "닉네임",
+          label: L10n.commonNickname,
           value: model.nickname.isEmpty ? "—" : model.nickname
         ) {
           isEditingNickname = true
@@ -96,8 +96,8 @@ public struct ProfileView: View {
 
       settingsRow(
         icon: Asset.Images.moodTag,
-        label: "기본 편지지",
-        value: "봄날",
+        label: L10n.profileDefaultPaper,
+        value: L10n.themeSpringDayName,
         action: nil
       )
 
@@ -105,8 +105,8 @@ public struct ProfileView: View {
 
       settingsRow(
         icon: Asset.Images.lock,
-        label: "암호 기본값",
-        value: "켜짐",
+        label: L10n.profilePasswordDefault,
+        value: L10n.profileOn,
         action: nil
       )
     }
@@ -127,7 +127,7 @@ public struct ProfileView: View {
         MutterIcon(Asset.Images.person, size: 20)
           .foregroundStyle(Asset.Colors.inkSoft.color)
 
-        TextField("닉네임", text: $model.nickname)
+        TextField(L10n.commonNickname, text: $model.nickname)
           .textFieldStyle(.plain)
           .fonts(.bodyLarge)
           .foregroundStyle(Asset.Colors.ink.color)
@@ -219,8 +219,8 @@ public struct ProfileView: View {
 
   /// 문의 메일 URL — 제목에 반드시 "Mutter" 포함(요구사항). mailto로 기본 메일 앱을 연다.
   private var contactMailURL: URL? {
-    let subject = "[Mutter] 문의사항"
-    let body = "문의 내용을 적어주세요.\n\n———\n(원활한 답변을 위해 앱 버전/기기 정보를 함께 남겨주시면 좋아요.)"
+    let subject = L10n.profileContactSubject
+    let body = L10n.profileContactBody
     let allowed = CharacterSet.alphanumerics
     let s = subject.addingPercentEncoding(withAllowedCharacters: allowed) ?? ""
     let b = body.addingPercentEncoding(withAllowedCharacters: allowed) ?? ""
@@ -229,7 +229,7 @@ public struct ProfileView: View {
 
   private var actionButtons: some View {
     VStack(spacing: 8) {
-      MutterButton("문의하기", style: .ghost) {
+      MutterButton(L10n.profileContact, style: .ghost) {
         guard let url = contactMailURL else { return }
         openURL(url) { accepted in
           if !accepted {
@@ -240,14 +240,14 @@ public struct ProfileView: View {
         }
       }
 
-      MutterButton("로그아웃", style: .ghost) {
+      MutterButton(L10n.profileLogout, style: .ghost) {
         Task { await model.signOut() }
       }
 
       Button {
         showDeleteConfirm = true
       } label: {
-        Text("계정 삭제")
+        Text(L10n.profileDeleteAccount)
           .fonts(.bodyLargeBold)
           .foregroundStyle(Asset.Colors.danger.color)
           .frame(maxWidth: .infinity, minHeight: 54)

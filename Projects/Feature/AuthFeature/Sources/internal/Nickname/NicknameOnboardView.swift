@@ -18,15 +18,15 @@ struct NicknameOnboardView: View {
       VStack(spacing: 20) {
         Spacer()
         VStack(spacing: 8) {
-          Text("어떻게 불러드릴까요?")
+          Text(L10n.nicknameTitle)
             .fonts(.titleLarge)
             .foregroundStyle(Asset.Colors.ink.color)
-          Text("받는 사람에게 보일 이름이에요")
+          Text(L10n.nicknameSubtitle)
             .fonts(.bodyMedium)
             .foregroundStyle(Asset.Colors.inkSoft.color)
         }
 
-        TextField("닉네임", text: $model.nickname)
+        TextField(L10n.commonNickname, text: $model.nickname)
           .textFieldStyle(.plain)
           .padding(14)
           .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
@@ -37,7 +37,7 @@ struct NicknameOnboardView: View {
             .foregroundStyle(Asset.Colors.goldDeep.color)
         }
 
-        MutterButton("시작하기", isLoading: model.isLoading, isEnabled: model.isValid) {
+        MutterButton(L10n.nicknameStart, isLoading: model.isLoading, isEnabled: model.isValid) {
           Task { await model.save() }
         }
 

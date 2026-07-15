@@ -20,19 +20,19 @@ public struct MainTabView<
   public var body: some View {
     TabView(selection: $selection) {
       HomeView()
-        .tabItem { tabLabel("홈", .home, Asset.Images.tabHome, Asset.Images.tabHomeFill) }
+        .tabItem { tabLabel(L10n.tabHome, .home, Asset.Images.tabHome, Asset.Images.tabHomeFill) }
         .tag(AppRoute.home)
       ThreadsView()
-        .tabItem { tabLabel("주고받음", .threads, Asset.Images.tabThread, Asset.Images.tabThreadFill) }
+        .tabItem { tabLabel(L10n.tabThreads, .threads, Asset.Images.tabThread, Asset.Images.tabThreadFill) }
         .tag(AppRoute.threads)
       InboxView()
-        .tabItem { tabLabel("받은함", .inbox, Asset.Images.tabInbox, Asset.Images.tabInboxFill) }
+        .tabItem { tabLabel(L10n.tabInbox, .inbox, Asset.Images.tabInbox, Asset.Images.tabInboxFill) }
         .tag(AppRoute.inbox)
       ConnectionsView()
-        .tabItem { tabLabel("연결", .connections, Asset.Images.tabPeople, Asset.Images.tabPeopleFill) }
+        .tabItem { tabLabel(L10n.tabConnections, .connections, Asset.Images.tabPeople, Asset.Images.tabPeopleFill) }
         .tag(AppRoute.connections)
       ProfileView()
-        .tabItem { tabLabel("프로필", .profile, Asset.Images.tabProfile, Asset.Images.tabProfileFill) }
+        .tabItem { tabLabel(L10n.tabProfile, .profile, Asset.Images.tabProfile, Asset.Images.tabProfileFill) }
         .tag(AppRoute.profile)
     }
     .tint(Asset.Colors.gold.color)

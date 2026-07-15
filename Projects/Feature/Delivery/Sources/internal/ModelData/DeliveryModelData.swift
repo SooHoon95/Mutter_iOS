@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 전달 링크 발급/관리 — 암호 기본 ON, 예약공개, revoke.
 @MainActor
@@ -62,7 +63,7 @@ final class DeliveryModelData {
     do {
       try await operation()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "잠시 후 다시 시도해 주세요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }
   }
 }

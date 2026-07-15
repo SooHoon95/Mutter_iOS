@@ -28,7 +28,7 @@ struct ConnectInviteView: View {
       VStack(spacing: 0) {
         MutterNavigationBar(
           Asset.Colors.ivory.color,
-          "초대",
+          L10n.inviteTitle,
           foregroundColor: Asset.Colors.ink.color,
           leftButtons: { MutterBackButton(action: onBack) },
           rightButtons: { EmptyView() }
@@ -54,7 +54,7 @@ struct ConnectInviteView: View {
     case .ready(let invite):
       ready(invite)
     case .accepted:
-      message(icon: Asset.Images.checkCircle, title: "연결됐어요", detail: "이제 서로에게 편지를 보낼 수 있어요.")
+      message(icon: Asset.Images.checkCircle, title: L10n.inviteConnectedTitle, detail: L10n.inviteConnectedDetail)
     case .failed(let text):
       failed(text)
     }
@@ -63,11 +63,11 @@ struct ConnectInviteView: View {
   private func ready(_ invite: ConnectInvite) -> some View {
     VStack(spacing: 16) {
       MutterIcon(Asset.Images.connect, size: 40).foregroundStyle(Asset.Colors.gold.color)
-      Text("\(invite.inviterNickname ?? "누군가")님이\n연결을 요청했어요")
+      Text(L10n.inviteRequest(invite.inviterNickname ?? L10n.inviteSomeone))
         .fonts(.title).foregroundStyle(Asset.Colors.ink.color).multilineTextAlignment(.center)
 
       if invite.canAccept {
-        MutterButton("연결하기") { Task { await model.accept() } }
+        MutterButton(L10n.inviteConnect) { Task { await model.accept() } }
       } else {
         Text(reason(invite))
           .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color).multilineTextAlignment(.center)
@@ -76,18 +76,18 @@ struct ConnectInviteView: View {
   }
 
   private func reason(_ invite: ConnectInvite) -> String {
-    if invite.isSelf { return "내가 만든 초대예요." }
-    if invite.alreadyConnected { return "이미 연결된 사이예요." }
-    if invite.viewerHasConnection { return "이미 다른 사람과 연결돼 있어요. 해제 후 다시 시도하세요." }
-    if invite.inviterHasConnection { return "상대가 이미 다른 사람과 연결돼 있어요." }
-    return "지금은 연결할 수 없어요."
+    if invite.isSelf { return L10n.inviteSelf }
+    if invite.alreadyConnected { return L10n.inviteAlreadyConnected }
+    if invite.viewerHasConnection { return L10n.inviteViewerHasConnection }
+    if invite.inviterHasConnection { return L10n.inviteInviterHasConnection }
+    return L10n.inviteUnavailable
   }
 
   /// 로드/수락 실패 상태 — 오류 메시지와 재시도 버튼 (EC-2.4).
   private func failed(_ text: String) -> some View {
     VStack(spacing: 16) {
-      message(icon: Asset.Images.warning, title: "연결할 수 없어요", detail: text)
-      MutterButton("다시 시도", style: .ghost) { Task { await model.load() } }
+      message(icon: Asset.Images.warning, title: L10n.inviteFailedTitle, detail: text)
+      MutterButton(L10n.commonRetry, style: .ghost) { Task { await model.load() } }
     }
   }
 

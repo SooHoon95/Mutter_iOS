@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 로그인 플로우 상태/로직. 이메일 매직코드(가입 겸용) + 비밀번호 + 소셜.
 @MainActor
@@ -96,7 +97,7 @@ final class AuthModelData {
     do {
       try await operation()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "잠시 후 다시 시도해 주세요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }
   }
 }

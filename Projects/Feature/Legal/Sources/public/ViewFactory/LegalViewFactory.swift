@@ -2,6 +2,7 @@ import SwiftUI
 
 import Domain
 import Router
+import UIComponent
 
 /// Legal 화면 팩토리. LegalRoute(신고/약관/개인정보)→화면.
 public struct LegalViewFactory: ViewFactory {
@@ -18,9 +19,9 @@ public struct LegalViewFactory: ViewFactory {
     case .takedown:
       TakedownView(takedownUsecase: takedownUsecase, onBack: onBack)
     case .terms:
-      LegalDocView(title: "이용약관", text: Self.termsText, onBack: onBack)
+      LegalDocView(title: L10n.legalTerms, text: Self.termsText, onBack: onBack)
     case .privacy:
-      LegalDocView(title: "개인정보처리방침", text: Self.privacyText, onBack: onBack)
+      LegalDocView(title: L10n.legalPrivacy, text: Self.privacyText, onBack: onBack)
     }
   }
 

@@ -109,7 +109,7 @@ final class ViewerModelData {
         state = .failed(error.userMessage)
       }
     } catch {
-      state = .failed("편지를 불러올 수 없어요.")
+      state = .failed(L10n.viewerErrorLoad)
     }
   }
 
@@ -117,7 +117,7 @@ final class ViewerModelData {
     state = .loading
     do {
       guard let letter = try await letterUsecase.letter(id: id) else {
-        state = .failed("편지를 찾을 수 없어요.")
+        state = .failed(L10n.viewerErrorNotFound)
         return
       }
       let payload = LetterPayload(
@@ -132,7 +132,7 @@ final class ViewerModelData {
     } catch let error as MutterError {
       state = .failed(error.userMessage)
     } catch {
-      state = .failed("편지를 불러올 수 없어요.")
+      state = .failed(L10n.viewerErrorLoad)
     }
   }
 

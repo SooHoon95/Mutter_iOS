@@ -21,7 +21,7 @@ struct TakedownView: View {
       VStack(spacing: 0) {
         MutterNavigationBar(
           Asset.Colors.ivory.color,
-          "문의하기",
+          L10n.legalContact,
           foregroundColor: Asset.Colors.ink.color,
           leftButtons: { MutterBackButton(action: onBack) },
           rightButtons: { EmptyView() }
@@ -40,17 +40,17 @@ struct TakedownView: View {
   private var form: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 16) {
-        Text("권리침해 신고")
+        Text(L10n.takedownTitle)
           .fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
-        Text("저작권 등 권리침해를 신고하시면 신속히 검토합니다.")
+        Text(L10n.takedownSubtitle)
           .fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
 
-        field("성명/단체", text: $model.claimant)
-        field("연락처(이메일)", text: $model.contact)
-        field("신고 대상(링크/트랙, 선택)", text: $model.trackRef)
+        field(L10n.takedownFieldClaimant, text: $model.claimant)
+        field(L10n.takedownFieldContact, text: $model.contact)
+        field(L10n.takedownFieldTarget, text: $model.trackRef)
 
         VStack(alignment: .leading, spacing: 8) {
-          Text("사유").fonts(.captionBold).foregroundStyle(Asset.Colors.inkSoft.color)
+          Text(L10n.takedownFieldReason).fonts(.captionBold).foregroundStyle(Asset.Colors.inkSoft.color)
           TextEditor(text: $model.reason)
             .frame(minHeight: 120)
             .padding(8)
@@ -61,7 +61,7 @@ struct TakedownView: View {
           Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
         }
 
-        MutterButton("신고 접수", isLoading: model.isLoading, isEnabled: model.isValid) {
+        MutterButton(L10n.takedownSubmit, isLoading: model.isLoading, isEnabled: model.isValid) {
           Task { await model.submit() }
         }
       }
@@ -74,8 +74,8 @@ struct TakedownView: View {
     VStack(spacing: 12) {
       MutterIcon(Asset.Images.checkCircle, size: 44)
         .foregroundStyle(Asset.Colors.gold.color)
-      Text("신고가 접수됐어요").fonts(.title).foregroundStyle(Asset.Colors.ink.color)
-      Text("검토 후 연락처로 안내드립니다.").fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
+      Text(L10n.takedownDoneTitle).fonts(.title).foregroundStyle(Asset.Colors.ink.color)
+      Text(L10n.takedownDoneDetail).fonts(.bodyMedium).foregroundStyle(Asset.Colors.inkSoft.color)
     }
     .padding(32)
   }

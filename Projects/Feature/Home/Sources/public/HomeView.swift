@@ -31,14 +31,14 @@ public struct HomeView: View {
       Asset.Colors.ivory.color.ignoresSafeArea()
       VStack(alignment: .leading, spacing: 18) {
         statCard
-        MutterButton("새 편지 쓰기", icon: Asset.Images.compose) {
+        MutterButton(L10n.homeCompose, icon: Asset.Images.compose) {
           coordinator.push(.compose(.new))
         }
 
         // 세그먼트 — 임시저장을 보낸 편지와 분리(통계·목록 혼입 방지).
         Picker("", selection: $selectedTab) {
-          Text("보낸 편지").tag(HomeTab.sent)
-          Text("임시저장").tag(HomeTab.draft)
+          Text(L10n.homeTabSent).tag(HomeTab.sent)
+          Text(L10n.homeTabDraft).tag(HomeTab.draft)
         }
         .pickerStyle(.segmented)
 
@@ -57,7 +57,7 @@ public struct HomeView: View {
                   Button(role: .destructive) {
                     Task { await model.delete(row.letter.id) }
                   } label: {
-                    Label("삭제", systemImage: "trash")
+                    Label(L10n.commonDelete, systemImage: "trash")
                   }
                 }
             }
@@ -80,10 +80,10 @@ public struct HomeView: View {
 
   private var statCard: some View {
     VStack(alignment: .leading, spacing: 4) {
-      Text("보낸 편지").fonts(.caption).foregroundStyle(Asset.Colors.onGold.color.opacity(0.8))
+      Text(L10n.homeSentCount).fonts(.caption).foregroundStyle(Asset.Colors.onGold.color.opacity(0.8))
       HStack(alignment: .firstTextBaseline, spacing: 8) {
         Text("\(model.sentCount)").fonts(.display).foregroundStyle(Asset.Colors.onGold.color)
-        Text("통 · \(model.openedCount)통 읽음")
+        Text(L10n.homeSentUnit(model.openedCount))
           .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.onGold.color)
       }
     }
@@ -113,7 +113,7 @@ public struct HomeView: View {
         )
         .foregroundStyle(row.isSent && row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
         VStack(alignment: .leading, spacing: 4) {
-          Text(row.letter.title.isEmpty ? "제목 없는 편지" : row.letter.title)
+          Text(row.letter.title.isEmpty ? L10n.commonUntitledLetter : row.letter.title)
             .fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color).lineLimit(1)
           Text(cardSubtitle(row))
             .fonts(.caption)
@@ -130,13 +130,13 @@ public struct HomeView: View {
 
   /// 카드 부제 — 보낸 편지는 열람 요약, 임시저장은 이어쓰기 안내.
   private func cardSubtitle(_ row: HomeModelData.LetterRow) -> String {
-    if !row.isSent { return "작성 중 · 탭하면 이어쓰기" }
-    return row.openSummary.map { "\($0.openCount)번 열림" } ?? "아직 열리지 않음"
+    if !row.isSent { return L10n.homeDraftInProgress }
+    return row.openSummary.map { L10n.homeOpened($0.openCount) } ?? L10n.homeNotOpened
   }
 
   /// 임시저장 배지.
   private var draftBadge: some View {
-    Text("작성 중")
+    Text(L10n.homeWriting)
       .fonts(.caption)
       .foregroundStyle(Asset.Colors.inkSoft.color)
       .padding(.horizontal, 8)
@@ -147,7 +147,7 @@ public struct HomeView: View {
   private func readBadge(_ read: Bool) -> some View {
     HStack(spacing: 3) {
       if read { MutterIcon(Asset.Images.read, size: 11) }
-      Text(read ? "읽음" : "안읽음").fonts(.caption)
+      Text(read ? L10n.homeRead : L10n.homeUnread).fonts(.caption)
     }
     .foregroundStyle(read ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
     .padding(.horizontal, 8)
@@ -158,7 +158,7 @@ public struct HomeView: View {
   private func emptyState(for tab: HomeTab) -> some View {
     VStack(spacing: 12) {
       Asset.Images.emptySent.image.resizable().scaledToFit().frame(height: 120)
-      Text(tab == .sent ? "아직 보낸 편지가 없어요" : "임시저장한 편지가 없어요")
+      Text(tab == .sent ? L10n.homeEmptySent : L10n.homeEmptyDraft)
         .fonts(.bodyLarge).foregroundStyle(Asset.Colors.inkSoft.color)
     }
     .frame(maxWidth: .infinity)

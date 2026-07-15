@@ -62,11 +62,11 @@ public struct ThreadsView: View {
       }
 
       VStack(alignment: .leading, spacing: 3) {
-        Text(counterpart.nickname ?? "이름 없음")
+        Text(counterpart.nickname ?? L10n.threadsUnnamed)
           .fonts(.bodyLargeBold)
           .foregroundStyle(Asset.Colors.ink.color)
           .lineLimit(1)
-        Text("\(counterpart.exchangeCount)통 주고받음")
+        Text(L10n.threadsExchangeCount(counterpart.exchangeCount))
           .fonts(.caption)
           .foregroundStyle(Asset.Colors.inkFaint.color)
       }
@@ -109,7 +109,7 @@ public struct ThreadsView: View {
           bottomBar(counterpart)
         }
       }
-      .navigationTitle(counterpart.nickname ?? "편지")
+      .navigationTitle(counterpart.nickname ?? L10n.threadsLetterFallback)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
@@ -159,7 +159,7 @@ public struct ThreadsView: View {
           .foregroundStyle(isSent ? Asset.Colors.goldDeep.color : Asset.Colors.gold.color)
 
           VStack(alignment: .leading, spacing: 3) {
-            Text(letter.title.isEmpty ? "편지" : letter.title)
+            Text(letter.title.isEmpty ? L10n.threadsLetterFallback : letter.title)
               .fonts(.bodyMediumBold)
               .foregroundStyle(Asset.Colors.ink.color)
               .lineLimit(2)
@@ -204,7 +204,7 @@ public struct ThreadsView: View {
       Divider()
         .background(Asset.Colors.hairline.color)
 
-      let buttonTitle = counterpart.nickname.map { "\($0)에게 편지 쓰기" } ?? "편지 쓰기"
+      let buttonTitle = counterpart.nickname.map { L10n.threadsWriteTo($0) } ?? L10n.threadsWrite
       MutterButton(buttonTitle, icon: Asset.Images.compose) {
         model.closeThread()
         onReply(counterpart.userId)
@@ -222,10 +222,10 @@ public struct ThreadsView: View {
     VStack(spacing: 16) {
       MutterIcon(Asset.Images.emptyConnections, size: 120)
         .foregroundStyle(Asset.Colors.inkFaint.color)
-      Text("주고받은 편지가 없어요")
+      Text(L10n.threadsEmptyTitle)
         .fonts(.bodyLarge)
         .foregroundStyle(Asset.Colors.inkSoft.color)
-      Text("연결된 사람에게 첫 편지를 써보세요")
+      Text(L10n.threadsEmptyDetail)
         .fonts(.caption)
         .foregroundStyle(Asset.Colors.inkFaint.color)
     }

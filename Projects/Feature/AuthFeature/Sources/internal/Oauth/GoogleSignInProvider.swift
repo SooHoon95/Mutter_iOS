@@ -2,6 +2,7 @@ import UIKit
 
 import AppFoundation
 import Domain
+import UIComponent
 
 import GoogleSignIn
 
@@ -11,11 +12,11 @@ struct GoogleSignInProvider: OauthSignInable {
   @MainActor
   func signIn() async throws -> OauthCredential {
     guard let presenter = Self.topViewController() else {
-      throw MutterError(.server("로그인 화면을 열 수 없어요."))
+      throw MutterError(.server(L10n.authErrorOpenLogin))
     }
     let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
     guard let idToken = result.user.idToken?.tokenString else {
-      throw MutterError(.server("Google 토큰을 받지 못했어요."))
+      throw MutterError(.server(L10n.authErrorGoogleToken))
     }
     return .social(provider: .google, token: idToken)
   }

@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 연결 탭 — N:N 연결 목록, 초대 링크 생성, 특정 연결 해제.
 @MainActor
@@ -57,7 +58,7 @@ final class ConnectionsModelData {
     do {
       try await operation()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "잠시 후 다시 시도해 주세요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }
   }
 }

@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 홈(우체통) — 내가 보낸/쓴 편지 + 읽음 상태.
 @MainActor
@@ -53,7 +54,7 @@ final class HomeModelData {
       try await letterUsecase.delete(id: letterId)
       rows.removeAll { $0.letter.id == letterId }
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "삭제하지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorDelete
     }
   }
 }

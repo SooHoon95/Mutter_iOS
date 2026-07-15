@@ -11,7 +11,7 @@ struct KakaoSignInButtonView: View {
       Task { await completion() }
     } label: {
       ZStack {
-        Text("카카오로 계속")
+        Text(L10n.authKakao)
           .fonts(.bodyMedium)
           .foregroundStyle(Asset.Colors.ink.color)
         HStack {

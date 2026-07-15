@@ -20,7 +20,7 @@ public struct InboxView: View {
       VStack(alignment: .leading, spacing: 0) {
         // MARK: 헤더
         HStack {
-          Text("받은 편지함")
+          Text(L10n.inboxTitle)
             .fonts(.titleLarge)
             .foregroundStyle(Asset.Colors.ink.color)
           Spacer()
@@ -69,7 +69,7 @@ public struct InboxView: View {
       }
 
       VStack(alignment: .leading, spacing: 4) {
-        Text(item.title.isEmpty ? "제목 없는 편지" : item.title)
+        Text(item.title.isEmpty ? L10n.commonUntitledLetter : item.title)
           .fonts(.bodyMediumBold)
           .foregroundStyle(Asset.Colors.ink.color)
           .lineLimit(1)
@@ -97,7 +97,7 @@ public struct InboxView: View {
     VStack(spacing: 12) {
       MutterIcon(Asset.Images.emptyReceived, size: 120)
         .foregroundStyle(Asset.Colors.inkFaint.color)
-      Text("받은 편지가 없어요")
+      Text(L10n.inboxEmpty)
         .fonts(.bodyLarge)
         .foregroundStyle(Asset.Colors.inkSoft.color)
     }

@@ -7,7 +7,7 @@ public struct AlertConfirm {
   let confirmTitle: String
   let onConfirm: () -> Void
 
-  public init(title: String, message: String, confirmTitle: String = "확인", onConfirm: @escaping () -> Void = {}) {
+  public init(title: String, message: String, confirmTitle: String = L10n.commonConfirm, onConfirm: @escaping () -> Void = {}) {
     self.title = title
     self.message = message
     self.confirmTitle = confirmTitle
@@ -28,8 +28,8 @@ public struct AlertCancellable {
   public init(
     title: String,
     message: String,
-    confirmTitle: String = "확인",
-    cancelTitle: String = "취소",
+    confirmTitle: String = L10n.commonConfirm,
+    cancelTitle: String = L10n.commonCancel,
     isDestructive: Bool = false,
     onConfirm: @escaping () -> Void = {},
     onCancel: @escaping () -> Void = {}

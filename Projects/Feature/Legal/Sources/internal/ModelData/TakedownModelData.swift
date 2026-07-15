@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import UIComponent
 
 /// 권리침해 신고(테이크다운) 폼 상태/로직. 익명 허용 — 법적 의무로 항상 접근 가능.
 @MainActor
@@ -41,7 +42,7 @@ final class TakedownModelData {
       )
       submitted = true
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "신고 접수에 실패했어요. 잠시 후 다시 시도해 주세요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorTakedown
     }
   }
 }

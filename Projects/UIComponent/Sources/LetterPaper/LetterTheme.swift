@@ -79,8 +79,8 @@ public extension LetterTheme {
 
   static let classicSerif = LetterTheme(
     id: "classic-serif",
-    name: "클래식 세리프",
-    summary: "시대를 초월한 우아함. 손으로 쓴 편지의 감촉.",
+    name: L10n.themeClassicSerifName,
+    summary: L10n.themeClassicSerifSummary,
     background: Asset.Colors.classicSerifBg.color,
     foreground: Asset.Colors.classicSerifFg.color,
     muted: Asset.Colors.classicSerifMuted.color,
@@ -91,8 +91,8 @@ public extension LetterTheme {
 
   static let modernMinimal = LetterTheme(
     id: "modern-minimal",
-    name: "모던 미니멀",
-    summary: "여백이 말한다. 텍스트에만 집중.",
+    name: L10n.themeModernMinimalName,
+    summary: L10n.themeModernMinimalSummary,
     background: Asset.Colors.modernMinimalBg.color,
     foreground: Asset.Colors.modernMinimalFg.color,
     muted: Asset.Colors.modernMinimalMuted.color,
@@ -103,8 +103,8 @@ public extension LetterTheme {
 
   static let warmCraft = LetterTheme(
     id: "warm-craft",
-    name: "따뜻한 크래프트",
-    summary: "커피향 나는 브라운 톤. 오래된 카페의 감성.",
+    name: L10n.themeWarmCraftName,
+    summary: L10n.themeWarmCraftSummary,
     background: Asset.Colors.warmCraftBg.color,
     foreground: Asset.Colors.warmCraftFg.color,
     muted: Asset.Colors.warmCraftMuted.color,
@@ -115,8 +115,8 @@ public extension LetterTheme {
 
   static let nightSky = LetterTheme(
     id: "night-sky",
-    name: "밤하늘",
-    summary: "깊은 남색 배경에 별빛 같은 문장들.",
+    name: L10n.themeNightSkyName,
+    summary: L10n.themeNightSkySummary,
     background: Asset.Colors.nightSkyBg.color,
     foreground: Asset.Colors.nightSkyFg.color,
     muted: Asset.Colors.nightSkyMuted.color,
@@ -127,8 +127,8 @@ public extension LetterTheme {
 
   static let springDay = LetterTheme(
     id: "spring-day",
-    name: "봄날",
-    summary: "연분홍 벚꽃처럼 가볍고 설레는 마음.",
+    name: L10n.themeSpringDayName,
+    summary: L10n.themeSpringDaySummary,
     background: Asset.Colors.springDayBg.color,
     foreground: Asset.Colors.springDayFg.color,
     muted: Asset.Colors.springDayMuted.color,
@@ -139,8 +139,8 @@ public extension LetterTheme {
 
   static let vintageTypewriter = LetterTheme(
     id: "vintage-typewriter",
-    name: "빈티지 타자기",
-    summary: "타자기 서체로 찍힌 진심. 아날로그의 온기.",
+    name: L10n.themeVintageTypewriterName,
+    summary: L10n.themeVintageTypewriterSummary,
     background: Asset.Colors.vintageTypewriterBg.color,
     foreground: Asset.Colors.vintageTypewriterFg.color,
     muted: Asset.Colors.vintageTypewriterMuted.color,
@@ -151,8 +151,8 @@ public extension LetterTheme {
 
   static let pureSpace = LetterTheme(
     id: "pure-space",
-    name: "순수 여백",
-    summary: "극도의 미니멀. 말 한마디가 전부인 편지.",
+    name: L10n.themePureSpaceName,
+    summary: L10n.themePureSpaceSummary,
     background: Asset.Colors.pureSpaceBg.color,
     foreground: Asset.Colors.pureSpaceFg.color,
     muted: Asset.Colors.pureSpaceMuted.color,

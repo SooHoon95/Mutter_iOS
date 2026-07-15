@@ -135,11 +135,11 @@ final class ComposeModelData {
 
   static func scErrorMessage(_ reason: ScValidationFailReason) -> String {
     switch reason {
-    case .invalidUrl: return "SoundCloud 링크가 맞는지 확인해 주세요 (soundcloud.com 주소)."
-    case .network: return "네트워크 연결을 확인하고 다시 시도해 주세요."
-    case .privateTrack: return "비공개이거나 지역 제한이 있는 트랙이에요. 다른 곡을 골라 주세요."
-    case .notFound: return "트랙을 찾을 수 없어요. 링크를 다시 확인해 주세요."
-    case .embedDisabled: return "이 트랙은 외부 재생이 허용되지 않아요. 다른 곡을 골라 주세요."
+    case .invalidUrl: return L10n.composeErrorInvalidUrl
+    case .network: return L10n.composeErrorNetwork
+    case .privateTrack: return L10n.composeErrorPrivateTrack
+    case .notFound: return L10n.composeErrorNotFound
+    case .embedDisabled: return L10n.composeErrorEmbedDisabled
     }
   }
 
@@ -148,9 +148,9 @@ final class ComposeModelData {
     guard let cue else { return nil }
     switch cue.source {
     case .soundcloud:
-      return cue.title.map { "‘\($0)’" } ?? "SoundCloud 트랙"
+      return cue.title.map { "‘\($0)’" } ?? L10n.composeMusicSoundcloudTrack
     case .hosted:
-      return "기본 제공 음악"   // 레거시(웹에서 만든 편지) 표기 전용 — 신규 선택 경로 없음.
+      return L10n.composeMusicDefault   // 레거시(웹에서 만든 편지) 표기 전용 — 신규 선택 경로 없음.
     }
   }
 
@@ -188,7 +188,7 @@ final class ComposeModelData {
         return letter.id
       }
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "저장하지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSave
       return nil
     }
   }
@@ -222,7 +222,7 @@ final class ComposeModelData {
       try await connectionUsecase.send(letterId: letterId, recipientId: recipientId)
       onDone()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "보내지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSend
     }
   }
 
@@ -255,7 +255,7 @@ final class ComposeModelData {
       issuedLink = "\(linkBaseURL)/l/\(link.token)"
       password = ""
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "링크를 만들지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorLinkCreate
     }
   }
 
@@ -269,7 +269,7 @@ final class ComposeModelData {
       try await connectionUsecase.send(letterId: id, recipientId: recipientId)
       finishSend()
     } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? "보내지 못했어요."
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSend
     }
   }
 

@@ -120,7 +120,7 @@
 "home.tab.sent" = "보낸 편지";
 "home.tab.draft" = "임시저장";
 "home.sentCount" = "보낸 편지";
-"home.sentStat" = "%1$d통 · %2$d통 읽음";
+"home.sentUnit" = "통 · %d통 읽음";
 "home.opened" = "%d번 열림";
 "home.notOpened" = "아직 열리지 않음";
 "home.draftInProgress" = "작성 중 · 탭하면 이어쓰기";

@@ -62,7 +62,7 @@ struct RootViewFactory {
         letterId: letterId,
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         linkBaseURL: AppLink.baseURL,
-        navTitle: "전달 링크",
+        navTitle: L10n.deliveryNav,
         onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) },
         onBack: { coordinator.pop() }
       )

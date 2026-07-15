@@ -44,9 +44,9 @@ public struct DeliveryView: View {
 
         ScrollView {
           VStack(alignment: .leading, spacing: 20) {
-            Text("링크로 보내기").fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
+            Text(L10n.deliveryLinkSend).fonts(.titleLarge).foregroundStyle(Asset.Colors.ink.color)
 
-            MutterButton("편지 미리보기", style: .ghost) { onPreview() }
+            MutterButton(L10n.deliveryPreview, style: .ghost) { onPreview() }
 
             issueCard
             if let token = model.lastIssuedToken { issuedLink(token) }
@@ -68,26 +68,26 @@ public struct DeliveryView: View {
   private var issueCard: some View {
     VStack(alignment: .leading, spacing: 14) {
       Toggle(isOn: $model.usePassword) {
-        Text("암호 보호").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
+        Text(L10n.sendPasswordTitle).fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
       }
       .tint(Asset.Colors.gold.color)
       if model.usePassword {
-        SecureField("암호", text: $model.password)
+        SecureField(L10n.commonPassword, text: $model.password)
           .textFieldStyle(.plain)
           .padding(12)
           .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
       }
 
       Toggle(isOn: $model.useReveal) {
-        Text("예약 공개").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
+        Text(L10n.deliveryReveal).fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.ink.color)
       }
       .tint(Asset.Colors.gold.color)
       if model.useReveal {
-        DatePicker("공개 시각", selection: $model.revealAt, in: Date()...)
+        DatePicker(L10n.deliveryRevealAt, selection: $model.revealAt, in: Date()...)
           .datePickerStyle(.compact)
       }
 
-      MutterButton("링크 발급", isLoading: model.isLoading, isEnabled: model.canIssue) {
+      MutterButton(L10n.deliveryIssue, isLoading: model.isLoading, isEnabled: model.canIssue) {
         Task { await model.issue() }
       }
     }
@@ -113,7 +113,7 @@ public struct DeliveryView: View {
 
   private var existingLinks: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text("발급된 링크").fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.inkSoft.color)
+      Text(L10n.deliveryIssued).fonts(.bodyMediumBold).foregroundStyle(Asset.Colors.inkSoft.color)
       ForEach(model.links) { link in
         HStack(spacing: 10) {
           MutterIcon(link.hasPassword ? Asset.Images.lock : Asset.Images.link, size: 18)
@@ -122,7 +122,7 @@ public struct DeliveryView: View {
             Text(String(link.token.prefix(10)) + "…")
               .fonts(.caption).foregroundStyle(Asset.Colors.inkMid.color)
             if link.revoked {
-              Text("무효화됨").fonts(.caption).foregroundStyle(Asset.Colors.inkFaint.color)
+              Text(L10n.deliveryRevoked).fonts(.caption).foregroundStyle(Asset.Colors.inkFaint.color)
             }
           }
           Spacer()
@@ -133,7 +133,7 @@ public struct DeliveryView: View {
             } label: {
               MutterIcon(Asset.Images.copy, size: 18).foregroundStyle(Asset.Colors.gold.color)
             }
-            Button("무효화") { Task { await model.revoke(link.token) } }
+            Button(L10n.deliveryRevoke) { Task { await model.revoke(link.token) } }
               .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
           }
         }
