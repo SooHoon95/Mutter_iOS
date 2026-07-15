@@ -10,6 +10,7 @@ let project = Project.framework(
   ],
   testDependencies: [],
   resourceSynthesizers: [
-    .assets()
+    .assets(),
+    .strings()
   ]
 )

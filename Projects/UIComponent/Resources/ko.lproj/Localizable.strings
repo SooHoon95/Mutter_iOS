@@ -1,0 +1,218 @@
+/* ===== 공통 ===== */
+"common.done" = "완료";
+"common.cancel" = "취소";
+"common.confirm" = "확인";
+"common.delete" = "삭제";
+"common.retry" = "다시 시도";
+"common.or" = "또는";
+"common.password" = "암호";
+"common.nickname" = "닉네임";
+"common.untitledLetter" = "제목 없는 편지";
+"common.retryLater" = "잠시 후 다시 시도해 주세요.";
+
+/* ===== 공통 에러 ===== */
+"error.save" = "저장하지 못했어요.";
+"error.send" = "보내지 못했어요.";
+"error.linkCreate" = "링크를 만들지 못했어요.";
+"error.nicknameSave" = "닉네임을 저장하지 못했어요.";
+"error.delete" = "삭제하지 못했어요.";
+"error.inviteLoad" = "초대를 불러올 수 없어요.";
+"error.inviteAccept" = "수락에 실패했어요.";
+"error.takedown" = "신고 접수에 실패했어요. 잠시 후 다시 시도해 주세요.";
+
+/* ===== 인증 ===== */
+"auth.google" = "Google로 계속";
+"auth.kakao" = "카카오로 계속";
+"auth.apple" = "Apple로 계속";
+"auth.email" = "이메일";
+"auth.getCode" = "코드 받기";
+"auth.loginWithPassword" = "비밀번호로 로그인";
+"auth.codeSent" = "%@로 보낸 6자리 코드를 입력하세요";
+"auth.codeField" = "인증 코드";
+"auth.reenterEmail" = "이메일 다시 입력";
+"auth.password" = "비밀번호";
+"auth.login" = "로그인";
+"auth.loginWithCode" = "코드로 로그인";
+"auth.error.openLogin" = "로그인 화면을 열 수 없어요.";
+"auth.error.googleToken" = "Google 토큰을 받지 못했어요.";
+"auth.error.kakaoFailed" = "카카오 로그인에 실패했어요.";
+"auth.error.kakaoNoIdToken" = "카카오 로그인 정보를 받지 못했어요. 잠시 후 다시 시도해 주세요.";
+"auth.error.appleToken" = "Apple 토큰을 받지 못했어요.";
+
+/* ===== 닉네임 온보딩 ===== */
+"nickname.title" = "어떻게 불러드릴까요?";
+"nickname.subtitle" = "받는 사람에게 보일 이름이에요";
+"nickname.start" = "시작하기";
+
+/* ===== 편지 쓰기 ===== */
+"compose.nav.new" = "편지 쓰기";
+"compose.nav.edit" = "이어쓰기";
+"compose.nav.reply" = "답장";
+"compose.title.placeholder" = "제목";
+"compose.body.placeholder" = "마음을 담아 적어보세요…";
+"compose.music.section" = "함께 흐를 음악 · 한 곡";
+"compose.music.selected" = "선택된 음악";
+"compose.music.soundcloudTrack" = "SoundCloud 트랙";
+"compose.music.default" = "기본 제공 음악";
+"compose.soundcloud.placeholder" = "SoundCloud 링크 붙여넣기";
+"compose.applying" = "확인 중…";
+"compose.apply" = "적용";
+"compose.reply.send" = "답장 보내기";
+"compose.draft" = "임시 저장";
+"compose.saveAndSend" = "저장하고 보내기";
+"compose.error.invalidUrl" = "SoundCloud 링크가 맞는지 확인해 주세요 (soundcloud.com 주소).";
+"compose.error.network" = "네트워크 연결을 확인하고 다시 시도해 주세요.";
+"compose.error.privateTrack" = "비공개이거나 지역 제한이 있는 트랙이에요. 다른 곡을 골라 주세요.";
+"compose.error.notFound" = "트랙을 찾을 수 없어요. 링크를 다시 확인해 주세요.";
+"compose.error.embedDisabled" = "이 트랙은 외부 재생이 허용되지 않아요. 다른 곡을 골라 주세요.";
+
+/* ===== 보내기 시트 ===== */
+"send.method.link" = "전달 링크";
+"send.method.connection" = "연결된 사람";
+"send.password.title" = "암호 보호";
+"send.password.subtitle" = "기본값이 프라이버시예요";
+"send.copied" = "복사됐어요";
+"send.copyLink" = "링크 복사하기";
+"send.issueLink" = "링크 발급";
+"send.noConnections" = "아직 연결된 사람이 없어요";
+"send.noConnections.detail" = "‘전달 링크’로 보내거나, 사람들 탭에서 연결을 맺어보세요.";
+"send.toConnections" = "연결된 사람에게 바로 보내기";
+"send.unnamedFriend" = "이름 없는 친구";
+
+/* ===== 연결/초대 ===== */
+"connections.title" = "연결";
+"connections.connected" = "연결된 사람";
+"connections.personFallback" = "연결된 사람";
+"connections.empty" = "아직 연결된 사람이 없어요";
+"connections.more" = "다른 사람과 더 연결하기";
+"connections.invite.hint" = "초대 링크를 보내 연결하세요.";
+"connections.invite.cancel" = "초대 취소";
+"connections.invite.create" = "초대 링크 만들기";
+"connections.disconnect" = "해제";
+"connections.disconnect.confirm" = "연결을 해제할까요?";
+"connections.disconnect.detail" = "편지와 받은함은 남지만 서로에게 더는 보낼 수 없어요.";
+"invite.title" = "초대";
+"invite.someone" = "누군가";
+"invite.request" = "%@님이\n연결을 요청했어요";
+"invite.connect" = "연결하기";
+"invite.connected.title" = "연결됐어요";
+"invite.connected.detail" = "이제 서로에게 편지를 보낼 수 있어요.";
+"invite.self" = "내가 만든 초대예요.";
+"invite.alreadyConnected" = "이미 연결된 사이예요.";
+"invite.viewerHasConnection" = "이미 다른 사람과 연결돼 있어요. 해제 후 다시 시도하세요.";
+"invite.inviterHasConnection" = "상대가 이미 다른 사람과 연결돼 있어요.";
+"invite.unavailable" = "지금은 연결할 수 없어요.";
+"invite.failedTitle" = "연결할 수 없어요";
+
+/* ===== 전달 링크(Delivery) ===== */
+"delivery.nav" = "전달 링크";
+"delivery.linkSend" = "링크로 보내기";
+"delivery.preview" = "편지 미리보기";
+"delivery.reveal" = "예약 공개";
+"delivery.revealAt" = "공개 시각";
+"delivery.issue" = "링크 발급";
+"delivery.issued" = "발급된 링크";
+"delivery.revoked" = "무효화됨";
+"delivery.revoke" = "무효화";
+
+/* ===== 홈 ===== */
+"home.compose" = "새 편지 쓰기";
+"home.tab.sent" = "보낸 편지";
+"home.tab.draft" = "임시저장";
+"home.sentCount" = "보낸 편지";
+"home.sentStat" = "%1$d통 · %2$d통 읽음";
+"home.opened" = "%d번 열림";
+"home.notOpened" = "아직 열리지 않음";
+"home.draftInProgress" = "작성 중 · 탭하면 이어쓰기";
+"home.writing" = "작성 중";
+"home.read" = "읽음";
+"home.unread" = "안읽음";
+"home.empty.sent" = "아직 보낸 편지가 없어요";
+"home.empty.draft" = "임시저장한 편지가 없어요";
+
+/* ===== 받은함 ===== */
+"inbox.title" = "받은 편지함";
+"inbox.empty" = "받은 편지가 없어요";
+
+/* ===== 법적/신고 ===== */
+"legal.contact" = "문의하기";
+"legal.terms" = "이용약관";
+"legal.privacy" = "개인정보처리방침";
+"takedown.title" = "권리침해 신고";
+"takedown.subtitle" = "저작권 등 권리침해를 신고하시면 신속히 검토합니다.";
+"takedown.field.claimant" = "성명/단체";
+"takedown.field.contact" = "연락처(이메일)";
+"takedown.field.target" = "신고 대상(링크/트랙, 선택)";
+"takedown.field.reason" = "사유";
+"takedown.submit" = "신고 접수";
+"takedown.done.title" = "신고가 접수됐어요";
+"takedown.done.detail" = "검토 후 연락처로 안내드립니다.";
+
+/* ===== 탭 ===== */
+"tab.home" = "홈";
+"tab.threads" = "주고받음";
+"tab.inbox" = "받은함";
+"tab.connections" = "연결";
+"tab.profile" = "프로필";
+
+/* ===== 프로필 ===== */
+"profile.savedToast" = "저장했어요";
+"profile.mailFallback" = "메일 앱이 없어 이메일 주소를 복사했어요";
+"profile.delete.confirm" = "계정을 삭제할까요?";
+"profile.delete.detail" = "편지와 연결이 모두 사라지며 되돌릴 수 없어요. 상대가 보관한 편지도 함께 사라집니다.";
+"profile.defaultPaper" = "기본 편지지";
+"profile.passwordDefault" = "암호 기본값";
+"profile.on" = "켜짐";
+"profile.contact" = "문의하기";
+"profile.contact.subject" = "[Mutter] 문의사항";
+"profile.contact.body" = "문의 내용을 적어주세요.\n\n———\n(원활한 답변을 위해 앱 버전/기기 정보를 함께 남겨주시면 좋아요.)";
+"profile.logout" = "로그아웃";
+"profile.deleteAccount" = "계정 삭제";
+
+/* ===== 주고받음(Threads) ===== */
+"threads.unnamed" = "이름 없음";
+"threads.exchangeCount" = "%d통 주고받음";
+"threads.letterFallback" = "편지";
+"threads.writeTo" = "%@에게 편지 쓰기";
+"threads.write" = "편지 쓰기";
+"threads.empty.title" = "주고받은 편지가 없어요";
+"threads.empty.detail" = "연결된 사람에게 첫 편지를 써보세요";
+
+/* ===== 열람(Viewer) ===== */
+"viewer.arrived" = "편지가 도착했어요";
+"viewer.untitled" = "소중한 편지";
+"viewer.subtitle" = "음악과 함께 천천히 읽어보세요.\n편지를 열면 바로 시작됩니다.";
+"viewer.open" = "편지 열기";
+"viewer.noInstall" = "설치 없이 바로 열려요";
+"viewer.savedToInbox" = "받은 편지함에 저장됐어요";
+"viewer.soundcloudTrack" = "SoundCloud 트랙";
+"viewer.scroll" = "스크롤 해주세요";
+"viewer.locked.title" = "암호가 걸린 편지예요";
+"viewer.locked.subtitle" = "발신자가 설정한 암호를 입력해 주세요";
+"viewer.open.short" = "열기";
+"viewer.notYet.title" = "아직 열 수 없는 편지예요";
+"viewer.notYet.at" = "%@에 열려요";
+"viewer.error.cantOpen" = "편지를 열 수 없어요";
+"viewer.error.load" = "편지를 불러올 수 없어요.";
+"viewer.error.notFound" = "편지를 찾을 수 없어요.";
+
+/* ===== 강제 업데이트 ===== */
+"forceUpdate.title" = "업데이트가 필요해요";
+"forceUpdate.detail" = "최신 버전으로 업데이트해야\n계속 사용할 수 있어요.";
+"forceUpdate.button" = "App Store에서 업데이트";
+
+/* ===== 편지지 테마 ===== */
+"theme.classicSerif.name" = "클래식 세리프";
+"theme.classicSerif.summary" = "시대를 초월한 우아함. 손으로 쓴 편지의 감촉.";
+"theme.modernMinimal.name" = "모던 미니멀";
+"theme.modernMinimal.summary" = "여백이 말한다. 텍스트에만 집중.";
+"theme.warmCraft.name" = "따뜻한 크래프트";
+"theme.warmCraft.summary" = "커피향 나는 브라운 톤. 오래된 카페의 감성.";
+"theme.nightSky.name" = "밤하늘";
+"theme.nightSky.summary" = "깊은 남색 배경에 별빛 같은 문장들.";
+"theme.springDay.name" = "봄날";
+"theme.springDay.summary" = "연분홍 벚꽃처럼 가볍고 설레는 마음.";
+"theme.vintageTypewriter.name" = "빈티지 타자기";
+"theme.vintageTypewriter.summary" = "타자기 서체로 찍힌 진심. 아날로그의 온기.";
+"theme.pureSpace.name" = "순수 여백";
+"theme.pureSpace.summary" = "극도의 미니멀. 말 한마디가 전부인 편지.";

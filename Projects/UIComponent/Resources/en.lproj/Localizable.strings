@@ -1,0 +1,218 @@
+/* ===== Common ===== */
+"common.done" = "Done";
+"common.cancel" = "Cancel";
+"common.confirm" = "Confirm";
+"common.delete" = "Delete";
+"common.retry" = "Try Again";
+"common.or" = "or";
+"common.password" = "Password";
+"common.nickname" = "Nickname";
+"common.untitledLetter" = "Untitled Letter";
+"common.retryLater" = "Please try again in a moment.";
+
+/* ===== Common errors ===== */
+"error.save" = "Couldn't save.";
+"error.send" = "Couldn't send.";
+"error.linkCreate" = "Couldn't create the link.";
+"error.nicknameSave" = "Couldn't save your nickname.";
+"error.delete" = "Couldn't delete.";
+"error.inviteLoad" = "Couldn't load the invitation.";
+"error.inviteAccept" = "Couldn't accept the invitation.";
+"error.takedown" = "Couldn't submit the report. Please try again in a moment.";
+
+/* ===== Auth ===== */
+"auth.google" = "Continue with Google";
+"auth.kakao" = "Continue with Kakao";
+"auth.apple" = "Continue with Apple";
+"auth.email" = "Email";
+"auth.getCode" = "Get Code";
+"auth.loginWithPassword" = "Sign in with Password";
+"auth.codeSent" = "Enter the 6-digit code sent to %@";
+"auth.codeField" = "Verification Code";
+"auth.reenterEmail" = "Re-enter Email";
+"auth.password" = "Password";
+"auth.login" = "Sign In";
+"auth.loginWithCode" = "Sign in with Code";
+"auth.error.openLogin" = "Couldn't open the sign-in screen.";
+"auth.error.googleToken" = "Couldn't get a Google token.";
+"auth.error.kakaoFailed" = "Kakao sign-in failed.";
+"auth.error.kakaoNoIdToken" = "Couldn't get Kakao sign-in info. Please try again in a moment.";
+"auth.error.appleToken" = "Couldn't get an Apple token.";
+
+/* ===== Nickname onboarding ===== */
+"nickname.title" = "What should we call you?";
+"nickname.subtitle" = "This is the name others will see";
+"nickname.start" = "Get Started";
+
+/* ===== Compose ===== */
+"compose.nav.new" = "Write a Letter";
+"compose.nav.edit" = "Continue Writing";
+"compose.nav.reply" = "Reply";
+"compose.title.placeholder" = "Title";
+"compose.body.placeholder" = "Write from the heart…";
+"compose.music.section" = "One song to play along";
+"compose.music.selected" = "Selected music";
+"compose.music.soundcloudTrack" = "SoundCloud Track";
+"compose.music.default" = "Built-in music";
+"compose.soundcloud.placeholder" = "Paste a SoundCloud link";
+"compose.applying" = "Checking…";
+"compose.apply" = "Apply";
+"compose.reply.send" = "Send Reply";
+"compose.draft" = "Save Draft";
+"compose.saveAndSend" = "Save & Send";
+"compose.error.invalidUrl" = "Please check the SoundCloud link (a soundcloud.com address).";
+"compose.error.network" = "Please check your connection and try again.";
+"compose.error.privateTrack" = "This track is private or region-restricted. Please choose another.";
+"compose.error.notFound" = "Track not found. Please check the link again.";
+"compose.error.embedDisabled" = "This track doesn't allow external playback. Please choose another.";
+
+/* ===== Send sheet ===== */
+"send.method.link" = "Share Link";
+"send.method.connection" = "Connections";
+"send.password.title" = "Password Protection";
+"send.password.subtitle" = "Privacy by default";
+"send.copied" = "Copied";
+"send.copyLink" = "Copy Link";
+"send.issueLink" = "Create Link";
+"send.noConnections" = "No connections yet";
+"send.noConnections.detail" = "Send via a share link, or connect from the People tab.";
+"send.toConnections" = "Send directly to a connection";
+"send.unnamedFriend" = "Unnamed friend";
+
+/* ===== Connections / invite ===== */
+"connections.title" = "Connections";
+"connections.connected" = "Connected People";
+"connections.personFallback" = "Connection";
+"connections.empty" = "No connections yet";
+"connections.more" = "Connect with more people";
+"connections.invite.hint" = "Send an invite link to connect.";
+"connections.invite.cancel" = "Cancel Invite";
+"connections.invite.create" = "Create Invite Link";
+"connections.disconnect" = "Disconnect";
+"connections.disconnect.confirm" = "Disconnect?";
+"connections.disconnect.detail" = "Your letters and inbox remain, but you can no longer send to each other.";
+"invite.title" = "Invitation";
+"invite.someone" = "Someone";
+"invite.request" = "%@\nwants to connect";
+"invite.connect" = "Connect";
+"invite.connected.title" = "Connected";
+"invite.connected.detail" = "Now you can send letters to each other.";
+"invite.self" = "This is your own invitation.";
+"invite.alreadyConnected" = "You're already connected.";
+"invite.viewerHasConnection" = "You're already connected with someone else. Disconnect first.";
+"invite.inviterHasConnection" = "They're already connected with someone else.";
+"invite.unavailable" = "Can't connect right now.";
+"invite.failedTitle" = "Can't Connect";
+
+/* ===== Delivery ===== */
+"delivery.nav" = "Share Link";
+"delivery.linkSend" = "Send via Link";
+"delivery.preview" = "Preview Letter";
+"delivery.reveal" = "Scheduled Reveal";
+"delivery.revealAt" = "Reveal Time";
+"delivery.issue" = "Create Link";
+"delivery.issued" = "Created Links";
+"delivery.revoked" = "Revoked";
+"delivery.revoke" = "Revoke";
+
+/* ===== Home ===== */
+"home.compose" = "Write New Letter";
+"home.tab.sent" = "Sent";
+"home.tab.draft" = "Drafts";
+"home.sentCount" = "Sent Letters";
+"home.sentStat" = "%1$d sent · %2$d read";
+"home.opened" = "Opened %d times";
+"home.notOpened" = "Not opened yet";
+"home.draftInProgress" = "Draft · tap to continue";
+"home.writing" = "Writing";
+"home.read" = "Read";
+"home.unread" = "Unread";
+"home.empty.sent" = "No sent letters yet";
+"home.empty.draft" = "No saved drafts";
+
+/* ===== Inbox ===== */
+"inbox.title" = "Inbox";
+"inbox.empty" = "No letters received";
+
+/* ===== Legal / report ===== */
+"legal.contact" = "Contact";
+"legal.terms" = "Terms of Service";
+"legal.privacy" = "Privacy Policy";
+"takedown.title" = "Report Infringement";
+"takedown.subtitle" = "Report copyright or other infringement and we'll review it promptly.";
+"takedown.field.claimant" = "Name / Organization";
+"takedown.field.contact" = "Contact (email)";
+"takedown.field.target" = "Target (link/track, optional)";
+"takedown.field.reason" = "Reason";
+"takedown.submit" = "Submit Report";
+"takedown.done.title" = "Report Received";
+"takedown.done.detail" = "We'll follow up at your contact after review.";
+
+/* ===== Tabs ===== */
+"tab.home" = "Home";
+"tab.threads" = "Threads";
+"tab.inbox" = "Inbox";
+"tab.connections" = "People";
+"tab.profile" = "Profile";
+
+/* ===== Profile ===== */
+"profile.savedToast" = "Saved";
+"profile.mailFallback" = "No mail app — copied the email address instead";
+"profile.delete.confirm" = "Delete account?";
+"profile.delete.detail" = "All your letters and connections are permanently deleted. Letters others saved are removed too.";
+"profile.defaultPaper" = "Default Stationery";
+"profile.passwordDefault" = "Password Default";
+"profile.on" = "On";
+"profile.contact" = "Contact";
+"profile.contact.subject" = "[Mutter] Inquiry";
+"profile.contact.body" = "Please describe your inquiry.\n\n———\n(Including your app version and device info helps us respond faster.)";
+"profile.logout" = "Sign Out";
+"profile.deleteAccount" = "Delete Account";
+
+/* ===== Threads ===== */
+"threads.unnamed" = "Unnamed";
+"threads.exchangeCount" = "%d exchanged";
+"threads.letterFallback" = "Letter";
+"threads.writeTo" = "Write to %@";
+"threads.write" = "Write a Letter";
+"threads.empty.title" = "No letters exchanged yet";
+"threads.empty.detail" = "Write your first letter to a connection";
+
+/* ===== Viewer ===== */
+"viewer.arrived" = "A letter has arrived";
+"viewer.untitled" = "A special letter";
+"viewer.subtitle" = "Read slowly, with music.\nIt begins the moment you open it.";
+"viewer.open" = "Open Letter";
+"viewer.noInstall" = "Opens instantly — no install";
+"viewer.savedToInbox" = "Saved to your inbox";
+"viewer.soundcloudTrack" = "SoundCloud Track";
+"viewer.scroll" = "Scroll down";
+"viewer.locked.title" = "This letter is locked";
+"viewer.locked.subtitle" = "Enter the password set by the sender";
+"viewer.open.short" = "Open";
+"viewer.notYet.title" = "This letter isn't ready yet";
+"viewer.notYet.at" = "Opens at %@";
+"viewer.error.cantOpen" = "Can't open this letter";
+"viewer.error.load" = "Couldn't load the letter.";
+"viewer.error.notFound" = "Letter not found.";
+
+/* ===== Force update ===== */
+"forceUpdate.title" = "Update Required";
+"forceUpdate.detail" = "Please update to the latest version\nto keep using the app.";
+"forceUpdate.button" = "Update on the App Store";
+
+/* ===== Stationery themes ===== */
+"theme.classicSerif.name" = "Classic Serif";
+"theme.classicSerif.summary" = "Timeless elegance. The feel of a handwritten letter.";
+"theme.modernMinimal.name" = "Modern Minimal";
+"theme.modernMinimal.summary" = "Let the space speak. Focus on the words.";
+"theme.warmCraft.name" = "Warm Craft";
+"theme.warmCraft.summary" = "Coffee-toned browns. The mood of an old café.";
+"theme.nightSky.name" = "Night Sky";
+"theme.nightSky.summary" = "Deep navy with sentences like starlight.";
+"theme.springDay.name" = "Spring Day";
+"theme.springDay.summary" = "Light and fluttering, like pink cherry blossoms.";
+"theme.vintageTypewriter.name" = "Vintage Typewriter";
+"theme.vintageTypewriter.summary" = "Sincerity struck in typeface. Analog warmth.";
+"theme.pureSpace.name" = "Pure Space";
+"theme.pureSpace.summary" = "Extreme minimalism. A letter where one line says it all.";
