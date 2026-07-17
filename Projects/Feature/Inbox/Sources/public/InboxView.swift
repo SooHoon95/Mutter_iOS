@@ -35,8 +35,12 @@ public struct InboxView: View {
 
         // MARK: 목록 / 빈 상태
         if model.items.isEmpty && !model.isLoading {
-          emptyState
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+          ScrollView {
+            emptyState
+              .frame(maxWidth: .infinity)
+              .containerRelativeFrame(.vertical)
+          }
+          .refreshable { await model.load() }
         } else {
           ScrollView {
             LazyVStack(spacing: 10) {
@@ -49,6 +53,7 @@ public struct InboxView: View {
             .padding(.bottom, 20)
             .frame(maxWidth: 600)
           }
+          .refreshable { await model.load() }
         }
       }
     }

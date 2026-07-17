@@ -177,6 +177,8 @@
 "threads.write" = "Write a Letter";
 "threads.empty.title" = "No letters exchanged yet";
 "threads.empty.detail" = "Write your first letter to a connection";
+"threads.sheet.empty" = "No letters yet";
+"threads.sheet.loadError" = "Couldn't load the letters.";
 
 /* ===== Viewer ===== */
 "viewer.arrived" = "A letter has arrived";

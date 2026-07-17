@@ -18,7 +18,8 @@ import FirebaseMessaging
 @main
 struct MutterApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-  
+  @Environment(\.scenePhase) private var scenePhase
+
   var body: some Scene {
     WindowGroup {
       OverlayWindowView {
@@ -26,6 +27,12 @@ struct MutterApp: App {
           .environment(NetworkMonitor.shared)
           .onOpenURL { url in
             OauthDeepLinkHandler.shared.handle(url: url)
+          }
+          .onChange(of: scenePhase) { _, phase in
+            // 앱이 전면으로 활성화되면 아이콘 뱃지를 지운다.
+            // scene 기반 앱에선 UIApplicationDelegate.applicationDidBecomeActive가 호출되지 않으므로
+            // SwiftUI scenePhase로 감지한다(코드베이스 ConnectionsView와 동일 패턴).
+            if phase == .active { UNUserNotificationCenter.current().setBadgeCount(0) }
           }
       }
     }
@@ -126,7 +133,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
   ) {
     print("[Push] APNs 등록 실패: \(error.localizedDescription)")
   }
-  
+
+  /// 앱 아이콘 뱃지 제거. iOS 17+ 정식 API(setBadgeCount) 사용 — 구형 applicationIconBadgeNumber setter는 no-op.
+  /// scene 기반 SwiftUI 앱이라 UIApplicationDelegate.applicationDidBecomeActive는 호출되지 않으므로,
+  /// 활성화 시 초기화는 App의 scenePhase에서 하고 여기서는 알림 탭(didReceive)에서만 호출한다.
+  func clearBadge() {
+    UNUserNotificationCenter.current().setBadgeCount(0)
+  }
+
   private func requestPushAuthorization(_ application: UIApplication) {
     let center = UNUserNotificationCenter.current()
     center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
@@ -138,7 +152,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
   }
 }
 
-// MARK: - 포그라운드 알림 표시 (Mercury 패턴)
+// MARK: - 포그라운드 알림 표시 + 탭 처리(뱃지 초기화) (Mercury 패턴)
 extension AppDelegate: UNUserNotificationCenterDelegate {
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
@@ -146,6 +160,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
     completionHandler([.banner, .sound, .badge])
+  }
+
+  /// 알림을 탭해 앱을 열면 뱃지를 지운다(이전엔 탭 응답 핸들러 자체가 없어 뱃지가 남았다).
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    clearBadge()
+    completionHandler()
   }
 }
 

@@ -177,6 +177,8 @@
 "threads.write" = "편지 쓰기";
 "threads.empty.title" = "주고받은 편지가 없어요";
 "threads.empty.detail" = "연결된 사람에게 첫 편지를 써보세요";
+"threads.sheet.empty" = "아직 편지가 없어요";
+"threads.sheet.loadError" = "편지를 불러오지 못했어요.";
 
 /* ===== 열람(Viewer) ===== */
 "viewer.arrived" = "편지가 도착했어요";

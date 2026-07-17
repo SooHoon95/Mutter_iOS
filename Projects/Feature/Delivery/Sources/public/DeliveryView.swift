@@ -59,6 +59,7 @@ public struct DeliveryView: View {
           .padding(24)
           .frame(maxWidth: 560)
         }
+        .refreshable { await model.load() }
       }
     }
     .toolbar(.hidden, for: .navigationBar)

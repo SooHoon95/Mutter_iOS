@@ -38,6 +38,7 @@ public struct ConnectionsView: View {
         .padding(24)
         .frame(maxWidth: 520)
       }
+      .refreshable { await model.load() }
     }
     .task { await model.load() }
     // 앱 포그라운드 복귀 시 재로드 — 상대가 연결을 끊었을 때 최신 상태 반영 (EC-2.5).

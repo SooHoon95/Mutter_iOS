@@ -20,6 +20,10 @@ struct CounterpartRow: Decodable {
 }
 
 /// get_thread RPC 반환 row.
+///
+/// 관대한 디코딩: 예전엔 `title`·`direction`·`at`가 non-optional이라 그중 하나가 NULL이거나
+/// 서버 반환 키가 미세하게 어긋나면 **단 한 건의 디코드 실패가 스레드 전체를 `[]`로 만들었다**(빈 시트 원인).
+/// 필드별로 기본값을 둬 편지가 목록에서 통째로 빠지지 않게 한다.
 struct ThreadLetterRow: Decodable {
   let letterId: String
   let token: String?
@@ -30,6 +34,16 @@ struct ThreadLetterRow: Decodable {
   enum CodingKeys: String, CodingKey {
     case token, title, direction, at
     case letterId = "letter_id"
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    // 각 필드는 누락/NULL이어도 실패하지 않고 안전한 기본값으로 대체한다.
+    letterId = (try? container.decode(String.self, forKey: .letterId)) ?? ""
+    token = try? container.decode(String.self, forKey: .token)
+    title = (try? container.decode(String.self, forKey: .title)) ?? ""
+    direction = (try? container.decode(String.self, forKey: .direction)) ?? LetterDirection.sent.rawValue
+    at = (try? container.decode(Date.self, forKey: .at)) ?? Date()
   }
 
   func toDomain() -> ThreadLetter {

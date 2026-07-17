@@ -40,6 +40,7 @@ public struct ProfileView: View {
         .padding(.bottom, 40)
         .frame(maxWidth: 480)
       }
+      .refreshable { await model.load() }
     }
     .task { await model.load() }
     .toastIfNeeded($model.savedToast, text: L10n.profileSavedToast)

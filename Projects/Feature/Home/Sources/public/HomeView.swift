@@ -43,8 +43,12 @@ public struct HomeView: View {
         .pickerStyle(.segmented)
 
         if displayRows.isEmpty && !model.isLoading {
-          emptyState(for: selectedTab)
-          Spacer()
+          ScrollView {
+            emptyState(for: selectedTab)
+              .frame(maxWidth: .infinity)
+              .containerRelativeFrame(.vertical)
+          }
+          .refreshable { await model.load() }
         } else {
           List {
             ForEach(displayRows) { row in
@@ -64,6 +68,7 @@ public struct HomeView: View {
           }
           .listStyle(.plain)
           .scrollContentBackground(.hidden)
+          .refreshable { await model.load() }
         }
 
         if let message = model.errorMessage {

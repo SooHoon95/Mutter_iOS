@@ -26,7 +26,10 @@ public struct ThreadsView: View {
       Asset.Colors.ivory.color.ignoresSafeArea()
 
       if model.counterparts.isEmpty && !model.isLoading {
-        emptyState
+        ScrollView {
+          emptyState.containerRelativeFrame(.vertical)
+        }
+        .refreshable { await model.load() }
       } else {
         ScrollView {
           LazyVStack(spacing: 10) {
@@ -39,6 +42,7 @@ public struct ThreadsView: View {
           .padding(.vertical, 16)
           .frame(maxWidth: 600)
         }
+        .refreshable { await model.load() }
       }
     }
     .task { await model.load() }
@@ -94,16 +98,8 @@ public struct ThreadsView: View {
         Asset.Colors.ivory.color.ignoresSafeArea()
 
         VStack(spacing: 0) {
-          // 편지 버블 목록
-          ScrollView {
-            LazyVStack(spacing: 12) {
-              ForEach(model.thread) { letter in
-                threadRow(letter)
-              }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-          }
+          // 편지 버블 목록 — 로딩/실패/빈 상태를 드러내 "빈 시트"를 방지한다.
+          threadContent(counterpart)
 
           // 하단 편지 쓰기 바
           bottomBar(counterpart)
@@ -132,6 +128,47 @@ public struct ThreadsView: View {
               .foregroundStyle(Asset.Colors.goldDeep.color)
           }
         }
+      }
+    }
+  }
+
+  // MARK: - 시트 본문 상태 (로딩 / 실패 / 빈 / 목록)
+
+  @ViewBuilder
+  private func threadContent(_ counterpart: Counterpart) -> some View {
+    if model.isThreadLoading {
+      ProgressView()
+        .tint(Asset.Colors.gold.color)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    } else if let error = model.threadError {
+      VStack(spacing: 16) {
+        MutterIcon(Asset.Images.warning, size: 40)
+          .foregroundStyle(Asset.Colors.gold.color)
+        Text(error)
+          .fonts(.bodyMedium)
+          .foregroundStyle(Asset.Colors.inkSoft.color)
+          .multilineTextAlignment(.center)
+        MutterButton(L10n.commonRetry, style: .ghost) {
+          Task { await model.openThread(counterpart) }
+        }
+        .frame(maxWidth: 240)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .padding(24)
+    } else if model.thread.isEmpty {
+      Text(L10n.threadsSheetEmpty)
+        .fonts(.bodyMedium)
+        .foregroundStyle(Asset.Colors.inkFaint.color)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    } else {
+      ScrollView {
+        LazyVStack(spacing: 12) {
+          ForEach(model.thread) { letter in
+            threadRow(letter)
+          }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
       }
     }
   }
