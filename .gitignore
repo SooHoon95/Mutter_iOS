@@ -5,6 +5,9 @@
 ## User settings
 xcuserdata/
 
+## Tooling runtime state (oh-my-claudecode 등 — 커밋 대상 아님)
+state/
+
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
 *.xccheckout

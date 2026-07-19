@@ -30,14 +30,24 @@ struct MainView: View {
   @State private var pendingLetter: DeeplinkToken?
   /// 미인증/splash 중 수신된 초대 딥링크 — 로그인 완료 시 소비(EC-5.2/5.5).
   @State private var pendingConnectToken: String?
+  /// 최신 버전 미설치 시 전면 차단(강제 업데이트).
+  @State private var forceUpdateRequired = false
   @Inject private var sessionManager: SessionManagable
 
   var body: some View {
     ZStack {
       currentView()
+
+      // 강제 업데이트 차단 게이트 — 스플래시·로그인 상태와 무관하게 전면을 덮는다.
+      if forceUpdateRequired {
+        ForceUpdateView()
+          .transition(.opacity)
+      }
     }
     .animation(.easeInOut(duration: 0.25), value: isSplashDone)
+    .animation(.easeInOut(duration: 0.2), value: forceUpdateRequired)
     .environmentObject(coordinator)
+    .task { await checkForceUpdate() }
     .task {
       // Lottie 스플래시가 최소 1회 재생되도록 최소 노출시간 확보(세션 확인이 즉시 끝나도 플래시 방지).
       let minSplash = Task { try? await Task.sleep(nanoseconds: 2_000_000_000) }
@@ -139,6 +149,18 @@ struct MainView: View {
   }
 
   // MARK: - Pending Connect Consumption
+
+  /// App Store 최신 버전보다 설치 버전이 낮으면 강제 업데이트 게이트를 띄운다.
+  /// 조회 실패 시엔 게이트를 띄우지 않는다(fail-open). 스토어 라이브 버전 기준이라
+  /// 새 버전이 심사 통과·출시된 뒤에야 트리거된다.
+  private func checkForceUpdate() async {
+    let current = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "0"
+    let bundleId = Bundle.main.bundleIdentifier ?? ""
+    let usecase = AppUpdateUsecase(repository: AppUpdateRepository(bundleId: bundleId))
+    if await usecase.isUpdateRequired(currentVersion: current) {
+      forceUpdateRequired = true
+    }
+  }
 
   /// 보류 초대 토큰을 소비해 connect 화면으로 push. 로그인 완료 + 토큰 있을 때만 동작.
   private func consumePendingConnectIfNeeded() {

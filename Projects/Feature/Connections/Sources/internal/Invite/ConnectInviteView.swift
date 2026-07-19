@@ -23,7 +23,7 @@ struct ConnectInviteView: View {
   var body: some View {
     ZStack {
       Asset.Colors.ivory.color.ignoresSafeArea()
-
+ 
       // Mercury 패턴: navbar를 body 최상단 Component로 직접 배치(모디파이어 아님).
       VStack(spacing: 0) {
         MutterNavigationBar(
