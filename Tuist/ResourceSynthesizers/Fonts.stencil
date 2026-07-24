@@ -13,9 +13,7 @@
   import SwiftUI
 #endif
 
-// Deprecated typealiases
-@available(*, deprecated, renamed: "{{fontType}}.Font", message: "This typealias will be removed in SwiftGen 7.0")
-{{accessModifier}} typealias {{param.fontAliasName|default:"Font"}} = {{fontType}}.Font
+// (deprecated `typealias Font = FontConvertible.Font` 제거 — SwiftUI.Font를 모듈 전역에서 가려 충돌하므로.)
 
 // swiftlint:disable superfluous_disable_command file_length implicit_return
 

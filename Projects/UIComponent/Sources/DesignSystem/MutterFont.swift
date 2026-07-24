@@ -4,9 +4,8 @@ import UIKit
 /// Mutter 타이포그래피 토큰.
 /// 앱 크롬(버튼·네비바·토스트·화면 제목)에 쓰는 시맨틱 폰트 스케일.
 /// - 편지 본문 자체는 테마별 폰트(`LetterTheme`)를 쓰므로 여기 정의를 쓰지 않는다.
-/// - 디스플레이/제목 = serif(명조 계열 감성), 본문/UI = sans.
-/// - 현재 시스템 폰트(serif/default design). Nanum Myeongjo `.ttf`는 추후
-///   `resourceSynthesizers: [.fonts()]` + `FontFamily`로 교체한다.
+/// - 디스플레이/제목 = serif(명조 계열 감성, 시스템 serif), 본문/UI(sans) = **Pretendard**(번들 폰트).
+/// - Android(PretendardFamily)와 동일하게 sans는 Pretendard로 통일. serif 토큰만 시스템 명조 감성 유지.
 /// - `.fonts(_:)` 모디파이어가 size/weight/design + lineHeight 보정을 한 번에 적용한다.
 public enum MutterFont {
   /// 워드마크/히어로 — 명조 40
@@ -76,19 +75,33 @@ public enum MutterFont {
     }
   }
 
-  /// SwiftUI Font 값.
+  /// sans 토큰용 Pretendard 폰트(weight 매핑). serif 토큰은 이 값을 쓰지 않는다.
+  private var pretendardFont: FontConvertible {
+    if weight == .bold { return FontFamily.Pretendard.bold }
+    if weight == .semibold { return FontFamily.Pretendard.semiBold }
+    if weight == .medium { return FontFamily.Pretendard.medium }
+    if weight == .light { return FontFamily.Pretendard.light }
+    return FontFamily.Pretendard.regular
+  }
+
+  /// SwiftUI Font 값. sans=Pretendard, serif=시스템 명조.
   public var font: Font {
-    .system(size: size, weight: weight, design: design)
+    if design == .serif {
+      return .system(size: size, weight: weight, design: .serif)
+    }
+    return pretendardFont.swiftUIFont(size: size)
   }
 
   /// lineHeight 보정을 위한 UIFont(실측 lineHeight 계산용).
   var uiFont: UIFont {
-    let uiWeight = weight.uiWeight
-    let base = UIFont.systemFont(ofSize: size, weight: uiWeight)
-    if design == .serif, let descriptor = base.fontDescriptor.withDesign(.serif) {
-      return UIFont(descriptor: descriptor, size: size)
+    if design == .serif {
+      let base = UIFont.systemFont(ofSize: size, weight: weight.uiWeight)
+      if let descriptor = base.fontDescriptor.withDesign(.serif) {
+        return UIFont(descriptor: descriptor, size: size)
+      }
+      return base
     }
-    return base
+    return pretendardFont.font(size: size)
   }
 }
 
