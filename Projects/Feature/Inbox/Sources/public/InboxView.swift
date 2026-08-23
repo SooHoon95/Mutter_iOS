@@ -42,17 +42,29 @@ public struct InboxView: View {
           }
           .refreshable { await model.load() }
         } else {
-          ScrollView {
-            LazyVStack(spacing: 10) {
-              ForEach(model.items) { item in
-                Button { onOpen(item.token) } label: { letterCard(item) }
-                  .buttonStyle(PressableButtonStyle())
-              }
+          List {
+            ForEach(model.items) { item in
+              Button { onOpen(item.token) } label: { letterCard(item) }
+                .buttonStyle(PressableButtonStyle())
+                .frame(maxWidth: 600)
+                .frame(maxWidth: .infinity)
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                  Button(role: .destructive) {
+                    Task { await model.delete(item) }
+                  } label: {
+                    Label(L10n.commonDelete, systemImage: "trash")
+                  }
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-            .frame(maxWidth: 600)
           }
+          .listStyle(.plain)
+          .listRowSpacing(10)
+          .scrollContentBackground(.hidden)
+          .contentMargins(.bottom, 20, for: .scrollContent)
+          .animation(.default, value: model.items)
           .refreshable { await model.load() }
         }
       }

@@ -35,4 +35,16 @@ public final class InboxRepository: InboxRepositorable {
       throw SupabaseErrorMapper.map(error)
     }
   }
+
+  public func remove(letterId: String) async throws {
+    do {
+      try await provider.client
+        .from("inbox")
+        .delete()
+        .eq("letter_id", value: letterId)
+        .execute()
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
 }

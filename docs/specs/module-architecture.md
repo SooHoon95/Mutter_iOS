@@ -73,7 +73,7 @@ struct LetterOpenSummary { let letterId: String; let openCount: Int; let lastOpe
 
 ## 5. Infrastructure (deps: AppFoundation, Domain, Networking)
 - `FeatureRepository/<영역>/`: Domain `<X>Repositorable` **구현**. `Model/`에 DTO(Codable) + `Mapper`(DTO↔Domain).
-- **RPC 매핑(~20, 메서드 1:1)**: `get_letter_by_token`(2-arg, reveal 게이트)→open · `issue_link`(reveal_at 포함)·`revoke_link`·`list`(delivery_links select) · `record_letter_open`(읽음확인 기록)·`get_my_letter_opens`(발신자 롤업) · `save_to_inbox`·`get_my_inbox` · `get_my_sent_with_recipients`·`get_counterparts`·`get_thread` · `create/get/accept_connect_invite`·`get_my_connections`·`send_to_connection`·`disconnect_connection` · `report_takedown`·`disable_letter_audio` · `delete_my_account`. 테이블 직접: `profiles`(upsert), `letters`(CRUD), `letter_opens`(읽음확인).
+- **RPC 매핑(~20, 메서드 1:1)**: `get_letter_by_token`(2-arg, reveal 게이트)→open · `issue_link`(reveal_at 포함)·`revoke_link`·`list`(delivery_links select) · `record_letter_open`(읽음확인 기록)·`get_my_letter_opens`(발신자 롤업) · `save_to_inbox`·`get_my_inbox` · `get_my_sent_with_recipients`·`get_counterparts`·`get_thread` · `create/get/accept_connect_invite`·`get_my_connections`·`send_to_connection`·`disconnect_connection` · `report_takedown`·`disable_letter_audio` · `delete_my_account`. 테이블 직접: `profiles`(upsert), `letters`(CRUD), `letter_opens`(읽음확인), `inbox`(delete — RLS inbox_self_rw로 본인 행 한정).
 - **`paragraphs jsonb`↔`body` 변환**: 저장 시 body를 빈 줄 split → paragraphs[], cue는 paragraphs[0].cue. 로드 시 역변환. (웹과 동일 계약)
 - `Service/`: `PushTokenService`(FCM 토큰 등록 → `push_tokens` 테이블). `UserDefaults/`: 로컬 캐시.
 

@@ -15,4 +15,8 @@ public final class InboxUsecase: InboxUsecasable {
   public func myInbox() async throws -> [InboxItem] {
     try await repository.myInbox()
   }
+
+  public func remove(letterId: String) async throws {
+    try await repository.remove(letterId: letterId)
+  }
 }
