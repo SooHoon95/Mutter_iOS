@@ -1,6 +1,21 @@
 # tasks/todo.md
 
-## 현재 작업 — 1주차 루프: 웹(letter-app)·Android(Mutter_android) 구현 + TestFlight (2026-09-16)
+## 현재 작업 — 양 플랫폼 심사 제출 + 웹 배포 대기 (2026-09-16)
+
+사용자 지시: "안드·iOS 배포되면 웹도 배포하자, 둘 다 심사 올려". 웹(e3bbe60)은 두 앱 출시 후 push.
+
+- [x] iOS: `submit` 레인에 version/build/notes 옵션 추가 → `fastlane submit version:1.0.4 build:8 notes:…` — **18:11 심사 제출 완료**(1.0.4 버전 생성·ko 릴리스 노트·precheck 통과·빌드 8 선택, 승인 후 수동 출시)
+- [x] Android: versionCode 4 / 1.2.0 버전업 커밋(59908a2) → `bundleRelease`+`assembleRelease` BUILD SUCCESSFUL → badging `versionCode=4 versionName=1.2.0` → AAB `app/build/outputs/bundle/release/app-release.aab`(16.5MB). Play API 자격증명 없음 → 콘솔 수동 업로드·제출. 에뮬레이터 R8 스모크 ✔(설치 성공·프로세스 생존·FATAL 0·MainActivity 렌더)
+- [ ] 웹: 보류. 두 앱 출시 확인 후 `git push`(Vercel) + `supabase db push`(0033) + 카카오 디버거 확인
+- [x] 리뷰 섹션 기록
+
+### 리뷰 (2026-09-16, 심사 제출)
+
+- iOS 1.0.4(8): 18:11 심사 제출 완료. 릴리스 노트 ko 포함, precheck 통과, 승인 후 수동 출시(ASC에서 "출시" 버튼). Fastfile `submit`이 version/build/notes를 받게 됨(97e1181).
+- Android 1.2.0(vc4): AAB `Mutter_android/app/build/outputs/bundle/release/app-release.aab`, R8 APK 에뮬레이터 스모크 통과. Play Console 업로드·릴리스 노트·제출은 사용자(자격증명 없음). 저장소에 git remote 없음.
+- 웹 e3bbe60: 두 앱 출시 확인 후 `git push` + `supabase db push`(0033) + 카카오 디버거 확인 — 보류 중.
+
+## 이전 작업 — 1주차 루프: 웹(letter-app)·Android(Mutter_android) 구현 + TestFlight (2026-09-16)
 
 사용자가 두 저장소 접근을 열어 이 세션에서 직접 구현. 스펙: `marketing/plans/2026-09-16-week1-loop-spec.md`. 웹은 Vercel(live) + Vite SPA → 크롤러 UA 조건부 rewrite로 Edge Function 분기.
 
