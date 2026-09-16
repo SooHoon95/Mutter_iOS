@@ -23,6 +23,22 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 App Store Connect API 키 인증 확인
 
+### ios tf_status
+
+```sh
+[bundle exec] fastlane ios tf_status
+```
+
+TestFlight 빌드 상태 조회(processingState·usesNonExemptEncryption·베타 상태)
+
+### ios tf_add_tester
+
+```sh
+[bundle exec] fastlane ios tf_add_tester
+```
+
+TestFlight 내부 그룹에 테스터 추가
+
 ### ios generate
 
 ```sh

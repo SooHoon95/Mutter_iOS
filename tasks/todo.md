@@ -12,8 +12,16 @@
 - [x] 웹 검증: typecheck ✔ · lint 0 에러 · vitest 307/307(신규 21: ogPreview 9·campaign 4·storeLinks 3·LetterEndCta 5) · build ✔ · OG PNG 9장 생성(1200×630)
 - [x] Android L2: `domain/LetterShareMessage.kt` + `:domain` junit 테스트 · `uicomponent/component/ShareSheet.kt`(ACTION_SEND) · Compose `issuedLink: DeliveryLink?` + SendSheet 공유 1순위 · Delivery `lastIssuedLink` + 행 공유
 - [x] Android 검증: `JAVA_HOME=openjdk@17 ./gradlew :domain:test assembleDebug` — BUILD SUCCESSFUL, 5/5
-- [~] critic 독립 리뷰 — Android 완료(Critical 0 / Major 1 수용: 저장소 관례상 Kotlin 하드코딩 / Minor m1·m2·m4 반영, m3 좁은 화면 확인은 후속) → **Android 커밋 3a25505** · 웹 critic 완료(Critical 1: index.html og:image 상대경로 → 절대 URL / Major 1: 터치 타깃 44px / Minor 6 중 m1·m3·m4·m6 반영, m2는 스펙 명시, m5 정보) → 웹 커밋
-- [ ] 리뷰 섹션 기록
+- [x] critic 독립 리뷰 — Android(Critical 0 / Major 1 수용 / Minor m1·m2·m4 반영) → **Android 3a25505** · 웹(Critical 1 og:image 절대 URL / Major 1 44px / Minor m1·m3·m4·m6 반영, m2 스펙 명시) → **웹 e3bbe60**
+- [x] 리뷰 섹션 기록
+
+### 리뷰 (2026-09-16, 다중 저장소)
+
+- TestFlight: 1.0.4 빌드 8 업로드(15:14) → 처리 VALID·규정준수 OK였으나 내부 그룹 테스터 0명 → `tf_add_tester`로 계정 소유자 추가(17:51). Fastfile에 `tf_status`·`tf_add_tester` 신설(1958c4f).
+- Android(3a25505): 공유 시트 + 동봉 문구, `:domain` junit 5/5, assembleDebug 통과. Connections 초대 공유도 `shareText`로 통합. 후속: 좁은 화면(320dp)에서 기존 링크 행 3버튼 확인.
+- 웹(e3bbe60): OG(Edge Function + `get_letter_preview` RPC + 봉투 9장) · 마지막 장 CTA 3단 · 캠페인 링크 · 랜딩 한 줄 A. vitest 308/308.
+- **배포 필요(사용자)**: 세 저장소 `git push` · Supabase `supabase db push`(0033) · Vercel 배포 후 카카오 공유 디버거로 `/l/<token>` 카드 확인 · Vercel env `VITE_ASC_PROVIDER_ID`(선택).
+- 미결(사용자): 커스텀 도메인 · OG 닉네임 노출 정책 · 브랜드 액센트 색 · 웹 애널리틱스 도구(2~3주차).
 
 ## 이전 작업 — 1주차 루프: iOS 공유 시트·동봉 문구 + 웹·Android 실행 스펙 (2026-09-16)
 
