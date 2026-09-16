@@ -165,7 +165,9 @@ OG용 데이터 조회는 **기존 공개 RPC(`get_letter_by_token` — iOS Infr
 ```
 iOS (iPhone|iPad|iPod)           → App Store URL + ?pt=<PROVIDER_ID>&ct=<token>&mt=8
 Android                          → Play URL + &referrer=utm_source%3Dviewer%26utm_medium%3Dcta%26utm_campaign%3D<token>
-그 외(데스크톱)                   → 스토어 버튼 대신 QR 1개(랜딩 루트 URL + utm_source=viewer&utm_medium=qr) + "휴대폰에서 이어 하기"
+그 외(데스크톱)                   → 1순위만 QR 1개(/download?utm_source=viewer&utm_medium=qr) + "휴대폰에서 이어 하기".
+                                    2순위(받은편지함)는 웹 로그인 흐름(/login → 복귀 시 자동 저장), 3순위는 /download?utm_source=viewer&utm_medium=send 링크.
+                                    (구현 결정 2026-09-16: 데스크톱에서 QR 세 개는 과함. /download가 utm_source=viewer를 CTA별 ct로 매핑해 귀속은 유지)
 ```
 
 클릭 시 `store_redirect{os, ct}` 이벤트(§4)를 먼저 기록하고 이동한다.

@@ -2,6 +2,11 @@
 
 사용자 교정이 발생할 때마다 최신 항목을 위로 추가한다. (`self-improvement` 스킬 규약)
 
+### 2026-09-16 — TestFlight "업로드 성공"을 "테스터에게 보임"으로 보고했다 — 노출은 끝단(그룹 테스터)까지 확인해야 완료
+- 상황: `fastlane beta`가 "Successfully uploaded"를 찍자 "처리 후 내부 테스터에 노출됩니다"라고 보고하고 넘어갔다. 2시간 뒤 사용자: "왜 안 올라오냐". 실제로는 (1) 1차 업로드가 1.0.3 트레인 마감(90186)으로 실패했고 재업로드했으며, (2) 재업로드 빌드는 VALID·규정준수 OK였지만 **내부 테스터 그룹에 사람이 0명**이라 아무에게도 배포되지 않았다. 업로드 성공과 "TestFlight 앱에 보임" 사이에 처리·규정준수·그룹 배정 세 단계가 있는데 하나도 확인하지 않았다.
+- 교정: Fastfile에 `tf_status`(processingState·usesNonExemptEncryption·내부/외부 베타 상태·그룹별 테스터·팀 사용자)와 `tf_add_tester`(내부 그룹에 팀 사용자 추가) 레인을 만들어 확인·수정했다. 사용자 계정을 그룹에 넣은 뒤에야 빌드가 보인다.
+- 규칙: **TestFlight 배포 요청은 `fastlane beta` 성공이 아니라 `fastlane tf_status`에서 `processing=VALID` + `internal=READY_FOR_BETA_TESTING` + 대상 그룹 테스터 ≥1을 확인한 뒤에 "올라갔다"고 보고한다.** 사용자가 기다리는 결과물은 "업로드 로그"가 아니라 "폰에서 보이는 빌드"다. 이미 스토어에 출시된 버전(트레인)에는 새 빌드를 못 올리므로 업로드 전에 MARKETING_VERSION이 라이브 버전보다 높은지 먼저 본다.
+
 ### 2026-07-02 — [최종/근본해결] 에셋을 Mercury와 동일 구조로: 카탈로그명=네임스페이스 + 테마색 완전 평탄
 - 상황: 사용자가 "왜 Colors.xcassets 안에 Images를 욱여넣었냐"·"Theme이 왜 아직 Color 안에 있냐"·"Mercury 프로젝트랑 똑같이 만들어놔" 연속 지적. 아래 2026-07-01·06-30의 "카탈로그 1개 유지"는 임시방편이었다.
 - **Mercury의 정본 방식(그대로 채택)**: `Assets.stencil`은 **원본 그대로**(133행 `catalogs.count > 1`이면 카탈로그를 파일명 enum으로 래핑). 즉 **카탈로그 파일명 자체가 최상위 네임스페이스**가 된다. 안쪽은 provides-namespace 없는 그냥 정리 폴더(또는 루트 직접). ⇒ `Colors.xcassets → Asset.Colors.*`, `Images.xcassets → Asset.Images.*`.

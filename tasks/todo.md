@@ -1,6 +1,21 @@
 # tasks/todo.md
 
-## 현재 작업 — 1주차 루프: iOS 공유 시트·동봉 문구 + 웹·Android 실행 스펙 (2026-09-16)
+## 현재 작업 — 1주차 루프: 웹(letter-app)·Android(Mutter_android) 구현 + TestFlight (2026-09-16)
+
+사용자가 두 저장소 접근을 열어 이 세션에서 직접 구현. 스펙: `marketing/plans/2026-09-16-week1-loop-spec.md`. 웹은 Vercel(live) + Vite SPA → 크롤러 UA 조건부 rewrite로 Edge Function 분기.
+
+- [x] TestFlight: 1.0.3 트레인 마감(90186) → 1.0.4 버전업 커밋(7d055e3) → `fastlane beta` 재실행 → **1.0.4 빌드 8 업로드 성공**
+- [x] TestFlight 미노출 원인: 빌드 8은 VALID·규정준수 OK·READY_FOR_BETA_TESTING인데 내부 그룹 `내부테스팅` 테스터 0명 → `tf_add_tester`로 dkehskeh@gmail.com 추가(17:51) · 레인 커밋 1958c4f · lessons.md 기록
+- [x] 웹 L1: `index.html` 기본 OG · `supabase/migrations` `get_letter_preview` RPC(본문 없이 template_id·sealed) · `api/letter-preview.ts` Edge Function · `vercel.json` UA 조건 rewrite · `scripts/gen-og-envelopes.mjs`(Playwright) → `public/og/*.png` 8장
+- [x] 웹 L3: `src/lib/storeLinks.ts`(ct/referrer) · `src/lib/campaign.ts`(utm→ct) · `src/lib/analytics.ts`(no-op track) · `src/components/StoreButtons.tsx`(Download에서 추출) · `src/features/viewer/LetterEndCta.tsx` 3단 + 워드마크 · LetterView 통합
+- [x] 웹 랜딩: Landing 히어로 한 줄 A + 스토어 버튼(utm→ct) · ConnectStorePrompt `ct=connect_invite`
+- [x] 웹 검증: typecheck ✔ · lint 0 에러 · vitest 307/307(신규 21: ogPreview 9·campaign 4·storeLinks 3·LetterEndCta 5) · build ✔ · OG PNG 9장 생성(1200×630)
+- [x] Android L2: `domain/LetterShareMessage.kt` + `:domain` junit 테스트 · `uicomponent/component/ShareSheet.kt`(ACTION_SEND) · Compose `issuedLink: DeliveryLink?` + SendSheet 공유 1순위 · Delivery `lastIssuedLink` + 행 공유
+- [x] Android 검증: `JAVA_HOME=openjdk@17 ./gradlew :domain:test assembleDebug` — BUILD SUCCESSFUL, 5/5
+- [~] critic 독립 리뷰 — Android 완료(Critical 0 / Major 1 수용: 저장소 관례상 Kotlin 하드코딩 / Minor m1·m2·m4 반영, m3 좁은 화면 확인은 후속) → **Android 커밋 3a25505** · 웹 critic 완료(Critical 1: index.html og:image 상대경로 → 절대 URL / Major 1: 터치 타깃 44px / Minor 6 중 m1·m3·m4·m6 반영, m2는 스펙 명시, m5 정보) → 웹 커밋
+- [ ] 리뷰 섹션 기록
+
+## 이전 작업 — 1주차 루프: iOS 공유 시트·동봉 문구 + 웹·Android 실행 스펙 (2026-09-16)
 
 플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 채널 전략 1주차(L1·L2·L3) 중 iOS L2만 이 세션에서 구현, 웹·Android는 각 저장소 세션용 자급형 스펙(`marketing/plans/2026-09-16-week1-loop-spec.md`).
 
@@ -12,8 +27,8 @@
 - [x] `tuist generate` → `tuist build Mutter`(Build Succeeded) → `tuist test UIComponent`(6/6, 신규 5) → `/arch-check`(신규 위반 0 — 발견 항목은 기존 Auth 콜백·UIKit import·SendSheet `Method.allCases`)
 - [x] 스펙 문서 `marketing/plans/2026-09-16-week1-loop-spec.md` (§0 공통 문구·스토어 URL·토큰표 / §1 웹 OG / §2 웹 CTA 3단 / §3 랜딩 / §4 이벤트 / §5 Android ACTION_SEND / §6 수용 기준)
 - [x] `critic` 독립 리뷰 — Critical 0 / Major 1(스펙: iMessage는 서버 크롤러 없음) / Minor 7 → 8건 전부 반영(접근성 라벨, `pt` 순서, `%1$s` 각주, RPC 실명 `get_letter_by_token`, save_to_inbox 확인 필요, 암호 유무 문구, todo 카운트) → 재빌드 Build Succeeded
-- [ ] 커밋 2개(feat / docs)
-- [ ] 리뷰 섹션 기록
+- [x] 커밋 2개 — c4fc890(feat 공유 시트) · 746bbea(docs 채널 전략+1주차 스펙)
+- [x] 리뷰 섹션 기록
 
 ### 리뷰 (2026-09-16)
 
