@@ -78,6 +78,11 @@
 "send.noConnections.detail" = "‘전달 링크’로 보내거나, 사람들 탭에서 연결을 맺어보세요.";
 "send.toConnections" = "연결된 사람에게 바로 보내기";
 "send.unnamedFriend" = "이름 없는 친구";
+"send.share" = "공유하기";
+
+"share.letter.body" = "노래 한 곡을 담아 편지를 썼어요.\n열면 음악이 함께 흘러요. 앱 없이 바로 열 수 있어요.";
+"share.letter.password" = "암호는 따로 알려줄게요.";
+"share.letter.revealAt" = "%@에 열려요.";
 
 /* ===== 연결/초대 ===== */
 "connections.title" = "연결";

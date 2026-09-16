@@ -49,7 +49,7 @@ public struct DeliveryView: View {
             MutterButton(L10n.deliveryPreview, style: .ghost) { onPreview() }
 
             issueCard
-            if let token = model.lastIssuedToken { issuedLink(token) }
+            if let link = model.lastIssuedLink { issuedLink(link) }
             if !model.links.isEmpty { existingLinks }
 
             if let message = model.errorMessage {
@@ -97,16 +97,29 @@ public struct DeliveryView: View {
     .shadows(.shadowLow)
   }
 
-  private func issuedLink(_ token: String) -> some View {
-    let link = "\(linkBaseURL)/l/\(token)"
-    return HStack {
-      Text(link).fonts(.caption).foregroundStyle(Asset.Colors.inkMid.color).lineLimit(1)
+  private func linkURL(_ token: String) -> String { "\(linkBaseURL)/l/\(token)" }
+
+  /// 네이티브 공유 시트 — 동봉 문구(암호·예약 반영) + 링크. 복사 버튼과 병기한다.
+  private func shareIcon(_ link: DeliveryLink, size: CGFloat) -> some View {
+    ShareLink(
+      item: LetterShareMessage.text(url: linkURL(link.token), hasPassword: link.hasPassword, revealAt: link.revealAt)
+    ) {
+      MutterIcon(Asset.Images.share, size: size).foregroundStyle(Asset.Colors.gold.color)
+    }
+    .accessibilityLabel(L10n.sendShare)
+  }
+
+  private func issuedLink(_ link: DeliveryLink) -> some View {
+    let url = linkURL(link.token)
+    return HStack(spacing: 16) {
+      Text(url).fonts(.caption).foregroundStyle(Asset.Colors.inkMid.color).lineLimit(1)
       Spacer()
       Button {
-        UIPasteboard.general.string = link
+        UIPasteboard.general.string = url
       } label: {
         MutterIcon(Asset.Images.copy, size: 20).foregroundStyle(Asset.Colors.gold.color)
       }
+      shareIcon(link, size: 20)
     }
     .padding(12)
     .background(Asset.Colors.goldSoft.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
@@ -128,12 +141,13 @@ public struct DeliveryView: View {
           }
           Spacer()
           if !link.revoked {
-            // 링크 유실 대비 — 발급된 링크를 다시 복사해 전달할 수 있게.
+            // 링크 유실 대비 — 발급된 링크를 다시 복사·공유해 전달할 수 있게.
             Button {
-              UIPasteboard.general.string = "\(linkBaseURL)/l/\(link.token)"
+              UIPasteboard.general.string = linkURL(link.token)
             } label: {
               MutterIcon(Asset.Images.copy, size: 18).foregroundStyle(Asset.Colors.gold.color)
             }
+            shareIcon(link, size: 18)
             Button(L10n.deliveryRevoke) { Task { await model.revoke(link.token) } }
               .fonts(.captionBold).foregroundStyle(Asset.Colors.goldDeep.color)
           }

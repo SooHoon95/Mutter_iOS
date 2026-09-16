@@ -1,6 +1,29 @@
 # tasks/todo.md
 
-## 현재 작업 — 마케팅 에이전트 + 영상 프롬프팅 에이전트 구축 (2026-09-16)
+## 현재 작업 — 1주차 루프: iOS 공유 시트·동봉 문구 + 웹·Android 실행 스펙 (2026-09-16)
+
+플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 채널 전략 1주차(L1·L2·L3) 중 iOS L2만 이 세션에서 구현, 웹·Android는 각 저장소 세션용 자급형 스펙(`marketing/plans/2026-09-16-week1-loop-spec.md`).
+
+- [x] `UIComponent/Sources/Share/LetterShareMessage.swift` (순수 헬퍼, L10n 조합)
+- [x] Localizable.strings ko·en: `send.share`, `share.letter.body/password/revealAt`
+- [x] Compose: `issuedLink: DeliveryLink?` + `issuedLinkURL`, SendSheet CTA 3단(공유·복사·완료)
+- [x] Delivery: `lastIssuedLink: DeliveryLink?`, issuedLink/existingLinks 행에 ShareLink 아이콘
+- [x] `UIComponent/Tests/LetterShareMessageTests.swift` 5케이스
+- [x] `tuist generate` → `tuist build Mutter`(Build Succeeded) → `tuist test UIComponent`(6/6, 신규 5) → `/arch-check`(신규 위반 0 — 발견 항목은 기존 Auth 콜백·UIKit import·SendSheet `Method.allCases`)
+- [x] 스펙 문서 `marketing/plans/2026-09-16-week1-loop-spec.md` (§0 공통 문구·스토어 URL·토큰표 / §1 웹 OG / §2 웹 CTA 3단 / §3 랜딩 / §4 이벤트 / §5 Android ACTION_SEND / §6 수용 기준)
+- [x] `critic` 독립 리뷰 — Critical 0 / Major 1(스펙: iMessage는 서버 크롤러 없음) / Minor 7 → 8건 전부 반영(접근성 라벨, `pt` 순서, `%1$s` 각주, RPC 실명 `get_letter_by_token`, save_to_inbox 확인 필요, 암호 유무 문구, todo 카운트) → 재빌드 Build Succeeded
+- [ ] 커밋 2개(feat / docs)
+- [ ] 리뷰 섹션 기록
+
+### 리뷰 (2026-09-16)
+
+- iOS L2 완료: `LetterShareMessage`(UIComponent, Foundation만 import, 값 인자만) + ko/en 문자열 4개 + Compose `issuedLink: DeliveryLink?`/`issuedLinkURL` + SendSheet CTA 3단(공유 ShareLink → 복사 secondary → 완료 ghost) + Delivery `lastIssuedLink` + 발급/기존 링크 행 ShareLink 아이콘(접근성 라벨 포함). ShareLink item은 String(URL 타입이면 동봉 문구가 빠짐).
+- 검증: `tuist generate`(L10n 심볼 생성 확인) · `tuist build Mutter` Build Succeeded(2회) · `tuist test UIComponent` 6/6(신규 5) · `/arch-check` 신규 위반 0.
+- 웹·Android는 저장소 접근 불가(하네스가 cwd 밖 차단, 샌드박스 해제로도 불가) → 사용자 선택으로 자급형 스펙 `marketing/plans/2026-09-16-week1-loop-spec.md` 작성. 각 저장소 세션에서 `/add-dir /Users/choesuhun/Desktop/Code/Mutter` 후 §1~§5 실행.
+- 미해결(사용자): 커스텀 도메인 · Android applicationId 확인 · App Store `pt` · OG 닉네임 노출 정책 · 웹 호스팅(Vercel/Netlify)·SSR 여부 · 웹 애널리틱스 도구 · 브랜드 액센트 색.
+- 수동 확인 권장: 시뮬레이터에서 편지 저장 → 보내기 시트 → 링크 발급 → 공유하기 → 메시지 앱에 3줄+빈 줄+URL 순서, 암호 ON 시 암호 줄 포함. 전달 관리 화면에서 예약공개 발급 → "…에 열려요" 포함.
+
+## 이전 작업 — 마케팅 에이전트 + 영상 프롬프팅 에이전트 구축 (2026-09-16)
 
 플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 서드파티 스킬은 전역(-g) 선별 설치, 에이전트는 프로젝트 `.claude/agents/`, 공유 컨텍스트는 `.agents/product-marketing.md`(marketingskills 정본 경로), 산출물은 `marketing/`.
 
@@ -14,8 +37,8 @@
 - [x] `CLAUDE.md` 커맨드 표 2행 + 마케팅·영상 에이전트 절 · `.gitignore` marketing 렌더 산출물
 - [x] 검증: 설치 확인 · 스모크 1(마케터 → `marketing/copy/2026-09-16-one-liner-subtitle.md`, copywriting+metadata-optimization, iTunes API 32건) · 스모크 2(비디오 → `marketing/video/2026-09-16-teaser-reels/` 5샷 Veo 프롬프트, AUDIO/NEGATIVE/스타일 블록 전부 포함) · 스모크 3(`hyperframes init/check` — ffmpeg·Chrome GPU 인식; Layout 1건은 빈 예제의 타임라인 부재) · 새 프로세스 `claude -p --agent` 프로브(본문 주입 ✔, `skills:` 프리로드 ✗ → 본문에 Skill 로드 가드 추가)
 - [x] `critic` 독립 리뷰 — Major 2(카테고리 예외·스킬 3개 제한 stall) Minor 3 중 4건 반영, m3(`--skill` 플래그)는 `init --help`·플러그인 스킬 본문으로 존재 확인해 기각
-- [ ] `/commit`
-- [ ] 리뷰 섹션 기록
+- [x] `/commit` — 5849459(에이전트 인프라) · 3e40dc0(첫 산출물)
+- [x] 리뷰 섹션 기록
 
 ### 리뷰 (2026-09-16)
 

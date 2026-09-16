@@ -156,7 +156,7 @@ struct SendSheet: View {
       }
 
       // 발급된 링크 미리보기 (링크가 있을 때)
-      if let link = model.issuedLink {
+      if let link = model.issuedLinkURL {
         HStack(spacing: 10) {
           Text(link)
             .fonts(.caption)
@@ -182,14 +182,17 @@ struct SendSheet: View {
         )
       }
 
-      // CTA 버튼 — 복사는 복사만(시트 유지 + 복사됨 피드백), 닫기는 "완료"로 분리.
-      if let link = model.issuedLink {
+      // CTA 3단 — 공유(동봉 문구+링크) > 복사(문구가 부담스러운 사용자용, 시트 유지) > 완료.
+      if let link = model.issuedLink, let url = model.issuedLinkURL {
+        shareButton(
+          LetterShareMessage.text(url: url, hasPassword: link.hasPassword, revealAt: link.revealAt)
+        )
         MutterButton(
           linkCopied ? L10n.sendCopied : L10n.sendCopyLink,
-          icon: linkCopied ? Asset.Images.check : Asset.Images.copy,
-          isLoading: false
+          style: .secondary,
+          icon: linkCopied ? Asset.Images.check : Asset.Images.copy
         ) {
-          copyLink(link)
+          copyLink(url)
         }
         MutterButton(L10n.commonDone, style: .ghost) {
           model.finishSend()
@@ -269,6 +272,23 @@ struct SendSheet: View {
   }
 
   // MARK: - 공통 헬퍼
+
+  /// 공유 CTA. `ShareLink`는 라벨을 직접 그려야 하므로 MutterButton primary와 같은 토큰으로 맞춘다.
+  /// item은 URL이 아니라 문자열 — URL 타입을 넘기면 메신저에 동봉 문구가 빠진다.
+  private func shareButton(_ message: String) -> some View {
+    ShareLink(item: message) {
+      HStack(spacing: 8) {
+        MutterIcon(Asset.Images.share, size: 18)
+        Text(L10n.sendShare).fonts(.bodyLargeBold)
+      }
+      .foregroundStyle(Asset.Colors.onGold.color)
+      .frame(maxWidth: .infinity, minHeight: 54)
+      .background(MutterGradient.gold)
+      .clipShape(RoundedRectangle(cornerRadius: MutterRadius.lg))
+      .shadows(.shadowLow)
+    }
+    .buttonStyle(PressableButtonStyle())
+  }
 
   /// 링크 복사 + "복사됐어요" 피드백(2초 후 원복). 시트는 닫지 않는다.
   private func copyLink(_ link: String) {

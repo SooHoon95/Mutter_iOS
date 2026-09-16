@@ -30,7 +30,8 @@ final class ComposeModelData {
   private(set) var sentLetterId: String?   // 시트 대상 편지 id(저장으로 확정).
   var usePassword = true                    // 전달 링크 암호 기본 ON(기본값이 프라이버시).
   var password = ""
-  var issuedLink: String?                   // 발급된 전달 링크 전체 URL.
+  var issuedLink: DeliveryLink?             // 발급된 전달 링크. 암호·예약 여부가 공유 문구에 쓰인다.
+  var issuedLinkURL: String? { issuedLink.map { "\(linkBaseURL)/l/\($0.token)" } }
   var isIssuing = false
   var connections: [Connection] = []        // 연결된 사람(독점 1:1 — 0 또는 1).
   var isSending = false                     // 연결 상대 직접 발송 중.
@@ -252,7 +253,7 @@ final class ComposeModelData {
         password: usePassword ? password : nil,
         revealAt: nil
       )
-      issuedLink = "\(linkBaseURL)/l/\(link.token)"
+      issuedLink = link
       password = ""
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorLinkCreate

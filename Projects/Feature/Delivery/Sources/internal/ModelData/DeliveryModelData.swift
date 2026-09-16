@@ -16,7 +16,7 @@ final class DeliveryModelData {
   var revealAt = Date().addingTimeInterval(3600)
   var isLoading = false
   var errorMessage: String?
-  var lastIssuedToken: String?
+  var lastIssuedLink: DeliveryLink?
 
   private let letterId: String
   private let deliveryUsecase: DeliveryUsecasable
@@ -43,7 +43,7 @@ final class DeliveryModelData {
         password: usePassword ? password : nil,
         revealAt: useReveal ? revealAt : nil
       )
-      lastIssuedToken = link.token
+      lastIssuedLink = link
       password = ""
       await load()
     }

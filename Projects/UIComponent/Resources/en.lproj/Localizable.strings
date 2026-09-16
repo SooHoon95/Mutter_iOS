@@ -78,6 +78,11 @@
 "send.noConnections.detail" = "Send via a share link, or connect from the People tab.";
 "send.toConnections" = "Send directly to a connection";
 "send.unnamedFriend" = "Unnamed friend";
+"send.share" = "Share";
+
+"share.letter.body" = "I wrote you a letter with one song in it.\nThe music plays when you open it. No app needed.";
+"share.letter.password" = "I'll send you the password separately.";
+"share.letter.revealAt" = "It opens at %@.";
 
 /* ===== Connections / invite ===== */
 "connections.title" = "Connections";
