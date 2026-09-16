@@ -93,3 +93,9 @@ agent_docs/
 # OMC / Ralph 런타임 상태 (무시)
 .omc/
 .omx/
+
+# 마케팅 산출물 — 프롬프트·브리프·카피는 커밋, 렌더·의존성은 무시
+marketing/**/node_modules/
+marketing/**/renders/
+marketing/**/*.mp4
+marketing/**/*.mov

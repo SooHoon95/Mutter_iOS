@@ -74,8 +74,21 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 | 빌드·에러 분석 | `/build-ios` |
 | 커밋 | `/commit` |
 | 아키텍처 규칙 전수 검사 | `/arch-check` |
+| 마케팅(포지셔닝·ASO·카피·출시·소셜) → `mutter-marketer` 에이전트 위임 | `/marketing` |
+| 영상 연출·AI 영상 프롬프트·Hyperframes 브리프 → `mutter-video-director` 에이전트 위임 | `/video-prompt` |
 
 자동 트리거: 코드 수정 후 → `/arch-check` · 파일 추가/삭제 후 → `/tuist-gen` · 빌드 에러 → `/build-ios`(의존성 문제 시 `/tuist-dep-check`) · 커밋 요청 → `/commit`.
+
+---
+
+## 마케팅·영상 에이전트 (`.claude/agents/`)
+
+| 에이전트 | 역할 | 공유 컨텍스트 |
+|---|---|---|
+| `mutter-marketer` | 포지셔닝·출시·ASO·카피·소셜·가격. marketingskills(`aso`·`copywriting`·`launch`·`marketing-plan`·`marketing-council` 등)와 aso-skills를 Skill로 호출 | `.agents/product-marketing.md` |
+| `mutter-video-director` | 컨셉→샷리스트→Veo/Kling/Seedance 프롬프트 + Hyperframes 브리프. `prompt-videos`·`video-prompting` 프리로드, `hyperframes:*` 플러그인 스킬 사용 | 같은 파일 + 에이전트 내 고정 스타일 블록 |
+
+산출물은 `marketing/`(레이아웃·재설치 커맨드는 `marketing/README.md`). 마케팅 스킬은 전역 설치라 저장소에 포함되지 않는다.
 
 ---
 
