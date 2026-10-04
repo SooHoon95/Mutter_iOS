@@ -20,14 +20,27 @@
 - `/marketing <요청>` → mutter-marketer
 - `/video-prompt <요청>` → mutter-video-director
 
-## 새 머신에서 스킬 재설치 (전역)
+## 스킬·플러그인 설치
+
+마케팅 스킬은 **프로젝트 범위 플러그인**이다. `.claude/settings.json`에 마켓플레이스와 활성화가 선언돼 있어, 저장소를 받아 Claude Code를 열면 설치를 묻는다.
+
+| 플러그인 | 출처 | 스킬 수 |
+|---|---|---|
+| `marketing-skills` | coreyhaines31/marketingskills (GitHub 52.8K★) | 50 |
+| `aso-skills` | eronred/aso-skills | 40 |
+| `hyperframes` | claude-plugins-official (user 범위) | 20 |
+
+수동 설치가 필요하면:
 
 ```bash
-npx skills add coreyhaines31/marketingskills -g -y -s product-marketing marketing-plan marketing-council launch aso copywriting copy-editing ad-creative social video content-strategy marketing-psychology customer-research competitor-profiling paywalls pricing referrals analytics image
-npx skills add eronred/aso-skills -g -y -s aso-audit keyword-research metadata-optimization screenshot-optimization app-preview-video app-launch seasonal-aso competitor-analysis app-store-featured creator-ugc-marketing rating-prompt-strategy review-management android-aso localization
-npx skills add parthjadhav/app-store-screenshots -g -y
+claude plugin marketplace add coreyhaines31/marketingskills
+claude plugin marketplace add eronred/aso-skills
+claude plugin install marketing-skills@marketingskills --scope project
+claude plugin install aso-skills@aso-skills --scope project
+# 영상 쪽 전역 스킬(플러그인 없음)
 npx skills add replicate/skills -g -y -s prompt-videos
 npx skills add square-zero-labs/video-prompting-skill -g -y -s video-prompting
+npx skills add parthjadhav/app-store-screenshots -g -y
 claude plugin install hyperframes@claude-plugins-official
-brew install ffmpeg   # Hyperframes 렌더
+brew install ffmpeg
 ```

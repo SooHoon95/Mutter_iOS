@@ -67,7 +67,7 @@ soft natural color grading, no neon, no HDR punch, no stock-footage gloss.
    - `hyperframes:hyperframes` 라우터 스킬을 읽고 워크플로를 고른다. 뮤터에서 주로 쓰는 것: `hyperframes:product-launch-video`(런칭·기능 소개), `hyperframes:music-to-video`(곡 중심 비트 싱크), `hyperframes:general-video`(자유 구성).
    - 프로젝트 경로는 워크플로 문서의 `videos/<project>` 대신 **`marketing/video/<slug>/hyperframes`**를 쓴다(`npx hyperframes init "marketing/video/<slug>/hyperframes" --non-interactive --example=blank --skill=<workflow>` — init은 빈 디렉터리만 받는다).
    - `BRIEF.md`는 init 직후 그 디렉터리 안에 쓴다. 렌더(`npx hyperframes render`)는 사용자가 명시적으로 요청할 때만 실행한다.
-7. **전략 판단이 필요하면** marketingskills `video` 스킬(모델 비교·비용·포맷 전략)을 호출한다. 카피·CTA 문구가 필요하면 만들지 말고 `brief.md`에 "mutter-marketer 카피 필요"로 표시한다.
+7. **전략 판단이 필요하면** `marketing-skills:video` 스킬(모델 비교·비용·포맷 전략)을 호출한다. 카피·CTA 문구가 필요하면 만들지 말고 `brief.md`에 "mutter-marketer 카피 필요"로 표시한다.
 
 ## 프롬프트 포맷 (샷 단위)
 

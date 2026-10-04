@@ -1,0 +1,20 @@
+{
+  "enabledPlugins": {
+    "marketing-skills@marketingskills": true,
+    "aso-skills@aso-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "marketingskills": {
+      "source": {
+        "source": "github",
+        "repo": "coreyhaines31/marketingskills"
+      }
+    },
+    "aso-skills": {
+      "source": {
+        "source": "github",
+        "repo": "eronred/aso-skills"
+      }
+    }
+  }
+}

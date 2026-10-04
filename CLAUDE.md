@@ -85,10 +85,10 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 
 | 에이전트 | 역할 | 공유 컨텍스트 |
 |---|---|---|
-| `mutter-marketer` | 포지셔닝·출시·ASO·카피·소셜·가격. marketingskills(`aso`·`copywriting`·`launch`·`marketing-plan`·`marketing-council` 등)와 aso-skills를 Skill로 호출 | `.agents/product-marketing.md` |
+| `mutter-marketer` | 포지셔닝·출시·ASO·카피·소셜·가격. `marketing-skills:*`(aso·copywriting·launch·marketing-plan·marketing-council 등)와 `aso-skills:*` 플러그인 스킬을 호출 | `.agents/product-marketing.md` |
 | `mutter-video-director` | 컨셉→샷리스트→Veo/Kling/Seedance 프롬프트 + Hyperframes 브리프. `prompt-videos`·`video-prompting` 프리로드, `hyperframes:*` 플러그인 스킬 사용 | 같은 파일 + 에이전트 내 고정 스타일 블록 |
 
-산출물은 `marketing/`(레이아웃·재설치 커맨드는 `marketing/README.md`). 마케팅 스킬은 전역 설치라 저장소에 포함되지 않는다.
+산출물은 `marketing/`(레이아웃·설치 방법은 `marketing/README.md`). 마케팅 스킬은 프로젝트 범위 플러그인(`marketing-skills`·`aso-skills`, `.claude/settings.json`에 선언)이라 이 저장소에서만 켜진다.
 
 ---
 
