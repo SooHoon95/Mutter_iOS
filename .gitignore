@@ -99,3 +99,9 @@ marketing/**/node_modules/
 marketing/**/renders/
 marketing/**/*.mp4
 marketing/**/*.mov
+
+# 마케팅 루프 — 로컬 로그와 비밀값은 무시, 데이터·리포트·큐는 커밋
+marketing/data/logs/
+marketing/LOOP_DISABLED
+.env.marketing
+__pycache__/

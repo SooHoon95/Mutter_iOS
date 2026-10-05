@@ -76,6 +76,8 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 | 아키텍처 규칙 전수 검사 | `/arch-check` |
 | 마케팅(포지셔닝·ASO·카피·출시·소셜) → `mutter-marketer` 에이전트 위임 | `/marketing` |
 | 영상 연출·AI 영상 프롬프트·Hyperframes 브리프 → `mutter-video-director` 에이전트 위임 | `/video-prompt` |
+| 주간 마케팅 루프 즉시 실행(순위·경쟁·리뷰·시즌 → 리포트·초안) | `/marketing-loop` |
+| 마케팅 큐 초안 승인·실행(프로모션 텍스트 반영은 여기서만) | `/marketing-approve` |
 
 자동 트리거: 코드 수정 후 → `/arch-check` · 파일 추가/삭제 후 → `/tuist-gen` · 빌드 에러 → `/build-ios`(의존성 문제 시 `/tuist-dep-check`) · 커밋 요청 → `/commit`.
 
@@ -87,8 +89,12 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 |---|---|---|
 | `mutter-marketer` | 포지셔닝·출시·ASO·카피·소셜·가격. `marketing-skills:*`(aso·copywriting·launch·marketing-plan·marketing-council 등)와 `aso-skills:*` 플러그인 스킬을 호출 | `.agents/product-marketing.md` |
 | `mutter-video-director` | 컨셉→샷리스트→Veo/Kling/Seedance 프롬프트 + Hyperframes 브리프. `prompt-videos`·`video-prompting` 프리로드, `hyperframes:*` 플러그인 스킬 사용 | 같은 파일 + 에이전트 내 고정 스타일 블록 |
+| `mutter-aso-analyst` | 실무. `marketing/data/` 순위·경쟁·리뷰 데이터 해석, 메타데이터 제안(현재→제안→근거). 리드가 위임 | 같은 파일 |
+| `mutter-copywriter` | 실무. 브리프 → 프로모션 텍스트·스레드·릴스 캡션 초안을 `marketing/queue/`에(승인 대기). 리드가 위임 | 같은 파일 |
 
 산출물은 `marketing/`(레이아웃·설치 방법은 `marketing/README.md`). 마케팅 스킬은 프로젝트 범위 플러그인(`marketing-skills`·`aso-skills`, `.claude/settings.json`에 선언)이라 이 저장소에서만 켜진다.
+
+**주간 루프**: `scripts/marketing/weekly.sh`(launchd 월 09:00)가 수집 → 리드 판단 → 리포트·초안 → 커밋. 발행·스토어 변경은 `/marketing-approve`로만. 컨텍스트 파일의 `auto` 블록은 `context_sync.py`가 생성하므로 손으로 고치지 않는다. `feat:` 커밋 뒤에는 Proof Points에 출처와 함께 기능을 추가한다.
 
 ---
 

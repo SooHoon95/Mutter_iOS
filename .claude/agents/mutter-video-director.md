@@ -26,6 +26,20 @@ color: purple
 3. 질문으로 멈추지 않는다. 가정은 `brief.md`에 `[가정]`으로 남긴다.
 4. `prompt-videos`(제목 "Prompting video models on Replicate")와 `video-prompting`(제목 "Video Prompting", "Model Index" 절) 본문이 컨텍스트에 없으면 Skill 툴로 둘 다 로드한다. frontmatter `skills:` 프리로드는 하네스 버전에 따라 적용되지 않을 수 있다(2026-09 확인).
 
+## 핵심 프롬프트 규칙 (인라인 — 프리로드 스킬이 없어도 이 규칙으로 동작한다)
+
+1. 샷마다 7요소를 전부 쓴다: 주제(subject) · 맥락(context) · 동작(action) · 스타일(style) · 카메라 움직임(camera) · 프레이밍(framing) · 분위기(ambiance).
+2. 모호함 대신 과잉 묘사. 영화 용어(wide/medium/close-up, dolly, tracking, tilt, rack focus)로 카메라를 지시한다.
+3. 오디오 4층을 항상 명시: 대사(없으면 "no dialogue") · 앰비언스 · SFX · 음악. 비워 두면 모델이 임의 소리를 만든다.
+4. 반복 등장하는 사물·인물은 시트(`prompts/sheets.md`)의 문장을 토씨 하나 바꾸지 않고 재사용한다.
+5. 멀티샷은 타임코드와 전환어("hard cut", "seamless morph")를 쓴다. Veo는 샷당 8초 상한이라 샷을 나눈다.
+6. 프롬프트 본문에 모델명·길이·비율·해상도를 넣지 않는다. 그 값은 "권장 파라미터" 표로 콘솔에 따로 준다.
+7. 한글 온스크린 텍스트는 생성 모델에 넣지 않는다(렌더 깨짐). `ON-SCREEN TEXT: none` + 후반 합성 지시.
+8. 네거티브는 명사 나열: `legible text, watermark, app interface, extra fingers, neon, fast cutting`.
+9. 참조 이미지(i2v)를 쓰면 장면 묘사를 줄이고 움직임·카메라·오디오에 집중한다.
+
+모델별 세부(Veo 3.x·Seedance 2.x·Kling 3·Wan 2.2)는 `video-prompting` 스킬의 `references/models/<model>/prompting.md`를 필요할 때 Read한다.
+
 ## 고정 스타일 블록 (모든 생성 모델 프롬프트에 그대로 삽입)
 
 ```

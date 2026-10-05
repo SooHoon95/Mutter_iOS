@@ -1,9 +1,35 @@
 # Product Marketing Context
 
-> Version: v1 · Last updated: 2026-09-16
+> Version: v2 · Last updated: 2026-10-05
 > 소스: `docs/appstore-submission.md`(스토어 카피·키워드 검증), `docs/specs/*`(기능), `Projects/UIComponent/Resources/Assets/Colors.xcassets`·`LetterTheme.swift`(브랜드 토큰).
 > `[확인 필요]`는 추정 또는 미결정 항목. 값이 정해지면 채우고 Changelog에 기록한다.
-> 이 파일은 marketingskills(`aso`·`copywriting`·`launch`·`social`·`video` 등)와 `mutter-marketer`·`mutter-video-director` 에이전트가 시작 시 읽는 공유 컨텍스트다.
+> 이 파일은 `marketing-skills:*`·`aso-skills:*` 플러그인과 `mutter-marketer`(리드)·`mutter-aso-analyst`·`mutter-copywriter`·`mutter-video-director` 에이전트가 시작 시 읽는 공유 컨텍스트다.
+> 아래 `auto:begin`~`auto:end` 블록은 `scripts/marketing/context_sync.py`가 코드에서 생성한다. 손으로 고치지 않는다. 사실(버전·색·테마·순위)은 그 블록이 정본이다.
+> **Proof Points 규칙**: 기능 주장은 출처(커밋·파일·RPC)를 붙인다. 출처 없는 주장은 넣지 않는다. 순위·수치를 카피에 인용할 땐 그 자리에서 재조회하고 측정일을 붙인다.
+
+<!-- auto:begin -->
+## 자동 생성 사실 (코드·수집 데이터 기준 — 손으로 고치지 않는다)
+
+- verified_commit: `d4e93f8` · verified_at: 2026-10-05 · 생성: `scripts/marketing/context_sync.py`
+- iOS: 저장소 MARKETING_VERSION 1.0.4 · 스토어 라이브 1.0.4(iTunes lookup) · App Store id 6790086549 · 번들 com.efreedom.mutter
+- Android: 1.2.0 (versionCode 4) · 패키지 com.efreedom.mutter
+- 웹 뷰어 베이스 URL: `https://letter-app-nine-kohl.vercel.app` (`AppLink.swift`) · 커스텀 도메인 `[확인 필요]`
+- 브랜드 토큰: Ivory `#FFFDF2` · Ink `#221D14` · Gold(액센트, 실값 모브 핑크) `#C77BAE` · GoldDeep `#8E4E7E` · GoldSoft `#F7E8F1`
+
+| 편지지 테마 | Bg | Fg | Accent |
+|---|---|---|---|
+| classic-serif | `#FAF8F3` | `#2C2416` | `#8B6914` |
+| modern-minimal | `#FFFFFF` | `#111111` | `#0066CC` |
+| warm-craft | `#F5EDE0` | `#3B2A1A` | `#C0550A` |
+| night-sky | `#0D1B2A` | `#E8DFC8` | `#C8A24A` |
+| spring-day | `#FFF7F8` | `#2D1A1F` | `#D4587A` |
+| vintage-typewriter | `#F8F4EC` | `#1C1C1C` | `#444033` |
+| pure-space | `#F9F9F9` | `#222222` | `#222222` |
+
+- 키워드 순위(iTunes Search API KR, 2026-10-05 — 실제 스토어 순위와 토크나이징이 달라 추세 지표로만): 음악편지 미노출/43 · 음악 편지 1/42 · 노래선물 1/4 · 노래편지 6/47 · 음악선물 4/43 · 고백편지 1/17 · 뮤터 1/6
+- 앱 평점: 0 (0건) · 수집 리뷰 0건
+- 경쟁앱: Dearyou v1.8.0 4.56★(113건, 2026-09-27) · Sincerely v1.94.0 4.86★(14건, 2026-09-30)
+<!-- auto:end -->
 
 ## Product Overview
 
@@ -11,7 +37,7 @@
 - 한 줄: 편지에 노래 한 곡을 담아 보내는 앱. 받는 사람이 편지를 여는 순간 그 음악이 함께 흐른다.
 - 개념: "연출되는 편지". 편지 = 편지지 테마를 입힌 본문 1장 + 음악 1곡 자동재생. 편지가 열리는 순간이 하나의 무대처럼 연출된다.
 - 카테고리: 소셜 네트워킹(보조: 라이프스타일). 무료. 광고 없음. 인앱결제 없음(현재).
-- 플랫폼: iOS 1.0.3(SwiftUI) · Android 1.1.0 · 웹 뷰어(React+Supabase, 수신자 무설치).
+- 플랫폼: iOS(SwiftUI) · Android(Compose) · 웹 뷰어(React+Supabase, 수신자 무설치). 현재 버전은 자동 생성 블록 참조.
 - 시장·언어: 대한민국, 한국어.
 - URL: 웹 뷰어 `letter-app-nine-kohl.vercel.app` (커스텀 도메인 `mutter.app` 상태 `[확인 필요]`).
 - 로그인: Apple · Google · Kakao · 이메일.
@@ -41,13 +67,13 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 
 ## Competitive Landscape
 
-- 직접 경쟁(KR App Store `고백편지` 검색 상위): Dearyou, Sincerely. 뮤터는 같은 검색어 3위(2026-09, 유료 ASO 없이). `[확인 필요]` 두 앱의 기능·가격·리뷰 프로파일링 — `competitor-profiling` 스킬 첫 과제.
+- 직접 경쟁(KR App Store `고백편지` 검색 상위): Dearyou(id 1615253712), Sincerely(id 6443709181). 뮤터는 같은 검색어 1위(2026-10-05, iTunes Search API, 유료 ASO 없이 — 최신값은 자동 생성 블록). `[확인 필요]` 두 앱의 기능·가격·리뷰 프로파일링 — `marketing-skills:competitor-profiling` 첫 과제. 주간 변화는 `marketing/data/aso/`에 누적된다.
 - 대체재: 카카오톡 메시지·선물하기, 인스타 DM, 플레이리스트 링크 공유(스포티파이·멜론·유튜브뮤직), 롤링페이퍼 앱, 손편지.
 - ASO 함정 카테고리(뮤터 키워드로 쓰지 않는다 — 타 카테고리 앱이 장악): 응원(LED전광판) · 사과(게임/과일) · 이별(이별극복) · 카드(은행) · 플레이리스트/노래추천/음악공유(스포티파이) · 디데이/기념일/연애/생일(D-day·소개팅) · 롤링페이퍼(전용 앱) · 추억/감동(게임) · 감사(감사일기) · 음성편지(녹음기).
 
 ## Differentiation
 
-1. 음악이 편지의 일부다. 여는 순간 자동재생. "무음 편지 0"(SoundCloud 공식 임베드 실패 시 CC0 무드 트랙 폴백).
+1. 음악이 편지의 일부다. 여는 순간 자동재생(SoundCloud 공식 임베드). 재생이 불가하면 폴백 없이 "음악 없음"으로 정직하게 표시한다(2026-07-03 결정, 커밋 4be5426에서 CC0 번들 폴백 제거 — "무음 편지 0" 문구는 더 이상 쓰지 않는다).
 2. 받는 사람은 앱이 필요 없다. 링크 하나.
 3. 조심스러운 마음까지 챙긴다. 암호 · 예약공개 · 링크 끄기 · 읽음확인.
 4. 편지지 테마 7종으로 "연출"한다.
@@ -57,7 +83,7 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 
 - "그냥 카톡으로 보내면 되지 않나" → 남는 것과 연출의 차이. 편지는 링크로 다시 열 수 있고 음악과 함께 기억된다.
 - "상대가 앱 깔아야 하는 거 아냐" → 아니다. 링크만 있으면 웹에서 열린다.
-- "음악 저작권은?" → SoundCloud 공식 임베드 또는 CC0 트랙. 오디오를 저장하지 않는다.
+- "음악 저작권은?" → SoundCloud 공식 임베드만 쓴다(Widget Terms 준수). 오디오를 저장하지 않는다.
 - "오글거리지 않나" → modern-minimal·pure-space 같은 절제된 테마가 있다. 카피 톤도 담백하게 간다.
 - Anti-persona: 대량 발송·마케팅 메시지 용도, 익명 메시지 서비스를 원하는 사용자(뮤터는 1:1 연결 모델).
 
@@ -65,7 +91,7 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 
 - 진입 트리거: 다가오는 기념일·생일, 고백 결심, 멀리 있는 사람이 생각나는 밤, 노래를 듣다 떠오른 사람.
 - 대체 행동에서 넘어오는 이유: 카톡은 가벼움, 손편지는 번거로움, 플레이리스트 공유는 맥락 없음.
-- 마찰: 로그인 필수(Apple/Google/Kakao) · 음악 선택 방법 학습(SoundCloud 링크 붙이기 또는 CC0 무드 선택).
+- 마찰: 로그인 필수(Apple/Google/Kakao) · 음악 선택 방법 학습(SoundCloud 링크 붙이기).
 
 ## Customer Language
 
@@ -103,15 +129,32 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 
 ## Proof Points
 
-- App Store KR `고백편지` 검색 3위(iTunes Search API, 2026-09, 유료 ASO 없이).
-- iOS 1.0.3 · Android 1.1.0 출시, 웹 뷰어 운영 중.
-- 기능: 테마 7종 · 음악 1곡 자동재생 · 무설치 수신 · 암호 · 예약공개 · 링크 끄기 · 읽음확인 · 1:1 연결/직접 발송 · 답장/스레드 · 이어쓰기(임시저장) · 받은편지함(스와이프 삭제) · 푸시.
-- 프라이버시: 추적 없음, 민감 권한 없음, 오디오 미저장.
-- `[확인 필요]` 다운로드 수, 발송 편지 수, 열람율, 리뷰 평점.
+기능 주장은 아래 목록에 **출처가 붙은 것만** 쓴다. 순위·버전·평점은 자동 생성 블록이 정본이다.
+
+| 주장 | 출처 |
+|---|---|
+| 편지지 테마 7종 | `Projects/UIComponent/Sources/LetterPaper/LetterTheme.swift` |
+| 음악 1곡 자동재생(SoundCloud 임베드), 재생 불가 시 무음 표시 | `Projects/AudioSync/`, 커밋 4be5426 |
+| 받는 사람 무설치 수신(웹 링크) | 웹 `/l/:token`, RPC `get_letter_by_token` |
+| 암호 보호 · 예약 공개 · 링크 끄기 | `delivery_links`(password_hash·reveal_at·revoked), RPC issue/revoke, 마이그레이션 0018 |
+| 읽음 확인 | RPC `record_letter_open`, 마이그레이션 0017 |
+| 1:1 연결 · 직접 발송 · 답장/스레드 | 마이그레이션 0027, Feature/Connections·Threads |
+| 이어쓰기(임시저장) | Feature/Compose 이어쓰기 흐름 |
+| 받은편지함 + 스와이프 삭제 | 커밋 dd38b02(iOS), de43e0c(Android) |
+| 푸시 알림(편지 도착·읽음) | 마이그레이션 0028·0029 |
+| **공유 시트 + 동봉 문구**(암호·예약 안내 포함) | iOS c4fc890 · Android 3a25505 |
+| **링크 미리보기 카드(OG)** — 테마별 봉투, 잠금은 봉인 카드 | 웹 e3bbe60, RPC `get_letter_preview`(0033) |
+| **편지 마지막 장 CTA 3단**(답장 → 받은편지함 → 나도 보내기) | 웹 e3bbe60 `LetterEndCta` |
+| 프라이버시: 추적 없음, 민감 권한 없음, 오디오 미저장 | `docs/appstore-submission.md` §3 |
+| App Store KR `고백편지`·`노래선물`·`음악 편지`·`뮤터` 1위 | 자동 생성 블록(측정일 포함). 인용 전 재조회 |
+
+`[확인 필요]` 다운로드 수 · 발송 편지 수 · 열람율(Supabase 집계 RPC 도입 후 자동 생성 블록에 추가 예정).
 
 ## Goals
 
-- 단기(1~3개월): KR App Store 니치 키워드(음악편지·노래선물·노래편지·음악선물) 1위 확보 · 리뷰 확보 루틴 · 첫 소셜 채널(인스타/틱톡) 콘텐츠 루틴.
+- 단기(1~3개월): KR App Store 니치 키워드(음악 편지·노래선물·노래편지·음악선물) 1위 유지·확보 · 리뷰 확보 루틴(현재 0건) · 첫 소셜 채널(인스타 릴스 원본 → 쇼츠·틱톡 재배포 + 스레드) 콘텐츠 루틴.
+- 채널 결론(`marketing/plans/2026-09-16-channel-strategy.md`): 1순위는 수신자 웹 뷰어 루프(공유 문구·OG 카드·마지막 장 CTA — 구현 완료). 커뮤니티(에타·더쿠·디시·오픈채팅) 홍보 글, X, 유료 광고는 하지 않는다. 지표는 발송 편지 수·열람율·두 번째 편지·답장 비율이고 설치 수는 보조다.
+- 운영: 주간 루프(`scripts/marketing/weekly.sh`, 월 09:00)가 순위·경쟁·리뷰·시즌을 점검하고 초안을 `marketing/queue/`에 쌓는다. 발행과 스토어 변경은 사람이 승인한다.
 - 중기: 시즌 모멘트(크리스마스·발렌타인·어버이날·수능 등)는 프로모션 텍스트·소셜 콘텐츠로 대응(키워드 슬롯은 쓰지 않음).
 - KPI `[확인 필요]`: 다운로드 · 발송 편지 수 · 열람율 · 연결 수.
 - 예산 `[확인 필요]`: 현재 유료 광고 없음으로 가정.
@@ -126,4 +169,5 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 
 ## Changelog
 
+- 2026-10-05 v2 — 사실 정정: CC0 폴백 문구 3곳 삭제(커밋 4be5426 반영), 버전·순위·테마·색을 자동 생성 블록으로 이관, Proof Points에 출처 열 추가 + 신규 기능 3개(공유 시트·OG 카드·마지막 장 CTA), 경쟁앱 id, 채널 전략 결론을 Goals에 반영.
 - 2026-09-16 v1 — 초안 작성. 소스: docs/appstore-submission.md(스토어 카피·키워드 검증 결과), docs/specs(기능 인벤토리), Colors.xcassets·LetterTheme.swift(브랜드 토큰). 경쟁사 프로파일·실측 지표·브랜드 액센트 색 결정은 미완(`[확인 필요]`).

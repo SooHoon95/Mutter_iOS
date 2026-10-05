@@ -1,0 +1,16 @@
+{
+  "_comment": "season.py 입력. date는 MM-DD(매년) 또는 YYYY-MM-DD(단발). lead_days 안에 들어오면 활성. hint는 카피라이터용 한 줄.",
+  "default_lead_days": 21,
+  "events": [
+    {"key": "chuseok-2026", "name": "추석", "date": "2026-09-25", "hint": "멀리 있는 가족·친구에게 안부와 노래 한 곡"},
+    {"key": "hangul-day", "name": "한글날", "date": "10-09", "hint": "한글로 쓴 편지에 노래 한 곡"},
+    {"key": "pepero-day", "name": "빼빼로데이", "date": "11-11", "hint": "과자 대신 노래 한 곡을 담은 편지"},
+    {"key": "suneung-2026", "name": "수능", "date": "2026-11-19", "hint": "시험 끝난 친구·동생에게 수고했다는 편지"},
+    {"key": "christmas", "name": "크리스마스", "date": "12-25", "hint": "캐럴 한 곡과 함께 여는 편지. In-App Event 카드 후보", "lead_days": 35},
+    {"key": "new-year", "name": "새해", "date": "01-01", "hint": "한 해 고마웠던 사람에게"},
+    {"key": "valentine", "name": "발렌타인데이", "date": "02-14", "hint": "고백편지 1위 자산을 쓰는 주간"},
+    {"key": "white-day", "name": "화이트데이", "date": "03-14", "hint": "답장 편지 — 뷰어 CTA 1순위와 연결"},
+    {"key": "parents-day", "name": "어버이날", "date": "05-08", "hint": "부모님께 노래 한 곡. 앱 없이 열리는 점 강조"},
+    {"key": "teachers-day", "name": "스승의날", "date": "05-15", "hint": "선생님께 보내는 편지"}
+  ]
+}

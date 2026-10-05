@@ -1,0 +1,29 @@
+{
+  "_comment": "aso_watch.py 입력. keywords.priority=true는 순위 하락 경보 대상. 키워드는 .agents/product-marketing.md ASO 규칙의 확정 세트 + 토큰화 확인용 공백형.",
+  "app_id": 6790086549,
+  "country": "kr",
+  "keywords": [
+    {"term": "음악편지", "priority": true},
+    {"term": "음악 편지", "priority": true},
+    {"term": "노래선물", "priority": true},
+    {"term": "노래편지", "priority": true},
+    {"term": "음악선물", "priority": true},
+    {"term": "고백편지", "priority": true},
+    {"term": "편지지", "priority": false},
+    {"term": "편지앱", "priority": false},
+    {"term": "편지쓰기", "priority": false},
+    {"term": "손편지", "priority": false},
+    {"term": "안부", "priority": false},
+    {"term": "위로", "priority": false},
+    {"term": "축하", "priority": false},
+    {"term": "엽서", "priority": false},
+    {"term": "편지봉투", "priority": false},
+    {"term": "뮤터", "priority": true}
+  ],
+  "competitors": [
+    {"id": 1615253712, "name": "Dearyou"},
+    {"id": 6443709181, "name": "Sincerely"}
+  ],
+  "rank_drop_alert": 3,
+  "search_limit": 50
+}

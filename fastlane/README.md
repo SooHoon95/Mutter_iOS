@@ -39,6 +39,14 @@ TestFlight 빌드 상태 조회(processingState·usesNonExemptEncryption·베타
 
 TestFlight 내부 그룹에 테스터 추가
 
+### ios promo_text
+
+```sh
+[bundle exec] fastlane ios promo_text
+```
+
+App Store 프로모션 텍스트(ko) 갱신 — 라이브 버전, 심사 없음
+
 ### ios generate
 
 ```sh
