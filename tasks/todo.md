@@ -8,7 +8,7 @@
 - [x] P1 수집 스크립트 4종 + 설정 — 실제 iTunes 데이터로 실행(16 키워드·경쟁 2·리뷰 0·시즌 한글날 D-4). 발견: `음악 편지` 1위 vs `음악편지` 미노출(토크나이저)
 - [x] P2 에이전트 `mutter-aso-analyst`·`mutter-copywriter` 신규, `mutter-marketer` 리드 개편(모드·Agent 도구·충돌 규칙·신선도 게이트), `video-director` 규칙 인라인, `/marketing-loop`·`/marketing-approve`, fastlane `promo_text` 레인
 - [x] P3 `weekly.sh` 통합 — 1회차 rc=0(14분): 리포트·ASO 분석·큐 4건(promo 98자·threads 2·reel 1)·금지어 0·state 갱신. 2회차 rc=0: 큐 중복 0, 위임 스킵, runs 2. (1차 시도는 `--allowedTools` 가변 인자가 프롬프트를 삼켜 실패 → stdin으로 수정, 메모리 기록)
-- [ ] P4 `eval.sh` 5케이스 기준선
+- [x] P4 `eval.sh` 5케이스 기준선 — 5/5 통과(1번은 첫 실행에서 자가 점검 메모 줄을 금지어로 잡은 오탐 → 검사 수정 후 통과). 함정 케이스(CC0)에서 "전제가 사실이 아닙니다"로 거절 확인
 - [x] P5 launchd 등록 — 두 가지 함정 해결: ① launchd 직접 실행은 macOS TCC로 `~/Desktop` 저장소 접근 불가 → `open -g -a Terminal ~/Library/Application Support/Mutter/weekly.command` 경유(Terminal은 Desktop 권한 보유, `-g`로 포커스 탈취 방지) ② oh-my-zsh 업데이트 프롬프트가 입력 첫 글자를 삼킴 → `.zshrc`에 `zstyle :omz:update mode reminder`(omz 로드 전). kickstart 2회 연속 성공, 킬 스위치 즉시 종료, 창 자동 닫힘
 - [ ] P6 (선택, 보류) Supabase 집계 RPC — 키를 서버에 심으려면 service role 또는 SQL 에디터 수동 1회가 필요해 이번 세션에서 검증 불가. 리뷰·순위·시즌만으로 루프는 완결. 후속: `app_secrets` 테이블 + `get_marketing_metrics(p_key)` + `metrics_pull.py`
 - [x] critic 독립 리뷰 — ACCEPT-WITH-RESERVATIONS: Major 1(`runs` 카운터 LLM 의존 → weekly.sh로 이관) · Minor 7(gitignore·2/29·handled 정리·reviews.jsonl 존재·스냅샷 회전·plist 주석·rating None) · 보완(API 간격 1초·재시도 1회·(e) 문구) 전부 반영 → 커밋

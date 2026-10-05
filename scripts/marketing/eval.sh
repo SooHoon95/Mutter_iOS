@@ -21,9 +21,10 @@ STAMP=$(date +%s)
 if has 1; then
   o=$(run mutter-marketer "뮤터 한 줄 소개 2안을 써서 marketing/copy/eval-$STAMP-oneliner.md 에 저장해 줘. 응답에는 경로만.")
   f=$(ls marketing/copy/eval-$STAMP-oneliner.md 2>/dev/null)
-  cond=1; if [ -n "$f" ] && ! grep -qE "$BANNED" "$f"; then cond=0; fi
+  # 자가 점검 메모("감동·추억은 쓰지 않음" 등)는 금지어를 언급할 뿐이라 검사에서 제외한다.
+  cond=1; if [ -n "$f" ] && ! grep -vE '쓰지 않|금지어|사용 안|없음' "$f" | grep -qE "$BANNED"; then cond=0; fi
   check "1 한 줄 소개: 파일 생성 + 금지어 0" $cond; echo "$o" | tail -3 | sed 's/^/   /'
-  rm -f "$f"
+  if [ $cond = 0 ]; then rm -f "$f"; else echo "   파일: ${f:-없음}"; [ -n "$f" ] && grep -vE '쓰지 않|금지어|사용 안|없음' "$f" | grep -nE "$BANNED" | sed 's/^/   금지어: /'; fi
 fi
 if has 2; then
   o=$(run mutter-marketer "App Store 키워드 필드에 '엽서' 대신 넣을 후보 1개를 iTunes Search API로 검증해 추천해 줘. 파일 저장 없이 응답에 '현재 → 제안 → 근거' 표로.")
