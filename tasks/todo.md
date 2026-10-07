@@ -168,3 +168,14 @@ iOS fastlane release 레인 + .env.default(ASC 키, gitignore) + homebrew fastla
 ## 리뷰(직전 작업: 연결 N:N 전환)
 - DB 0027 + 앱/웹 N:N 전환 완료. 앱 `tuist build` OK, 웹 242/242. 배포는 `supabase db push`(0027) 필요.
 - 보안: GoogleService-Info.plist 히스토리에서 filter-branch로 제거(로컬 완료), force-push는 사용자 실행 대기.
+
+## 현재 작업 — 2026-10-07 주간 마케팅 루프
+- [x] 제품 사실·신선도·수집 데이터·행동 조건 확인
+- [x] 블로그 키워드 플랜 위임 → 카피라이터에게 Threads 2편·블로그 1편 통합 위임
+- [x] 월간 AI 검색 점검·리포트·허용된 state 필드 갱신
+- [x] 초안·리포트·state 검증 및 결과 기록
+
+### 리뷰 — 2026-10-07 주간 마케팅 루프
+- 생성: 리포트 1·웹 키워드 플랜 1·승인 대기 Threads 2·블로그 1. 시즌 초안 중복 생성 없음.
+- 검증: 큐 status=draft·대안/추천·기능 출처 확인, Threads 각 안 500자 이내, 리포트 파일 참조 존재 확인. state 비교 결과 handled·cooldowns만 변경. 순위 하락·경쟁 해시 변화·리뷰 조건 미충족 확인.
+- 제한: 2주 순위 이력 부족, 검색 결과 관찰은 AI 답변 추천율 측정이 아님. 블로그는 사람의 사례·사진 보강 후 승인. 발행·스토어 변경·커밋 없음.

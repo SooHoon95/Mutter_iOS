@@ -1,0 +1,194 @@
+{
+  "date": "2026-10-07",
+  "collected_at": "2026-10-07T22:41:56+09:00",
+  "app": {
+    "version": "1.0.4",
+    "rating": 0,
+    "rating_count": 0,
+    "released": "2026-09-17"
+  },
+  "keywords": {
+    "음악편지": {
+      "priority": true,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "VITA - 동영상 편집 어플",
+        "VideoShow - 비디오 편집 및 사진 편집",
+        "KineMaster - AI 동영상 편집 어플"
+      ]
+    },
+    "음악 편지": {
+      "priority": true,
+      "rank": 1,
+      "total": 41,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "CapCut: 사진 및 동영상 에디터",
+        "오디오 편집기: 음악 편집, 사운드 편집 소프트웨어"
+      ]
+    },
+    "노래선물": {
+      "priority": true,
+      "rank": 1,
+      "total": 4,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "SongWish: AI 노래 선물 메이커",
+        "GiftSong"
+      ]
+    },
+    "노래편지": {
+      "priority": true,
+      "rank": 5,
+      "total": 47,
+      "top3": [
+        "Lingokids: 영어 게임",
+        "아기 첫 영어 ABC 알파벳 및 무료 파닉스 동요와 편",
+        "Moises: 뮤지션의 앱"
+      ]
+    },
+    "음악선물": {
+      "priority": true,
+      "rank": 3,
+      "total": 44,
+      "top3": [
+        "벨팡-벨소리 컬러링 통화연결음",
+        "발렌타인 데이: 사랑에 빠질 것만 같은 7가지의 선물",
+        "뮤터 - 음악 편지, 노래 선물"
+      ]
+    },
+    "고백편지": {
+      "priority": true,
+      "rank": 1,
+      "total": 17,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "Sincerely: 고민 상담 및 고백",
+        "WeeKL(위클) - 느린 편지"
+      ]
+    },
+    "편지지": {
+      "priority": false,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "VLLO 블로, 나의 첫 동영상 편집기",
+        "Canva(캔바): 디자인, 사진편집, 동영상 편집",
+        "사진합치기 및 사진편집 어플 -Perfect Image"
+      ]
+    },
+    "편지앱": {
+      "priority": false,
+      "rank": null,
+      "total": 38,
+      "top3": [
+        "Dearyou : 편지 펜팔",
+        "이지온메일-앱으로 쓰는 손편지!",
+        "폰편지"
+      ]
+    },
+    "편지쓰기": {
+      "priority": false,
+      "rank": null,
+      "total": 38,
+      "top3": [
+        "폰편지",
+        "편지 AI - AI를 이용해 편지쓰세요",
+        "이지온메일-앱으로 쓰는 손편지!"
+      ]
+    },
+    "손편지": {
+      "priority": false,
+      "rank": null,
+      "total": 45,
+      "top3": [
+        "이지온메일-앱으로 쓰는 손편지!",
+        "폰편지",
+        "Dearyou : 편지 펜팔"
+      ]
+    },
+    "안부": {
+      "priority": false,
+      "rank": null,
+      "total": 45,
+      "top3": [
+        "안부 - 부모님 돌봄 기록",
+        "안부 : 마음을 전하는 습관",
+        "안심 - 부모님 안부"
+      ]
+    },
+    "위로": {
+      "priority": false,
+      "rank": null,
+      "total": 42,
+      "top3": [
+        "옹심이 the 감자",
+        "하루냥",
+        "Dearyou : 편지 펜팔"
+      ]
+    },
+    "축하": {
+      "priority": false,
+      "rank": null,
+      "total": 49,
+      "top3": [
+        "생일 축하 - 사진 프레임",
+        "인사2026-추석,명절,인사,인사말,경조사,축하,장례",
+        "생일 축하 사진 편집기"
+      ]
+    },
+    "엽서": {
+      "priority": false,
+      "rank": null,
+      "total": 42,
+      "top3": [
+        "오늘도 엽서",
+        "스냅스 - SNAPS",
+        "퍼블로그 굿즈 포토북 사진인화 포토카드 스티커 달력"
+      ]
+    },
+    "편지봉투": {
+      "priority": false,
+      "rank": 1,
+      "total": 12,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "사랑의 편지: 커플을 위한 선물",
+        "Yours - 마음이 담긴 손편지"
+      ]
+    },
+    "뮤터": {
+      "priority": true,
+      "rank": 1,
+      "total": 8,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "디아블로 이모탈",
+        "고양이 번역기 - 인간-고양이 커뮤니케이터"
+      ]
+    }
+  },
+  "competitors": {
+    "1615253712": {
+      "name": "Dearyou",
+      "track_name": "Dearyou : 편지 펜팔",
+      "version": "1.8.0",
+      "rating": 4.5614,
+      "rating_count": 114,
+      "updated": "2026-09-27",
+      "description_sha": "54725fe94cab",
+      "release_notes": "버그를 수정하고 안정성을 개선했습니다."
+    },
+    "6443709181": {
+      "name": "Sincerely",
+      "track_name": "Sincerely: 고민 상담 및 고백",
+      "version": "1.94.0",
+      "rating": 4.85714,
+      "rating_count": 14,
+      "updated": "2026-09-30",
+      "description_sha": "8c2267a02bdd",
+      "release_notes": "앱 최적화 및 버그 수정\n더욱 쾌적해진 서비스를 만나보세요!"
+    }
+  }
+}

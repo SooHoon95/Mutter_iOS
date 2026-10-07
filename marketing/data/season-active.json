@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-05",
+  "date": "2026-10-07",
   "active": [
     {
       "key": "hangul-day",
       "name": "한글날",
       "date": "2026-10-09",
-      "days_left": 4,
+      "days_left": 2,
       "hint": "한글로 쓴 편지에 노래 한 곡",
       "already_drafted": true
     }

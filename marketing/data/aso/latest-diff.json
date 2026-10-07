@@ -1,8 +1,39 @@
 {
-  "keyword_changes": [],
-  "competitor_changes": [],
+  "keyword_changes": [
+    {
+      "term": "노래편지",
+      "priority": true,
+      "from": 6,
+      "to": 5,
+      "kind": "rise",
+      "material": false
+    },
+    {
+      "term": "음악선물",
+      "priority": true,
+      "from": 4,
+      "to": 3,
+      "kind": "rise",
+      "material": false
+    }
+  ],
+  "competitor_changes": [
+    {
+      "id": "1615253712",
+      "name": "Dearyou",
+      "fields": [
+        "rating_count"
+      ],
+      "from": {
+        "rating_count": 113
+      },
+      "to": {
+        "rating_count": 114
+      },
+      "release_notes": "버그를 수정하고 안정성을 개선했습니다."
+    }
+  ],
   "app_changes": [],
-  "note": "첫 스냅샷 — 비교 대상 없음",
-  "date": "2026-10-05",
-  "prev_date": null
+  "date": "2026-10-07",
+  "prev_date": "2026-10-05"
 }
