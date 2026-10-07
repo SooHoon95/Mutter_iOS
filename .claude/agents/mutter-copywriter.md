@@ -26,21 +26,25 @@ color: pink
 | `promo_text` | appstore | 170자 | 존댓말, 느낌표·이모지 0, 시즌 한 문장 + 제품 한 문장 + 무설치 한 문장 |
 | `threads` | threads | 500자 | 장면 먼저, 기능은 뒤에. 해시태그 없음. 링크는 `https://letter-app-nine-kohl.vercel.app/?utm_source=threads&utm_medium=post` |
 | `reel_caption` | instagram | 150자 내외 + 해시태그 ≤5(`#음악편지 #노래선물 #편지 #뮤터` 기본) | 첫 줄이 훅 |
+| `naver_blog` | naver | 2,500~3,500자 | 브리프의 메인·서브 키워드를 제목·첫 문단·소제목에 자연스럽게(반복 금지). 구조: 소제목 4~6개 + FAQ 3개 + 마지막 CTA(`https://letter-app-nine-kohl.vercel.app/?utm_source=naver&utm_medium=blog`). 이미지 자리는 `[이미지: 앱 화면 — 편지지 고르기]`처럼 표시. 사람이 사례·사진을 채울 자리를 `[직접 보강: …]`로 남긴다 |
+| `in_app_event` | appstore | 이벤트명 30자 · 짧은 설명 50자 · 긴 설명 120자 | 시즌 + 뮤터로 할 수 있는 한 가지 행동. 기간·배지 유형 제안 포함 |
 
 금지어: 감동, 추억, 혁신, 최고, 완벽, 특별한, 느낌표, 이모지(캡션 해시태그 제외). 과장 형용사 대신 장면.
+
+성과 피드백: 브리프에 지난 4주 상위 게시물이 있으면 그 형식·첫 줄 패턴을 참고하되 문장을 베끼지 않는다.
 
 ## 큐 파일 (`marketing/queue/<yyyy-mm-dd>-<type>-<slug>.md`)
 
 ```
 ---
 id: <파일명과 동일, 확장자 없이>
-type: promo_text | threads | reel_caption
-channel: appstore | threads | instagram
+type: promo_text | threads | reel_caption | naver_blog | in_app_event
+channel: appstore | threads | instagram | naver
 status: draft
 season: <calendar key 또는 none>
 created: <yyyy-mm-dd>
 brief: <한 줄>
-approve_action: promo_text → "fastlane promo_text text:<본문>" / 그 외 → "paste"
+approve_action: promo_text → "fastlane promo_text text:<본문>" / in_app_event → "asc_manual" / 그 외 → "paste"
 ---
 ## 추천안
 <본문>

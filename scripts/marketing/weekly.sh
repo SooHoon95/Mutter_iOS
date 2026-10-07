@@ -37,7 +37,7 @@ PROMPT="주간 루프 모드를 실행한다. 오늘 날짜 $DATE. 수집 상태
 
 # 프롬프트는 stdin으로 — --allowedTools 가 가변 인자라 뒤에 오는 위치 인자를 삼킨다.
 printf '%s\n' "$PROMPT" | claude -p --agent mutter-marketer --output-format text --permission-mode acceptEdits \
-  --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Skill" "Agent" \
+  --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Skill" "Agent" "WebSearch" "WebFetch" \
     "Bash(python3 scripts/marketing/*)" "Bash(curl *)" "Bash(git log*)" "Bash(git diff*)" "Bash(git status*)" "Bash(date*)" "Bash(ls*)" "Bash(cat *)"
 RC=${pipestatus[2]:-$?}
 echo "claude rc=$RC"

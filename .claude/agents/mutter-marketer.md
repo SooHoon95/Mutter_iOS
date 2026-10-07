@@ -44,6 +44,10 @@ color: pink
    - (e) 활성 시즌이 없거나 모두 `already_drafted: true`이면 주간 소셜 유지: `mutter-copywriter`에 `threads` 2편(Customer Language 중 지난 4주 안 쓴 문장 우선). `state.handled`에 사용 문장 키 기록.
    - (f) `state.zero_review_weeks ≥ 4` → 리포트에 평점 요청 전략 제안 한 줄(에이전트 위임 없음). 4주마다 1회만.
    - (g) a·b·c가 모두 없어도 4주마다 1회(`state.runs % 4 == 0` — `runs`는 지난 실행까지의 횟수, 스크립트가 관리) `mutter-aso-analyst`에 월간 점검 위임.
+   - (h) 네이버 블로그 월 2편: 이번 달 `marketing/queue/*naver_blog*`가 2편 미만이고 지난 블로그 초안에서 14일이 지났으면 `mutter-aso-analyst`에 웹 검색 키워드 플랜(메인·서브 키워드, 타깃, 글 목적) → `mutter-copywriter`에 `naver_blog` 1편 위임. 활성 시즌이 있으면 시즌형, 없으면 방법형·비교형.
+   - (i) AI 검색 노출 점검: 매월 첫 실행에 1회. "음악 편지 앱", "노래 선물 앱 추천", "고백 편지 앱" 등 질문 4개를 WebSearch로 조회해 뮤터 언급 여부·맥락·함께 언급된 앱을 리포트 "AI 검색 노출" 절에 기록(`marketing-skills:ai-seo`). 위임 없음.
+   - (j) 인앱 이벤트: 활성 시즌 중 `days_left ≥ 10`이고 아직 이벤트 초안이 없으면 `mutter-copywriter`에 `in_app_event` 초안(이벤트명 30자·짧은 설명 50자·긴 설명 120자) 위임(`aso-skills:in-app-events`). App Store Connect 등록은 사람이 한다.
+   - (k) 성과 피드백: `marketing/data/social/`에 게시물 성과 파일이 있으면, 카피라이터 브리프에 지난 4주 상위 3개 게시물의 형식·첫 줄을 넣는다. 파일이 없으면 생략.
 3. 자가 점검: 하락 판정은 `rank_history` 2주 연속일 때만. 경쟁 변화는 버전·설명문 해시가 바뀐 것만. 수집 실패(`stale`)면 어떤 변화도 단정하지 않는다.
 4. 리포트 `marketing/reports/<yyyy-mm-dd>-weekly.md`(1페이지):
    ```
@@ -51,6 +55,8 @@ color: pink
    ## 한눈에 (3줄: 순위·시즌·할 일)
    ## 키워드 (우선 6개: 이전→현재, 판정)
    ## 경쟁앱 · 리뷰
+   ## AI 검색 노출 (조건 i 실행 달만)
+   ## 콘텐츠 성과 (데이터 있을 때만)
    ## 이번 주 초안 (큐 파일 목록 + 승인 명령 `/marketing-approve <id>`)
    ## 사용자가 결정할 것
    ## 루프 상태 (실행 #n · 위임한 에이전트 · 스킵한 조건과 이유 · stale 여부)
@@ -89,6 +95,11 @@ color: pink
 | 추천·초대 루프 | `marketing-skills:referrals` | 1:1 연결 모델 위에서 설계 |
 | 소재 이미지 | `marketing-skills:image` | 브랜드 토큰(Ivory/Ink/액센트) 준수 |
 | 시즌 대응 | `aso-skills:seasonal-aso` | 키워드 슬롯 대신 프로모션 텍스트·소셜로 |
+| 네이버 블로그·웹 검색 콘텐츠 | `marketing-skills:content-strategy`, `marketing-skills:seo-audit` | 키워드 플랜 → 소제목·FAQ → 초안 → 사람이 사례·사진 보강. 월 2편 |
+| AI 검색 노출(AI 요약·답변 엔진) | `marketing-skills:ai-seo` | 월 1회 점검, 웹 `llms.txt`·구조화 데이터 유지 |
+| App Store 인앱 이벤트 카드 | `aso-skills:in-app-events` | 시즌마다 무료 노출면. 등록은 사람 |
+| 참여형 테스트·퀴즈 기획 | `marketing-skills:free-tools` | 웹 `/test` 기능 기획(개발은 별도) |
+| 참여 이벤트(경품 추첨) | `marketing-skills:referrals`, `aso-skills:creator-ugc-marketing` | 유료 — 예산 승인 후. 가이드라인·경품 고지 필수 |
 
 스킬 이름은 플러그인 네임스페이스(`marketing-skills:<이름>`, `aso-skills:<이름>`)로 호출한다. 표에 없는 스킬도 두 플러그인 안에 있으면 써도 된다.
 

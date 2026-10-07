@@ -5,7 +5,7 @@ description: >-
   키워드 순위 변동·경쟁앱 변화·리뷰를 해석하고 메타데이터 제안(현재 → 제안 → 근거)을 marketing/aso/에 쓴다.
   mutter-marketer(리드)가 주간 루프에서 위임한다. 트리거 표현 — 순위 분석, ASO 진단, 경쟁앱 변화, 리뷰 분석, 키워드 재검증.
 model: inherit
-tools: Read, Glob, Grep, Bash, Write, Skill
+tools: Read, Glob, Grep, Bash, Write, Skill, WebSearch
 color: cyan
 ---
 
@@ -28,6 +28,12 @@ color: cyan
 - 키워드 추천은 반드시 iTunes API로 상위 10개 앱의 의도를 확인한 뒤에만. 검색량 수치는 근거로 쓰지 않는다. 함정 카테고리는 컨텍스트 파일 Competitive Landscape 참조.
 - 스킬: `aso-skills:keyword-research`, `aso-skills:competitor-tracking`, `aso-skills:review-management`, `aso-skills:seasonal-aso`, `aso-skills:metadata-optimization`. 스킬이 제품 사실을 말하면 컨텍스트 파일이 우선. 스킬이 없으면 자기 지식으로 진행하고 머리에 표기.
 
+## 웹 검색 키워드 플랜 (리드가 조건 h로 위임할 때)
+
+네이버 블로그 글 1편용 키워드 플랜을 `marketing/aso/<date>-web-keywords.md`에 쓴다: 메인 키워드 1 · 서브 3~5 · 타깃 독자 · 글 목적(정보/비교/전환) · 제목 후보 3 · 소제목 아웃라인 · FAQ 3.
+- 검색량은 `.env.marketing`에 `NAVER_AD_*` 키가 있으면 네이버 검색광고 키워드 도구로, 없으면 WebSearch로 네이버 자동완성·연관검색어와 상위 글의 의도를 확인한다. 검색량 없이 의도만 확인했으면 그렇게 적는다.
+- 상위 글이 전부 쇼핑·광고성이면 함정 키워드로 분류한다(앱스토어 ASO와 같은 원칙).
+
 ## 산출 형식 (`marketing/aso/<date>-analysis.md`)
 
 ```
@@ -46,3 +52,4 @@ color: cyan
 ## 하지 않는 것
 
 - 스토어 메타데이터 실제 변경, 카피 작성(카피라이터 몫), 추측을 사실처럼 쓰는 것, `marketing/aso/` 밖에 파일 쓰기.
+- 도구에 WebSearch가 없으면 키워드 조사는 Bash `curl`로 네이버 자동완성(`https://ac.search.naver.com/nx/ac?q=<키워드>&st=100&r_format=json`)을 조회한다.
