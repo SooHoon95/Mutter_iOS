@@ -13,6 +13,11 @@
 - [ ] P6 (선택, 보류) Supabase 집계 RPC — 키를 서버에 심으려면 service role 또는 SQL 에디터 수동 1회가 필요해 이번 세션에서 검증 불가. 리뷰·순위·시즌만으로 루프는 완결. 후속: `app_secrets` 테이블 + `get_marketing_metrics(p_key)` + `metrics_pull.py`
 - [x] critic 독립 리뷰 — ACCEPT-WITH-RESERVATIONS: Major 1(`runs` 카운터 LLM 의존 → weekly.sh로 이관) · Minor 7(gitignore·2/29·handled 정리·reviews.jsonl 존재·스냅샷 회전·plist 주석·rating None) · 보완(API 간격 1초·재시도 1회·(e) 문구) 전부 반영 → 커밋
 
+### 2026-10-07 웹 배포
+- [x] Supabase `db push`: 0032(android app_config 행, min 0.1.0 — 강제 없음) · 0033(`get_letter_preview`). anon 호출 HTTP 200 `{"sealed":true}` 확인
+- [x] letter-app e3bbe60 push → Vercel 배포. 크롤러 UA `/l/:token` → OG 카드(봉인 이미지), 일반 UA → SPA, 사이트 제목 "뮤터 - 음악 편지", 봉투 이미지 200
+- [ ] 실제 편지 링크로 카카오 공유 디버거 확인(테마 봉투) — 사용자
+
 ## 이전 작업 — 양 플랫폼 심사 제출 + 웹 배포 대기 (2026-09-16)
 
 사용자 지시: "안드·iOS 배포되면 웹도 배포하자, 둘 다 심사 올려". 웹(e3bbe60)은 두 앱 출시 후 push.
