@@ -16,5 +16,18 @@
         "repo": "eronred/aso-skills"
       }
     }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/route-marketing-to-codex.sh"
+          }
+        ]
+      }
+    ]
   }
 }

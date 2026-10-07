@@ -22,7 +22,7 @@
 | 단계 | 무엇 | 산출 |
 |---|---|---|
 | 수집 | `aso_watch.py`(키워드 16개 순위·경쟁앱 2개) · `reviews_pull.py`(리뷰 RSS) · `season.py`(21일 내 시즌) · `context_sync.py`(코드 → 컨텍스트 파일 auto 블록) | `marketing/data/aso/<date>.json`, `latest-diff.json`, `reviews.jsonl`, `season-active.json` |
-| 판단 | `claude -p --agent mutter-marketer`(주간 루프 모드) → 행동 조건 판정 → `mutter-aso-analyst`·`mutter-copywriter` 위임 | `marketing/reports/<date>-weekly.md`, `marketing/aso/<date>-analysis.md`, `marketing/queue/*.md`(status: draft) |
+| 판단 | `codex exec`(리드 지침 + 주간 루프 모드, `LOOP_ENGINE=claude`면 `claude -p --agent mutter-marketer`) → 행동 조건 판정 → `mutter-aso-analyst`·`mutter-copywriter` 위임 | `marketing/reports/<date>-weekly.md`, `marketing/aso/<date>-analysis.md`, `marketing/queue/*.md`(status: draft) |
 | 기록 | macOS 알림 + `chore(marketing-loop): <date>` 커밋(push 없음) | `marketing/data/logs/<date>.log` |
 
 - **승인**: `/marketing-approve <queue-id>` — 프로모션 텍스트는 `fastlane promo_text`(dry-run 먼저), 소셜 글은 붙여넣기용으로 표시.

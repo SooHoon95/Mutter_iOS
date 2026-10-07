@@ -2,6 +2,8 @@
 # 마케팅 에이전트 회귀 테스트 — 플러그인 업데이트·에이전트 수정 뒤 실행. 5케이스, 각각 헤드리스로 돌리고 grep으로 판정.
 # 사용: scripts/marketing/eval.sh [케이스번호…]   (산출물은 marketing/_eval/ 아래, gitignore 대상 아님이므로 끝나면 지운다)
 set -u
+# 회귀 테스트는 Claude 에이전트 정의 자체를 검사한다 — 마케팅→Codex 라우팅 훅을 끈다.
+export MUTTER_MARKETING_ENGINE=claude
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"; cd "$ROOT" || exit 1
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 OUT="$(mktemp -d)"; PASS=0; FAIL=0

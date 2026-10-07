@@ -107,3 +107,6 @@ marketing/LOOP_DISABLED
 __pycache__/
 # 서브에이전트 memory: project 런타임 상태 — 커밋 안 함
 .claude/agent-memory/
+
+# Claude↔Codex 핑퐁 스레드 상태(scripts/ai)
+.ai-pingpong/

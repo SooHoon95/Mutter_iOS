@@ -1,7 +1,7 @@
-# CLAUDE.md
+# AGENTS.md
 
-Claude Code가 이 저장소에서 작업할 때 따르는 지침. 이 파일은 **대원칙과 스킬 트리거**만 담는다.
-구체 규칙·예시·보일러플레이트는 모두 `.claude/skills/<name>/SKILL.md`에 있다.
+Codex가 이 저장소에서 작업할 때 따르는 지침. 이 파일은 **대원칙과 스킬 트리거**만 담는다.
+구체 규칙·예시·보일러플레이트는 모두 `.agents/skills/<name>/SKILL.md`에 있다.
 
 ---
 
@@ -25,7 +25,7 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 1. **Plan 모드 기본** — 사소하지 않은 작업(3단계 이상 또는 아키텍처 결정)은 Plan 모드로 진입한다. 어긋나면 즉시 멈추고 재계획한다 — 그대로 밀어붙이지 않는다. Plan 모드는 빌드뿐 아니라 검증 단계에서도 쓴다. 모호함을 줄이기 위해 상세 스펙을 먼저 작성한다.
 2. **서브에이전트 활용** — 메인 컨텍스트를 깨끗이 유지하도록 서브에이전트를 적극 사용한다. 리서치·탐색·병렬 분석은 서브에이전트로 위임한다. 복잡한 문제일수록 컴퓨트를 더 투입하고, 서브에이전트 하나당 한 가지 갈래에만 집중시킨다. 범위가 작으면 현재 컨텍스트에서 직접 처리하고, 여러 파일·책임으로 나뉠 때만 분산한다.
 3. **자기 개선 루프** — 사용자 교정이 있을 때마다 패턴을 기록하고 같은 실수를 막을 규칙을 스스로 작성한다. 실수율이 낮아질 때까지 가차 없이 갱신한다. 세션 시작 시 누적 교훈을 먼저 검토한다. (운영은 `self-improvement` 스킬)
-4. **완료 전 검증** — 동작을 증명하지 않은 작업은 절대 완료로 표시하지 않는다. 필요하면 main과 변경 결과의 동작 차이를 비교한다. "스태프 엔지니어가 승인할까?"를 스스로 묻고, 테스트 실행·로그 확인으로 정확성을 입증한다. **자가 승인 금지** — 사소하지 않은 변경은 커밋 전 별도 패스로 `code-reviewer`/`critic`(또는 `/arch-check`)로 독립 검토한다. (교차 리뷰가 필요하면 `/codex`로 Codex에게 받는다)
+4. **완료 전 검증** — 동작을 증명하지 않은 작업은 절대 완료로 표시하지 않는다. 필요하면 main과 변경 결과의 동작 차이를 비교한다. "스태프 엔지니어가 승인할까?"를 스스로 묻고, 테스트 실행·로그 확인으로 정확성을 입증한다. **자가 승인 금지** — 사소하지 않은 변경은 커밋 전 별도 패스로 `code-reviewer`/`critic`(또는 `/arch-check`)로 독립 검토한다. (교차 리뷰는 `claude-pingpong` 스킬로 Claude에게 받는다)
 5. **우아함 추구 (균형)** — 사소하지 않은 변경에선 잠시 멈추고 "더 우아한 방법이 있나?"를 묻는다. 임시방편처럼 느껴지면 지금 아는 모든 것을 바탕으로 우아한 해법을 구현한다. 단순·명백한 수정은 건너뛴다 — 과한 엔지니어링 금지. 결과 제시 전 스스로 도전·검토한다.
 6. **자율적 버그 수정** — 버그 리포트를 받으면 바로 고친다. 손잡고 안내해 달라고 하지 않는다. 로그·에러·실패 테스트를 가리키고 그것을 해결한다. 사용자의 컨텍스트 전환은 0이어야 한다.
 
@@ -63,7 +63,7 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 
 ---
 
-## 슬래시 커맨드 (`.claude/commands/`)
+## 슬래시 커맨드 (Claude Code 전용 — Codex에서는 `.agents/skills/source-command-*` 스킬로 같은 절차를 따른다)
 
 | 상황 | 커맨드 |
 |---|---|
@@ -74,9 +74,8 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 | 빌드·에러 분석 | `/build-ios` |
 | 커밋 | `/commit` |
 | 아키텍처 규칙 전수 검사 | `/arch-check` |
-| 마케팅(포지셔닝·ASO·카피·출시·소셜) → Codex `mutter-marketer`에 위임 | `/marketing` |
-| Codex와 핑퐁(교차 리뷰·의견·구현 위임, 같은 스레드 이어 가기) | `/codex` |
-| 영상 연출·AI 영상 프롬프트·Hyperframes 브리프 → Codex `mutter-video-director`에 위임 | `/video-prompt` |
+| 마케팅(포지셔닝·ASO·카피·출시·소셜) → `mutter-marketer` 에이전트 위임 | `/marketing` |
+| 영상 연출·AI 영상 프롬프트·Hyperframes 브리프 → `mutter-video-director` 에이전트 위임 | `/video-prompt` |
 | 주간 마케팅 루프 즉시 실행(순위·경쟁·리뷰·시즌 → 리포트·초안) | `/marketing-loop` |
 | 마케팅 큐 초안 승인·실행(프로모션 텍스트 반영은 여기서만) | `/marketing-approve` |
 
@@ -84,9 +83,7 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 
 ---
 
-## 마케팅·영상 에이전트 (`.claude/agents/`)
-
-**마케팅·영상 작업은 Codex가 실행한다.** 아래 4개 에이전트는 Claude 서브에이전트로 띄우지 않고 `scripts/ai/codex.sh -w -a <에이전트>`로 Codex에 맡긴다(PreToolUse 훅 `.claude/hooks/route-marketing-to-codex.sh`가 강제). Claude는 요청 전달·결과 검증·보고를 맡는다. 예외: `MUTTER_MARKETING_ENGINE=claude`(주간 루프 폴백·`eval.sh`). 발행 승인(`/marketing-approve`)은 Claude가 실행한다.
+## 마케팅·영상 에이전트 (`.codex/agents/` — `scripts/ai/sync_codex_agents.py`가 `.claude/agents/`에서 생성. 원본만 고친다)
 
 | 에이전트 | 역할 | 공유 컨텍스트 |
 |---|---|---|
@@ -95,9 +92,7 @@ SwiftUI only (UIKit 금지) · **Tuist 모듈러(Mercury 스캐폴드 1:1 복제
 | `mutter-aso-analyst` | 실무. `marketing/data/` 순위·경쟁·리뷰 데이터 해석, 메타데이터 제안(현재→제안→근거). 리드가 위임 | 같은 파일 |
 | `mutter-copywriter` | 실무. 브리프 → 프로모션 텍스트·스레드·릴스 캡션 초안을 `marketing/queue/`에(승인 대기). 리드가 위임 | 같은 파일 |
 
-산출물은 `marketing/`(레이아웃·설치 방법은 `marketing/README.md`). 마케팅 스킬은 프로젝트 범위 플러그인(`marketing-skills`·`aso-skills`, `.claude/settings.json`에 선언)이라 이 저장소에서만 켜진다.
-
-에이전트 정의의 원본은 `.claude/agents/`다. Codex 사본(`.codex/agents/*.toml`)은 `scripts/ai/sync_codex_agents.py`가 생성하므로 손으로 고치지 않는다.
+산출물은 `marketing/`(레이아웃·설치 방법은 `marketing/README.md`). 마케팅 스킬은 프로젝트 범위 플러그인(`marketing-skills`·`aso-skills`, Codex에는 `~/.codex`에 설치)이다.
 
 **주간 루프**: `scripts/marketing/weekly.sh`(launchd 월 09:00)가 수집 → 리드 판단(Codex `codex exec`, `LOOP_ENGINE=claude`면 Claude) → 리포트·초안 → 커밋. 발행·스토어 변경은 `/marketing-approve`로만. 컨텍스트 파일의 `auto` 블록은 `context_sync.py`가 생성하므로 손으로 고치지 않는다. `feat:` 커밋 뒤에는 Proof Points에 출처와 함께 기능을 추가한다.
 
