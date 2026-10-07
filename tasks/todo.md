@@ -16,7 +16,7 @@
 ### 2026-10-07 웹 배포
 - [x] Supabase `db push`: 0032(android app_config 행, min 0.1.0 — 강제 없음) · 0033(`get_letter_preview`). anon 호출 HTTP 200 `{"sealed":true}` 확인
 - [x] letter-app e3bbe60 push → Vercel 배포. 크롤러 UA `/l/:token` → OG 카드(봉인 이미지), 일반 UA → SPA, 사이트 제목 "뮤터 - 음악 편지", 봉투 이미지 200
-- [ ] 실제 편지 링크로 카카오 공유 디버거 확인(테마 봉투) — 사용자
+- [x] 실제 편지 링크로 테마 봉투 카드·뷰어 확인 — 사용자 확인 "제대로 된다"(2026-10-07)
 
 ## 이전 작업 — 양 플랫폼 심사 제출 + 웹 배포 대기 (2026-09-16)
 
