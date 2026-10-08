@@ -2,7 +2,9 @@
 id: 2026-10-05-promo_text-hangul-day
 type: promo_text
 channel: appstore
-status: draft
+status: rejected
+rejected_at: 2026-10-07
+rejected_reason: 사용자 판단 — 프로모션 텍스트는 효과가 작아 생략, 실제 유입 프로모션에 집중
 season: hangul-day
 created: 2026-10-05
 brief: 한글날(10/9) 프로모션 텍스트. 한글로 꾹꾹 눌러 쓴 편지 + 노래 한 곡, 10/7~10/12 라이브 전제

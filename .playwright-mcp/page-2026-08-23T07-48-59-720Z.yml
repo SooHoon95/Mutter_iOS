@@ -1,0 +1,236 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img "App Store" [ref=e9]
+        - button "App Store" [ref=e12] [cursor=pointer]: iPhone용
+      - generic [ref=e17]:
+        - generic: 검색
+        - searchbox "검색" [ref=e18]
+    - generic [ref=e20]:
+      - list [ref=e22]:
+        - listitem [ref=e23]:
+          - button "투데이" [ref=e24] [cursor=pointer]
+        - listitem [ref=e28]:
+          - button "게임" [ref=e29] [cursor=pointer]
+        - listitem [ref=e33]:
+          - button "앱" [ref=e34] [cursor=pointer]
+        - listitem [ref=e38]:
+          - button "Arcade" [ref=e39] [cursor=pointer]
+      - generic [ref=e43]:
+        - generic [ref=e44]: 카테고리
+        - list "카테고리" [ref=e46]:
+          - listitem [ref=e47]:
+            - button "카테고리" [ref=e48] [cursor=pointer]
+          - listitem [ref=e53]:
+            - button "사진 및 비디오" [ref=e54] [cursor=pointer]
+          - listitem [ref=e59]:
+            - button "건강 및 피트니스" [ref=e60] [cursor=pointer]
+          - listitem [ref=e65]:
+            - button "생산성" [ref=e66] [cursor=pointer]
+          - listitem [ref=e71]:
+            - button "엔터테인먼트" [ref=e72] [cursor=pointer]
+          - listitem [ref=e77]:
+            - button "액션" [ref=e78] [cursor=pointer]
+          - listitem [ref=e83]:
+            - button "어드벤처" [ref=e84] [cursor=pointer]
+          - listitem [ref=e89]:
+            - button "퍼즐" [ref=e90] [cursor=pointer]
+          - listitem [ref=e95]:
+            - button "인디" [ref=e96] [cursor=pointer]
+      - generic:
+        - list
+  - generic [ref=e101]:
+    - main [ref=e102]:
+      - generic [ref=e103]:
+        - generic [ref=e114]:
+          - heading "뮤터 - 음악 편지, 노래 선물" [level=1] [ref=e115]
+          - paragraph [ref=e117]: 생일·기념일·고백, 마음을 담은 감성 편지
+          - paragraph [ref=e118]: iPhone 전용
+          - paragraph [ref=e119]: 무료 · iPhone⁠용으로 디자인됨 · macOS⁠용으로는 확인되지 않음
+          - generic [ref=e120]:
+            - button "Mac App Store에서 보기" [ref=e122] [cursor=pointer]:
+              - generic [ref=e123]: "다음 플랫폼에서 보기: Mac App Store"
+            - button "공유" [ref=e125] [cursor=pointer]
+        - list [ref=e131]:
+          - listitem [ref=e132]:
+            - link "연령 등급 15+ 세" [ref=e134] [cursor=pointer]:
+              - /url: "#information"
+              - generic [ref=e136]:
+                - term [ref=e137]:
+                  - generic [ref=e138]: 연령 등급
+                - definition [ref=e139]:
+                  - generic [ref=e140]: 15+
+                  - generic [ref=e141]: 세
+          - listitem [ref=e142]:
+            - link "카테고리 소셜 네트워킹" [ref=e144] [cursor=pointer]:
+              - /url: "#information"
+              - generic [ref=e146]:
+                - term [ref=e147]:
+                  - generic [ref=e148]: 카테고리
+                - definition [ref=e149]:
+                  - generic [ref=e152]: 소셜 네트워킹
+          - listitem [ref=e153]:
+            - link "개발자 SuHun Choi" [ref=e155] [cursor=pointer]:
+              - /url: https://apps.apple.com/kr/developer/suhun-choi/id6790086551?platform=iphone
+              - generic [ref=e157]:
+                - term [ref=e158]:
+                  - generic [ref=e159]: 개발자
+                - definition [ref=e160]:
+                  - generic [ref=e162]: SuHun Choi
+          - listitem [ref=e163]:
+            - link "언어 KO 한국어" [ref=e165] [cursor=pointer]:
+              - /url: "#information"
+              - generic [ref=e167]:
+                - term [ref=e168]:
+                  - generic [ref=e169]: 언어
+                - definition [ref=e170]:
+                  - generic [ref=e171]: KO
+                  - generic [ref=e172]: 한국어
+          - listitem [ref=e173]:
+            - link "크기 48.7 MB" [ref=e175] [cursor=pointer]:
+              - /url: "#information"
+              - generic [ref=e177]:
+                - term [ref=e178]:
+                  - generic [ref=e179]: 크기
+                - definition [ref=e180]:
+                  - generic [ref=e181]: "48.7"
+                  - generic [ref=e182]: MB
+        - region "iPhone 앱 미리보기 및 스크린샷" [ref=e183]:
+          - generic [ref=e186]:
+            - button "이전 페이지" [disabled] [ref=e187]
+            - list [ref=e188]:
+              - listitem [ref=e189]:
+                - generic "스크린샷" [ref=e191]
+              - listitem [ref=e195]:
+                - generic "스크린샷" [ref=e197]
+              - listitem [ref=e201]:
+                - generic "스크린샷" [ref=e203]
+              - listitem [ref=e207]
+              - listitem [ref=e213]
+              - listitem [ref=e219]
+            - button "다음 페이지" [ref=e225] [cursor=pointer]
+          - generic [ref=e226]: iPhone
+        - paragraph [ref=e231]:
+          - generic [ref=e232]: 좋아하는 노래를 들으면 떠오르는 사람이 있잖아요. 뮤터는 그 마음을 편지로 보내는 앱이에요. 편지를 쓰고, 어울리는 노래 한 곡을 더하면 끝. 받는 사람이 편지를 여는 순간, 그 음악이 함께 흐릅니다. ■ 어떻게 쓰나요 - 마음에 드는 편지지 테마를 고르고 편지를 씁니다 - 편지에 어울리는 노래 한 곡을 더합니다 - 링크로 보내거나, 연결된 친구에게 바로 보냅니다 ■ 받는 사람은 앱이 필요 없어요 링크만 있으면 웹에서 바로 열어볼 수 있어요. "이거 깔아야 돼?" 하고 물어볼 일 없이, 편하게 전하세요. ■ 조심스러운 마음까지 챙겼어요 - 암호 걸기 — 받는 사람만 열 수 있게 - 예약 공개 — 정해둔 시간에 딱 맞춰서 - 링크 끄기 — 마음이 바뀌면 언제든 취소 ■ 이런 날에 써보세요 기념일, 생일, 고백, 축하, 미안하다는 말. 그리고 아무 이유 없이 네 생각이 난 날. 한 통의 편지가 오래 남는 건, 결국 그 안에 담긴 마음 때문이니까요.
+          - button "더 보기" [ref=e234] [cursor=pointer]
+        - region "평가 및 리뷰" [ref=e235]:
+          - heading "평가 및 리뷰" [level=2] [ref=e238]
+          - list [ref=e239]:
+            - listitem [ref=e240]:
+              - generic [ref=e241]: 이 앱은 개요를 표시할 만큼 충분한 리뷰 또는 평가를 받지 않았습니다.
+        - region "새로운 소식" [ref=e242]:
+          - button [ref=e244] [cursor=pointer]:
+            - heading "새로운 소식" [level=2] [ref=e247]
+          - generic "새로운 소식" [ref=e249]:
+            - generic [ref=e250]:
+              - paragraph [ref=e251]:
+                - generic [ref=e252]: 앱 업데이트 기능을 추가했습니다.
+              - generic [ref=e253]:
+                - generic [ref=e254]: 버전 1.0.2
+                - time [ref=e255]: 7월 21일
+        - region "앱이 수집하는 개인정보" [ref=e256]:
+          - button [ref=e258] [cursor=pointer]:
+            - link "앱이 수집하는 개인정보" [ref=e260]:
+              - /url: "#"
+              - heading "앱이 수집하는 개인정보" [level=2] [ref=e262]
+          - paragraph [ref=e267]:
+            - text: SuHun Choi 개발자가 아래 설명된 데이터 처리 방식이 앱의 개인정보 처리방침에 포함되어 있을 수 있다고 표시했습니다. 자세한 내용은
+            - link "개발자의 개인정보 처리방침" [ref=e268] [cursor=pointer]:
+              - /url: https://letter-app-nine-kohl.vercel.app/legal/privacy
+            - text: 을 참조하십시오.
+        - list [ref=e271]:
+          - listitem [ref=e272]:
+            - generic "데이터가 수집되지 않음" [ref=e273]:
+              - heading "데이터가 수집되지 않음" [level=3] [ref=e275]
+              - paragraph [ref=e276]: 개발자가 이 앱에서 데이터를 수집하지 않습니다.
+              - list
+        - paragraph [ref=e278]:
+          - text: 개인정보 처리방침은 사용하는 기능이나 사용자의 나이 등에 따라 달라질 수 있습니다.
+          - link "더 알⁠아⁠보⁠기" [ref=e279] [cursor=pointer]:
+            - /url: https://apps.apple.com/kr/iphone/story/id1538632801
+        - region "손쉬운 사용" [ref=e280]:
+          - heading "손쉬운 사용" [level=2] [ref=e284]
+          - paragraph [ref=e288]:
+            - text: 개발자가 이 앱이 지원하는 손쉬운 사용 기능을 아직 등록하지 않았습니다.
+            - link "더 알아보기" [ref=e289] [cursor=pointer]:
+              - /url: https://apps.apple.com/story/id1814164299
+        - region "정보" [ref=e290]:
+          - heading "정보" [level=2] [ref=e293]
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - term [ref=e296]: 크기
+              - definition [ref=e297]:
+                - list [ref=e298]:
+                  - listitem [ref=e299]: 48.7 MB
+            - generic [ref=e300]:
+              - term [ref=e301]: 카테고리
+              - definition [ref=e302]:
+                - list [ref=e303]:
+                  - listitem [ref=e304]: 소셜 네트워킹
+            - generic [ref=e305]:
+              - term [ref=e306]: 호환성
+              - definition [ref=e307]:
+                - group [ref=e308]:
+                  - generic "iOS 18.0 이상 필요" [ref=e309] [cursor=pointer]
+            - generic [ref=e310]:
+              - term [ref=e311]: 언어
+              - definition [ref=e312]:
+                - list [ref=e313]:
+                  - listitem [ref=e314]: 한국어
+            - generic [ref=e315]:
+              - term [ref=e316]: 연령 등급
+              - definition [ref=e317]:
+                - group [ref=e318]:
+                  - generic "15+" [ref=e319] [cursor=pointer]
+            - generic [ref=e320]:
+              - term [ref=e321]: 제공자
+              - definition [ref=e322]:
+                - list [ref=e323]:
+                  - listitem [ref=e324]:
+                    - strong [ref=e325]: 이름
+                    - text: SuHun Choi
+            - generic [ref=e326]:
+              - term [ref=e327]: 저작권
+              - definition [ref=e328]:
+                - list [ref=e329]:
+                  - listitem [ref=e330]: © 2026 경제자유연구소
+        - generic [ref=e332]:
+          - listitem [ref=e333]:
+            - link "개발자 웹사이트 ↗" [ref=e335] [cursor=pointer]:
+              - /url: https://letter-app-nine-kohl.vercel.app/landing
+              - generic [ref=e336]: 개발자 웹사이트
+              - text: ↗
+          - listitem [ref=e337]:
+            - link "개인정보 처리방침 ↗" [ref=e339] [cursor=pointer]:
+              - /url: https://letter-app-nine-kohl.vercel.app/legal/privacy
+              - generic [ref=e340]: 개인정보 처리방침
+              - text: ↗
+    - generic [ref=e342]:
+      - generic [ref=e344]:
+        - button "대한민국" [ref=e345] [cursor=pointer]
+        - list [ref=e346]:
+          - listitem [ref=e347]:
+            - link "이 페이지는 English (UK)로 제공됩니다." [ref=e348] [cursor=pointer]:
+              - /url: "?l=en-GB"
+              - text: English (UK)
+      - generic [ref=e349]:
+        - paragraph [ref=e350]:
+          - generic [ref=e351]:
+            - text: Copyright © 2026
+            - link "Apple Inc." [ref=e352] [cursor=pointer]:
+              - /url: https://www.apple.com/kr/
+          - text: 모든 권리 보유.
+        - list [ref=e353]:
+          - listitem [ref=e354]:
+            - link "인터넷 서비스 약관" [ref=e355] [cursor=pointer]:
+              - /url: https://www.apple.com/kr/legal/internet-services/
+          - listitem [ref=e356]:
+            - link "App Store 및 개인정보 보호" [ref=e357] [cursor=pointer]:
+              - /url: https://www.apple.com/legal/privacy/data/ko/app-store/
+          - listitem [ref=e358]:
+            - link "쿠키 경고" [ref=e359] [cursor=pointer]:
+              - /url: https://www.apple.com/kr/legal/privacy/kr/cookies/
+          - listitem [ref=e360]:
+            - link "지원" [ref=e361] [cursor=pointer]:
+              - /url: https://support.apple.com/ko-kr/billing

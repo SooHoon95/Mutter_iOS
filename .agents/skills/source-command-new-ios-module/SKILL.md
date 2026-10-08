@@ -1,3 +1,14 @@
+---
+name: "source-command-new-ios-module"
+description: "Migrated source command `new-ios-module`"
+---
+
+# source-command-new-ios-module
+
+Use this skill when the user asks to run the migrated source command `new-ios-module`.
+
+## Command Template
+
 # new-ios-module
 
 새 Feature 모듈 또는 Core 모듈을 프로젝트에 추가한다.
@@ -7,7 +18,7 @@
 - **모듈 타입**: `Feature` / `Infrastructure` / `Domain` / `UIComponent`
 - **모듈명**: 생성할 모듈 이름 (예: Legal, Threads)
 
-## 작업 절차 (`mutter-architecture` 준수)
+## 작업 절차 (AGENTS.md 작업 진행 절차 준수)
 
 ### 1단계: 분석
 
@@ -29,7 +40,7 @@
 
 ### 5단계: 검증
 
-`mutter-architecture` 자가 점검과 의존성 방향 규칙을 확인한다.
+AGENTS.md "코드 작성 후" 체크리스트와 의존성 방향 규칙을 확인한다.
 
 ## Feature 모듈 Project.swift 템플릿
 
@@ -53,7 +64,7 @@ let project = Project.framework(
 
 필요한 의존성만 남긴다. 의존성 추가 시 아래 허용 규칙을 따른다.
 
-## 의존성 방향 규칙 (`mutter-architecture` 기반)
+## 의존성 방향 규칙 (AGENTS.md 기반)
 
 ### 허용되는 의존 관계
 
@@ -128,4 +139,4 @@ Projects/{모듈명}/
 - [ ] Domain Layer에 SwiftUI/UIKit import가 없는가 (Domain 모듈인 경우)
 - [ ] One Type Per File 규칙을 준수했는가
 - [ ] 필요 시 `FeatureRoute` + `RootViewFactory`에 등록했는가
-- [ ] `mise exec -- tuist generate` 실행하여 Xcode 프로젝트 업데이트
+- [ ] `tuist generate` 실행하여 Xcode 프로젝트 업데이트

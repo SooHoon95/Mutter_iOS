@@ -1,5 +1,23 @@
 # tasks/todo.md
 
+> 끝난 작업은 `tasks/archive/`로 옮긴다(`mutter-harness-ops`). 2026-09 이전 작업은 `tasks/archive/todo-2026-09.md`.
+
+## 현재 작업 — 하네스 afin-ios 구조 정합 (iOS·Android) (2026-10-08)
+
+- [x] afin-ios 하네스 구조 조사(CLAUDE.md 원칙 7절·`.claude/CLAUDE.md` OMC·`<프로젝트>-*` 통합 스킬·harness-ops·release-audit·tasks/archive)
+- [x] Mutter 스킬 10개 → 8개(`mutter-*` + omc-reference)로 통합, 실제 코드와 다른 사실 교정
+- [x] Mutter CLAUDE.md afin 구조로 재작성(마케팅 에이전트 절 유지), 커맨드 참조 갱신, `/release-audit` 이식
+- [x] tasks/ 정리(todo·lessons 아카이브)
+- [x] Mutter_android 하네스 신규 구축(CLAUDE.md·스킬·커맨드·tasks)
+- [x] 정적 검증(frontmatter·dangling 참조) + 런타임 검증(`claude -p` 스킬 노출·트리거) + 빌드 명령 실행 확인
+
+### 리뷰
+- 실제 코드와 달랐던 기존 스킬 사실 교정: `.alert(error:)`(존재 안 함 → `errorMessage` + `MutterError.userMessage`), usecase 컨테이너 등록(실제는 호출부 생성자 주입), `AppRoute/AuthRoute` 중심 설명(실제 `FeatureRoute`, Feature View는 콜백), `.mutterTitle()`(실제 `.fonts(...)`), 맨 `tuist`(실제 `mise exec -- tuist`), `/new-ios-screen` 템플릿.
+- 정적: 스킬 8개 name=디렉터리, dangling 0(남은 경고는 `.claude/agents` 에이전트명·OMC 플러그인 커맨드 — 의도된 것).
+- `claude -p` init: 프로젝트 스킬 7개·커맨드 13개 로드. 트리거 4건(네트워킹 2·SwiftUI·CI/CD) 모두 기대 스킬 로드. afin-ios와 동일하게 SKILL.md를 직접 읽는다.
+- 빌드: `mise exec -- tuist generate --no-open` 1회 실패 후 재시도 통과(문서화한 간헐 오류와 일치, 원인 로그는 덮어써져 미확인) → `tuist build Mutter` Build Succeeded. 마케팅 라우팅 훅 exit 2 차단 정상.
+- 미반영: Codex 사본(`AGENTS.md`·미추적 `.agents/skills/ios-*`)은 옛 스킬 이름 그대로.
+
 ## 현재 작업 — 마케팅 자동화: 주간 루프 + 리드/실무 에이전트 (2026-10-05)
 
 플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 수집은 스크립트, 판단은 에이전트. Tier 2(발행·스토어 변경)는 승인 게이트. 스케줄은 로컬 launchd(월 09:00 KST).
@@ -18,157 +36,6 @@
 - [x] letter-app e3bbe60 push → Vercel 배포. 크롤러 UA `/l/:token` → OG 카드(봉인 이미지), 일반 UA → SPA, 사이트 제목 "뮤터 - 음악 편지", 봉투 이미지 200
 - [x] 실제 편지 링크로 테마 봉투 카드·뷰어 확인 — 사용자 확인 "제대로 된다"(2026-10-07)
 
-## 이전 작업 — 양 플랫폼 심사 제출 + 웹 배포 대기 (2026-09-16)
-
-사용자 지시: "안드·iOS 배포되면 웹도 배포하자, 둘 다 심사 올려". 웹(e3bbe60)은 두 앱 출시 후 push.
-
-- [x] iOS: `submit` 레인에 version/build/notes 옵션 추가 → `fastlane submit version:1.0.4 build:8 notes:…` — **18:11 심사 제출 완료**(1.0.4 버전 생성·ko 릴리스 노트·precheck 통과·빌드 8 선택, 승인 후 수동 출시)
-- [x] Android: versionCode 4 / 1.2.0 버전업 커밋(59908a2) → `bundleRelease`+`assembleRelease` BUILD SUCCESSFUL → badging `versionCode=4 versionName=1.2.0` → AAB `app/build/outputs/bundle/release/app-release.aab`(16.5MB). Play API 자격증명 없음 → 콘솔 수동 업로드·제출. 에뮬레이터 R8 스모크 ✔(설치 성공·프로세스 생존·FATAL 0·MainActivity 렌더)
-- [ ] 웹: 보류. 두 앱 출시 확인 후 `git push`(Vercel) + `supabase db push`(0033) + 카카오 디버거 확인
-- [x] 리뷰 섹션 기록
-
-### 리뷰 (2026-09-16, 심사 제출)
-
-- iOS 1.0.4(8): 18:11 심사 제출 완료. 릴리스 노트 ko 포함, precheck 통과, 승인 후 수동 출시(ASC에서 "출시" 버튼). Fastfile `submit`이 version/build/notes를 받게 됨(97e1181).
-- Android 1.2.0(vc4): AAB `Mutter_android/app/build/outputs/bundle/release/app-release.aab`, R8 APK 에뮬레이터 스모크 통과. Play Console 업로드·릴리스 노트·제출은 사용자(자격증명 없음). 저장소에 git remote 없음.
-- 웹 e3bbe60: 두 앱 출시 확인 후 `git push` + `supabase db push`(0033) + 카카오 디버거 확인 — 보류 중.
-
-## 이전 작업 — 1주차 루프: 웹(letter-app)·Android(Mutter_android) 구현 + TestFlight (2026-09-16)
-
-사용자가 두 저장소 접근을 열어 이 세션에서 직접 구현. 스펙: `marketing/plans/2026-09-16-week1-loop-spec.md`. 웹은 Vercel(live) + Vite SPA → 크롤러 UA 조건부 rewrite로 Edge Function 분기.
-
-- [x] TestFlight: 1.0.3 트레인 마감(90186) → 1.0.4 버전업 커밋(7d055e3) → `fastlane beta` 재실행 → **1.0.4 빌드 8 업로드 성공**
-- [x] TestFlight 미노출 원인: 빌드 8은 VALID·규정준수 OK·READY_FOR_BETA_TESTING인데 내부 그룹 `내부테스팅` 테스터 0명 → `tf_add_tester`로 dkehskeh@gmail.com 추가(17:51) · 레인 커밋 1958c4f · lessons.md 기록
-- [x] 웹 L1: `index.html` 기본 OG · `supabase/migrations` `get_letter_preview` RPC(본문 없이 template_id·sealed) · `api/letter-preview.ts` Edge Function · `vercel.json` UA 조건 rewrite · `scripts/gen-og-envelopes.mjs`(Playwright) → `public/og/*.png` 8장
-- [x] 웹 L3: `src/lib/storeLinks.ts`(ct/referrer) · `src/lib/campaign.ts`(utm→ct) · `src/lib/analytics.ts`(no-op track) · `src/components/StoreButtons.tsx`(Download에서 추출) · `src/features/viewer/LetterEndCta.tsx` 3단 + 워드마크 · LetterView 통합
-- [x] 웹 랜딩: Landing 히어로 한 줄 A + 스토어 버튼(utm→ct) · ConnectStorePrompt `ct=connect_invite`
-- [x] 웹 검증: typecheck ✔ · lint 0 에러 · vitest 307/307(신규 21: ogPreview 9·campaign 4·storeLinks 3·LetterEndCta 5) · build ✔ · OG PNG 9장 생성(1200×630)
-- [x] Android L2: `domain/LetterShareMessage.kt` + `:domain` junit 테스트 · `uicomponent/component/ShareSheet.kt`(ACTION_SEND) · Compose `issuedLink: DeliveryLink?` + SendSheet 공유 1순위 · Delivery `lastIssuedLink` + 행 공유
-- [x] Android 검증: `JAVA_HOME=openjdk@17 ./gradlew :domain:test assembleDebug` — BUILD SUCCESSFUL, 5/5
-- [x] critic 독립 리뷰 — Android(Critical 0 / Major 1 수용 / Minor m1·m2·m4 반영) → **Android 3a25505** · 웹(Critical 1 og:image 절대 URL / Major 1 44px / Minor m1·m3·m4·m6 반영, m2 스펙 명시) → **웹 e3bbe60**
-- [x] 리뷰 섹션 기록
-
-### 리뷰 (2026-09-16, 다중 저장소)
-
-- TestFlight: 1.0.4 빌드 8 업로드(15:14) → 처리 VALID·규정준수 OK였으나 내부 그룹 테스터 0명 → `tf_add_tester`로 계정 소유자 추가(17:51). Fastfile에 `tf_status`·`tf_add_tester` 신설(1958c4f).
-- Android(3a25505): 공유 시트 + 동봉 문구, `:domain` junit 5/5, assembleDebug 통과. Connections 초대 공유도 `shareText`로 통합. 후속: 좁은 화면(320dp)에서 기존 링크 행 3버튼 확인.
-- 웹(e3bbe60): OG(Edge Function + `get_letter_preview` RPC + 봉투 9장) · 마지막 장 CTA 3단 · 캠페인 링크 · 랜딩 한 줄 A. vitest 308/308.
-- **배포 필요(사용자)**: 세 저장소 `git push` · Supabase `supabase db push`(0033) · Vercel 배포 후 카카오 공유 디버거로 `/l/<token>` 카드 확인 · Vercel env `VITE_ASC_PROVIDER_ID`(선택).
-- 미결(사용자): 커스텀 도메인 · OG 닉네임 노출 정책 · 브랜드 액센트 색 · 웹 애널리틱스 도구(2~3주차).
-
-## 이전 작업 — 1주차 루프: iOS 공유 시트·동봉 문구 + 웹·Android 실행 스펙 (2026-09-16)
-
-플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 채널 전략 1주차(L1·L2·L3) 중 iOS L2만 이 세션에서 구현, 웹·Android는 각 저장소 세션용 자급형 스펙(`marketing/plans/2026-09-16-week1-loop-spec.md`).
-
-- [x] `UIComponent/Sources/Share/LetterShareMessage.swift` (순수 헬퍼, L10n 조합)
-- [x] Localizable.strings ko·en: `send.share`, `share.letter.body/password/revealAt`
-- [x] Compose: `issuedLink: DeliveryLink?` + `issuedLinkURL`, SendSheet CTA 3단(공유·복사·완료)
-- [x] Delivery: `lastIssuedLink: DeliveryLink?`, issuedLink/existingLinks 행에 ShareLink 아이콘
-- [x] `UIComponent/Tests/LetterShareMessageTests.swift` 5케이스
-- [x] `tuist generate` → `tuist build Mutter`(Build Succeeded) → `tuist test UIComponent`(6/6, 신규 5) → `/arch-check`(신규 위반 0 — 발견 항목은 기존 Auth 콜백·UIKit import·SendSheet `Method.allCases`)
-- [x] 스펙 문서 `marketing/plans/2026-09-16-week1-loop-spec.md` (§0 공통 문구·스토어 URL·토큰표 / §1 웹 OG / §2 웹 CTA 3단 / §3 랜딩 / §4 이벤트 / §5 Android ACTION_SEND / §6 수용 기준)
-- [x] `critic` 독립 리뷰 — Critical 0 / Major 1(스펙: iMessage는 서버 크롤러 없음) / Minor 7 → 8건 전부 반영(접근성 라벨, `pt` 순서, `%1$s` 각주, RPC 실명 `get_letter_by_token`, save_to_inbox 확인 필요, 암호 유무 문구, todo 카운트) → 재빌드 Build Succeeded
-- [x] 커밋 2개 — c4fc890(feat 공유 시트) · 746bbea(docs 채널 전략+1주차 스펙)
-- [x] 리뷰 섹션 기록
-
-### 리뷰 (2026-09-16)
-
-- iOS L2 완료: `LetterShareMessage`(UIComponent, Foundation만 import, 값 인자만) + ko/en 문자열 4개 + Compose `issuedLink: DeliveryLink?`/`issuedLinkURL` + SendSheet CTA 3단(공유 ShareLink → 복사 secondary → 완료 ghost) + Delivery `lastIssuedLink` + 발급/기존 링크 행 ShareLink 아이콘(접근성 라벨 포함). ShareLink item은 String(URL 타입이면 동봉 문구가 빠짐).
-- 검증: `tuist generate`(L10n 심볼 생성 확인) · `tuist build Mutter` Build Succeeded(2회) · `tuist test UIComponent` 6/6(신규 5) · `/arch-check` 신규 위반 0.
-- 웹·Android는 저장소 접근 불가(하네스가 cwd 밖 차단, 샌드박스 해제로도 불가) → 사용자 선택으로 자급형 스펙 `marketing/plans/2026-09-16-week1-loop-spec.md` 작성. 각 저장소 세션에서 `/add-dir /Users/choesuhun/Desktop/Code/Mutter` 후 §1~§5 실행.
-- 미해결(사용자): 커스텀 도메인 · Android applicationId 확인 · App Store `pt` · OG 닉네임 노출 정책 · 웹 호스팅(Vercel/Netlify)·SSR 여부 · 웹 애널리틱스 도구 · 브랜드 액센트 색.
-- 수동 확인 권장: 시뮬레이터에서 편지 저장 → 보내기 시트 → 링크 발급 → 공유하기 → 메시지 앱에 3줄+빈 줄+URL 순서, 암호 ON 시 암호 줄 포함. 전달 관리 화면에서 예약공개 발급 → "…에 열려요" 포함.
-
-## 이전 작업 — 마케팅 에이전트 + 영상 프롬프팅 에이전트 구축 (2026-09-16)
-
-플랜: `~/.claude/plans/mossy-wiggling-perlis.md`. 서드파티 스킬은 전역(-g) 선별 설치, 에이전트는 프로젝트 `.claude/agents/`, 공유 컨텍스트는 `.agents/product-marketing.md`(marketingskills 정본 경로), 산출물은 `marketing/`.
-
-- [x] 사전 준비: `brew install ffmpeg` (Hyperframes 렌더) — ffmpeg 9.0.1
-- [x] 전역 스킬 설치: marketingskills 19개 서브셋 · replicate prompt-videos · square-zero video-prompting · app-store-screenshots · aso-skills(40개 중 14개만 유지, 25개 제거 — 세션 컨텍스트 절약)
-- [x] 공식 플러그인 설치: `hyperframes@claude-plugins-official`
-- [x] `.agents/product-marketing.md` v1 (docs/appstore-submission.md·specs·Colors.xcassets 기반, 추정은 `[확인 필요]`)
-- [x] `.claude/agents/mutter-marketer.md`
-- [x] `.claude/agents/mutter-video-director.md` (skills 프리로드: prompt-videos, video-prompting)
-- [x] `.claude/commands/marketing.md` · `.claude/commands/video-prompt.md`
-- [x] `CLAUDE.md` 커맨드 표 2행 + 마케팅·영상 에이전트 절 · `.gitignore` marketing 렌더 산출물
-- [x] 검증: 설치 확인 · 스모크 1(마케터 → `marketing/copy/2026-09-16-one-liner-subtitle.md`, copywriting+metadata-optimization, iTunes API 32건) · 스모크 2(비디오 → `marketing/video/2026-09-16-teaser-reels/` 5샷 Veo 프롬프트, AUDIO/NEGATIVE/스타일 블록 전부 포함) · 스모크 3(`hyperframes init/check` — ffmpeg·Chrome GPU 인식; Layout 1건은 빈 예제의 타임라인 부재) · 새 프로세스 `claude -p --agent` 프로브(본문 주입 ✔, `skills:` 프리로드 ✗ → 본문에 Skill 로드 가드 추가)
-- [x] `critic` 독립 리뷰 — Major 2(카테고리 예외·스킬 3개 제한 stall) Minor 3 중 4건 반영, m3(`--skill` 플래그)는 `init --help`·플러그인 스킬 본문으로 존재 확인해 기각
-- [x] `/commit` — 5849459(에이전트 인프라) · 3e40dc0(첫 산출물)
-- [x] 리뷰 섹션 기록
-
-### 리뷰 (2026-09-16)
-
-- 설치: 전역 스킬 33개(marketingskills 19 · aso-skills 14 · prompt-videos · video-prompting · app-store-screenshots) + `hyperframes@claude-plugins-official` 0.8.40 + ffmpeg 9.0.1. aso-skills는 40개 중 25개 제거(세션 컨텍스트 절약).
-- 신규 파일: `.claude/agents/mutter-marketer.md`, `.claude/agents/mutter-video-director.md`, `.claude/commands/{marketing,video-prompt}.md`, `.agents/product-marketing.md`(v1), `marketing/README.md`. 수정: `CLAUDE.md`(커맨드 2행 + 에이전트 절), `.gitignore`.
-- 스모크 산출물은 실제 사용 가능한 1차 결과물이라 커밋에 포함(카피 3+2안, 릴스 티저 5샷).
-- 확인된 한계: (1) 세션 중 설치한 플러그인 스킬(`hyperframes:*`)은 그 세션의 서브에이전트에 안 보임 → 새 세션 필요. (2) frontmatter `skills:` 프리로드가 `--agent` 경로에서 미적용(2.1.271) → 에이전트 본문 가드로 보완. (3) 백그라운드 Explore 보고 릴레이 2회 실패 → 직접 읽기로 전환(기존 메모리 규칙 재확인).
-- 사용자 결정 대기: 브랜드 액센트(토큰명 Gold, 실값 모브 핑크 `#C77BAE`) · 부제 교체 여부(마케터 추천 A안) · `고백편지` 순위 표기(문서 3위 vs 이번 검증 1위) · 커스텀 도메인 `mutter.app` 상태.
-
-## 이전 작업 — 양 플랫폼 스토어 업데이트 업로드
-
-사전 확인: iOS 라이브 1.0.2(iTunes lookup) → 1.0.3 필요 · Android Play 게시됨(HEAD vc=1, 워킹트리 vc=2 미커밋) → vc=3 안전.
-iOS fastlane release 레인 + .env.default(ASC 키, gitignore) + homebrew fastlane. Android는 Play API 자격증명 없음 → AAB 빌드 후 콘솔 업로드.
-
-- [x] iOS: MarketingVersion 1.0.2→1.0.3, 스와이프 삭제+버전업 커밋 (dd38b02, 0d138cb)
-- [x] iOS: `fastlane authcheck` AUTH OK → `fastlane release` — **1.0.3(빌드 7) ASC 업로드 성공** ("Successfully uploaded package")
-- [x] Android: WIP 주제별 커밋 5건(OAuth 픽스·FCM 푸시+R8·정책 화면·docs·스와이프 삭제) + 버전업(dbc4e12, vc3/1.1.0)
-- [x] Android: `:app:bundleRelease`+`assembleRelease` BUILD SUCCESSFUL — AAB 16M, badging `versionCode=3 versionName=1.1.0` 확인
-- [x] Android: 릴리스(R8) APK 에뮬레이터 스모크 — FATAL 0, 프로세스 생존, 로그인 화면 정상 렌더(스크린샷)
-- [x] Play Console 업로드는 수동 필요(Play API 자격증명·Chrome 연동 없음) — AAB 경로+절차 전달
-- [x] 릴리스 노트 초안 작성(아래 최종 보고)
-
-### 남은 일 (사용자)
-- ASC: 1.0.3 버전 생성 → What's New 입력 → 빌드 7 선택 → 심사 제출 (또는 `fastlane submit`)
-- Play Console: app-release.aab 업로드 + 릴리스 노트 + **데이터 보안 설문에 '기기 ID(FCM 푸시 토큰)' 추가**(푸시 신규 탑재)
-
-## 이전 작업 — 받은편지함 스와이프 삭제 (iOS + Android)
-
-백엔드 변경 불필요: `inbox` 테이블 RLS `inbox_self_rw`(for all)가 본인 행 DELETE 허용,
-`letters` 직접 delete 전례(iOS/Android 모두)와 동일 패턴으로 `from("inbox").delete().eq("letter_id", …)`.
-
-### iOS (Mutter)
-- [x] Domain: `InboxRepositorable`·`InboxUsecasable`에 `remove(letterId:)` 추가, `InboxUsecase` 구현
-- [x] Infrastructure: `InboxRepository.remove` — `from("inbox").delete().eq("letter_id")`
-- [x] Feature/Inbox: `InboxModelData.delete(_:)` — 낙관적 제거 + 실패 시 롤백
-- [x] `InboxView`: 목록 분기를 `List` + `.swipeActions`(trailing, full swipe)로 전환 — 카드 스타일 유지
-- [x] 빌드 검증 (`mise exec -- tuist build Mutter` → ✔ Success, exit 0)
-
-### Android (Mutter_android)
-- [x] domain: `InboxRepository.remove` + `InboxUseCase.remove`
-- [x] data: `InboxRepositoryImpl.remove` — `postgrest.from("inbox").delete { eq("letter_id") }`
-- [x] feature/inbox: `InboxViewModel.delete` (낙관적 제거+롤백) + `SwipeToDismissBox`(EndToStart, Danger 배경+trash 아이콘)
-- [x] 빌드 검증 (JDK17 gradlew assembleDebug → BUILD SUCCESSFUL, exit 0)
-
-### 문서
-- [x] `docs/specs/module-architecture.md` 테이블 직접 접근 목록에 `inbox`(delete) 반영
-
-### 리뷰 (받은편지함 스와이프 삭제)
-- 변경: iOS 6파일(Domain 3·Infra 1·Feature 2) + Android 5파일(domain 2·data 1·feature 2) + 설계문서 1줄.
-- 백엔드 무변경 — `inbox` RLS `inbox_self_rw`(for all)로 본인 행 delete, `letters` 직접 delete 전례와 동일 패턴.
-- UI: iOS `List`+`.swipeActions`(trailing, full swipe, 삭제 라벨) / Android `SwipeToDismissBox`(EndToStart, Danger 배경+trash, `animateItem`).
-- 독립 리뷰(code-reviewer) 결과 Major 1건 — 전체 스냅샷 롤백이 연속 삭제 레이스에서 다른 항목까지 부활시킴 → 항목 단위 롤백(제거 항목+인덱스만 캡처)으로 양쪽 수정.
-- 검증: iOS `mise exec -- tuist build Mutter` ✔ Success·exit 0, Android `gradlew assembleDebug` BUILD SUCCESSFUL·exit 0 (레이스 수정 후 재빌드 포함).
-
-## 이전 작업 — 무계정 수신자: 가입하면 받은 편지/연결이 이어지게 (pending 경로 복귀)
-
-핵심 근본: 웹 로그인이 코드/가입 시 `/set-nickname`→홈으로 가 원래 경로(`state.from`)를 버림.
-이걸 고치면 연결하기·편지저장 둘 다 "링크 열다 가입 → 그 링크로 복귀"가 완성된다.
-
-### 웹 (letter-app)
-- [ ] `Login.tsx handleVerifyCode`: `/set-nickname`으로 갈 때 `state.from` 전달
-- [ ] `SetNickname.tsx`: 저장 후 `from`(있으면)으로 복귀, 없으면 `/welcome`
-- [ ] `SaveToInboxButton.tsx`: 비로그인 수신자에게 "가입하고 받은 편지함에 저장" CTA → `/login`(from=현재 편지 링크). 로그인 복귀 시 서버가 열람 자동저장(0022)
-- [ ] typecheck + 전체 테스트
-
-### 앱 (Mutter) — pending 편지 토큰 소비 (phase 2)
-- [ ] 미인증 뷰어에 "가입하고 보관" CTA (Viewer 피처에 옵션 콜백)
-- [ ] `MainView`: 로그인 완료 시 pending 편지 토큰을 인증 뷰어로 열어 자동저장(pendingConnectToken 패턴)
-- [ ] `tuist build`
-
-## 리뷰(직전 작업: 연결 N:N 전환)
-- DB 0027 + 앱/웹 N:N 전환 완료. 앱 `tuist build` OK, 웹 242/242. 배포는 `supabase db push`(0027) 필요.
-- 보안: GoogleService-Info.plist 히스토리에서 filter-branch로 제거(로컬 완료), force-push는 사용자 실행 대기.
-
 ## 현재 작업 — 2026-10-07 주간 마케팅 루프
 - [x] 제품 사실·신선도·수집 데이터·행동 조건 확인
 - [x] 블로그 키워드 플랜 위임 → 카피라이터에게 Threads 2편·블로그 1편 통합 위임
@@ -179,3 +46,14 @@ iOS fastlane release 레인 + .env.default(ASC 키, gitignore) + homebrew fastla
 - 생성: 리포트 1·웹 키워드 플랜 1·승인 대기 Threads 2·블로그 1. 시즌 초안 중복 생성 없음.
 - 검증: 큐 status=draft·대안/추천·기능 출처 확인, Threads 각 안 500자 이내, 리포트 파일 참조 존재 확인. state 비교 결과 handled·cooldowns만 변경. 순위 하락·경쟁 해시 변화·리뷰 조건 미충족 확인.
 - 제한: 2주 순위 이력 부족, 검색 결과 관찰은 AI 답변 추천율 측정이 아님. 블로그는 사람의 사례·사진 보강 후 승인. 발행·스토어 변경·커밋 없음.
+
+## 현재 작업 — 2026-10-07 콘텐츠 마케팅 운영안
+- [x] 컨텍스트·신선도·기존 큐·루프 조건 확인
+- [x] 주 3시간 예산·4주 캘린더·측정 및 루프 통합 작성
+- [x] 카피라이터 1주차 큐 4편 및 영상 핸드오프 브리프 작성
+- [x] 날짜·예산·큐 상태·제품 사실·참조 검증
+
+### 리뷰 — 콘텐츠 마케팅 운영안
+- 계획 1·1주차 승인 큐 4·영상 브리프 1 작성. 릴스 각각 16초로 통일, 제작과 발행 시간 중복 제거.
+- 검증: 큐 draft/대안 2개·Threads 각 안 500자 이내, 주간 예산 165/175/180분, 블로그 14일 간격과 월 2편 연결 확인.
+- 기존 자동 루프와 수동 요청·미구현 계측 구분. 발행·스토어 변경·커밋 없음. 렌더 제작은 별도 핸드오프.

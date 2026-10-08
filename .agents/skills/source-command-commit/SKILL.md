@@ -1,6 +1,17 @@
+---
+name: "source-command-commit"
+description: "Migrated source command `commit`"
+---
+
+# source-command-commit
+
+Use this skill when the user asks to run the migrated source command `commit`.
+
+## Command Template
+
 # commit
 
-변경 사항을 검토하고 커밋한다. `mutter-conventions`의 커밋 규칙을 준수한다.
+변경 사항을 검토하고 커밋한다. AGENTS.md의 "커밋 전" 체크리스트와 "커밋 메시지 규칙"을 준수한다.
 
 ## 작업 순서
 
@@ -9,7 +20,7 @@
 `git status`와 `git diff`로 변경 내용을 확인한다.
 staging된 파일이 없으면 변경 파일 목록을 사용자에게 보여주고 staging할 파일을 확인받는다.
 
-### 2단계: 커밋 전 검증 (`mutter-conventions` 커밋 규칙)
+### 2단계: 커밋 전 검증 (AGENTS.md "커밋 전" 체크리스트)
 
 1. 커밋에 포함되어서는 안 될 파일이 staging되지 않았는가
    - `.env`, API 키, 개인 인증서 파일 제외
@@ -57,6 +68,6 @@ git commit -m "{타입}: {메시지}"
 
 ## 커밋 규칙
 
-- **Co-Authored-By는 포함하지 않는다**
+- **Co-Authored-By는 포함하지 않는다** (AGENTS.md "커밋 전" #4)
 - `--no-verify` 없이 커밋한다 (SwiftLint pre-commit hook을 그대로 통과시킨다)
 - `git add`로 파일을 개별 지정한다 (`-A` / `.` 대신)

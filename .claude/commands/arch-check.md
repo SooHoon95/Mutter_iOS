@@ -1,8 +1,8 @@
 # arch-check
 
-CLAUDE.md의 아키텍처 규칙에 따라 코드베이스 위반을 탐지한다.
+`mutter-architecture`·`mutter-swiftui`·`mutter-conventions` 스킬 규칙에 따라 코드베이스 위반을 탐지한다.
 
-검사 전 관련 파일(`CLAUDE.md`, 대상 `Project.swift`, 해당 소스)을 먼저 읽고, 확인된 위반과 추정 위반(가설)을 구분해 보고한다. 아래 8개 검사 항목은 상호 독립적이므로 동시에 실행 가능하다.
+검사 전 관련 파일(위 스킬, 대상 `Project.swift`, 해당 소스)을 먼저 읽고, 확인된 위반과 추정 위반(가설)을 구분해 보고한다. 아래 8개 검사 항목은 상호 독립적이므로 동시에 실행 가능하다.
 
 ## 검사 항목
 
@@ -26,7 +26,7 @@ CLAUDE.md의 아키텍처 규칙에 따라 코드베이스 위반을 탐지한�
 - `Projects/Domain/` 내에서 `import SwiftUI`, `import UIKit` 패턴 검색
 
 **Domain에서 Infrastructure 직접 접근 (Dependency Rules "금지된 의존 관계" 위반)**
-- `Projects/Domain/` 내에서 `import Infrastructure`, `import Network` 패턴 검색
+- `Projects/Domain/` 내에서 `import Infrastructure`, `import Networking` 패턴 검색
 
 ### 3. Feature 간 직접 의존 (팀 규칙 #5 위반)
 
@@ -34,14 +34,14 @@ CLAUDE.md의 아키텍처 규칙에 따라 코드베이스 위반을 탐지한�
 - 자기 자신의 모듈은 제외
 
 현재 Feature 모듈 목록:
-Auth, Compose, Viewer, Delivery, Inbox, Connections, Threads, Profile, Home, Legal, MainTab
+AuthFeature, Compose, Connections, Delivery, Home, Inbox, Legal, MainTab, Profile, Threads, Viewer (`ls Projects/Feature`로 재확인)
 
 ### 4. ModelData 규칙 위반
 
-**ObservableObject + @Published 사용 (CLAUDE.md: "@Observable을 사용한다" 위반)**
+**ObservableObject + @Published 사용 (`mutter-swiftui`: @Observable과 @Published 혼용 금지)**
 - `Projects/Feature/` 내에서 `ObservableObject`, `@Published` 패턴 검색
 
-**ModelData가 public으로 노출 (CLAUDE.md: "internal로 선언하여 Feature 모듈 외부에 노출하지 않는다" 위반)**
+**ModelData가 public으로 노출 (`mutter-architecture`: ModelData는 internal)**
 - `Projects/Feature/` 내에서 `public.*class.*ModelData`, `public.*struct.*ModelData` 패턴 검색
 
 ### 5. DTO 직접 노출 위반 (Data Layer Rules 위반)
@@ -87,7 +87,7 @@ Auth, Compose, Viewer, Delivery, Inbox, Connections, Threads, Profile, Home, Leg
 
 ## 수정 가이드
 
-| 위반 | 수정 방법 | CLAUDE.md 근거 |
+| 위반 | 수정 방법 | 근거 |
 |------|-----------|----------------|
 | View에서 Repository 직접 호출 | UseCase를 통해 간접 호출 | 팀 규칙 #4 |
 | NavigationLink 직접 사용 | `coordinator.push(...)` 로 변경 | Navigation & Routing |
@@ -95,7 +95,7 @@ Auth, Compose, Viewer, Delivery, Inbox, Connections, Threads, Profile, Home, Leg
 | Domain에서 SwiftUI/UIKit import | import 제거, Foundation만 허용 | Architecture Principles #4 |
 | Feature → Feature 직접 의존 | Router 또는 Domain을 통해 간접 통신 | 팀 규칙 #5 |
 | ModelData가 public | `internal` (접근 제한자 미명시)으로 변경 | 데이터 흐름 - ModelData |
-| DTO가 View/UseCase에 노출 | Mapper(toEntity)로 Domain Model 변환 후 사용 | Data Layer Rules |
+| DTO가 View/UseCase에 노출 | Mapper(`toDomain()`)로 Domain Model 변환 후 사용 | Data Layer Rules |
 | ObservableObject 사용 | `@Observable` 매크로로 마이그레이션 | 데이터 흐름 - ModelData |
 | Completion Handler 신규 작성 | async/await로 변경 | 팀 규칙 #8 |
 
