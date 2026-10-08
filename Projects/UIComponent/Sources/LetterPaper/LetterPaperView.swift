@@ -1,42 +1,57 @@
 import SwiftUI
 
-/// 테마가 적용된 편지지. 제목 + 본문 단락을 테마 타이포/색으로 렌더한다.
+/// 테마가 적용된 편지지. 제목 + 본문 단락(사이사이 사진)을 테마 타이포/색으로 렌더한다.
 /// (웹 `TemplateThemed` + `LetterView` 이식. 스크롤·음악큐는 상위 feature가 담당.)
 public struct LetterPaperView: View {
   private let theme: LetterTheme
   private let title: String?
-  private let text: String
+  private let blocks: [LetterPaperBlock]
   /// 스크롤 진입 시 단락을 한 줄씩(위에서 아래로) 페이드-하강으로 드러내는 연출.
   /// 음악이 있는 편지를 연 뒤에만 켠다(무음/열기 전은 즉시 표시). 웹 Paginated.revealOnScroll과 동형.
   private let revealOnScroll: Bool
 
-  public init(theme: LetterTheme, title: String? = nil, text: String, revealOnScroll: Bool = false) {
+  public init(theme: LetterTheme, title: String? = nil, blocks: [LetterPaperBlock], revealOnScroll: Bool = false) {
     self.theme = theme
     self.title = title
-    self.text = text
+    self.blocks = blocks
     self.revealOnScroll = revealOnScroll
   }
 
+  public init(theme: LetterTheme, title: String? = nil, text: String, revealOnScroll: Bool = false) {
+    self.init(theme: theme, title: title, blocks: [.text(text)], revealOnScroll: revealOnScroll)
+  }
+
   /// 빈 줄 기준 단락 분리(웹과 동일한 문단 호흡).
-  private var paragraphs: [String] {
+  private static func paragraphs(of text: String) -> [String] {
     text
       .components(separatedBy: "\n\n")
       .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
       .filter { !$0.isEmpty }
   }
 
-  /// reveal용 줄 그룹 — 각 단락을 개행(\n) 기준 줄로 쪼개고, 전체 줄에 연속 인덱스를 부여한다
+  /// 렌더 순서대로 펼친 단락·사진. 각 단락은 개행(\n) 기준 줄로 쪼개고, 전체 줄에 연속 인덱스를 부여한다
   /// (위→아래 계단식 지연 계산용). 웹 Paginated의 [data-reveal-line]과 동형.
-  private var revealGroups: [RevealGroup] {
+  private var items: [PaperItem] {
     var global = 0
-    return paragraphs.enumerated().map { pIndex, para in
-      let lines = para.components(separatedBy: "\n").map { line -> RevealLine in
-        let item = RevealLine(id: global, text: line)
-        global += 1
-        return item
+    var paragraphIndex = 0
+    var result: [PaperItem] = []
+    for block in blocks {
+      switch block {
+      case .text(let text):
+        for para in Self.paragraphs(of: text) {
+          let lines = para.components(separatedBy: "\n").map { line -> RevealLine in
+            let item = RevealLine(id: global, text: line)
+            global += 1
+            return item
+          }
+          result.append(.paragraph(RevealGroup(id: paragraphIndex, text: para, lines: lines)))
+          paragraphIndex += 1
+        }
+      case .photo(let id, let url, let cacheKey, let aspectRatio):
+        result.append(.photo(id: id, url: url, cacheKey: cacheKey, aspectRatio: aspectRatio))
       }
-      return RevealGroup(id: pIndex, lines: lines)
     }
+    return result
   }
 
   public var body: some View {
@@ -47,19 +62,30 @@ public struct LetterPaperView: View {
         if let title, !title.isEmpty {
           RevealingLine(text: title, theme: theme, isHeading: true)
         }
-        ForEach(revealGroups) { group in
-          VStack(alignment: .leading, spacing: theme.bodyLineSpacing) {
-            ForEach(group.lines) { line in
-              RevealingLine(text: line.text, theme: theme)
+        ForEach(items) { item in
+          switch item {
+          case .paragraph(let group):
+            VStack(alignment: .leading, spacing: theme.bodyLineSpacing) {
+              ForEach(group.lines) { line in
+                RevealingLine(text: line.text, theme: theme)
+              }
             }
+          case .photo(_, let url, let cacheKey, let aspectRatio):
+            LetterPhotoView(url: url, cacheKey: cacheKey, aspectRatio: aspectRatio, tint: theme.muted)
+              .modifier(RevealOnScroll())
           }
         }
       } else {
         if let title, !title.isEmpty {
           Text(title).letterHeading(theme)
         }
-        ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-          Text(paragraph).letterBody(theme)
+        ForEach(items) { item in
+          switch item {
+          case .paragraph(let group):
+            Text(group.text).letterBody(theme)
+          case .photo(_, let url, let cacheKey, let aspectRatio):
+            LetterPhotoView(url: url, cacheKey: cacheKey, aspectRatio: aspectRatio, tint: theme.muted)
+          }
         }
       }
     }
@@ -70,7 +96,19 @@ public struct LetterPaperView: View {
   }
 }
 
-// MARK: - reveal 줄 모델
+// MARK: - 렌더 항목 모델
+
+private enum PaperItem: Identifiable {
+  case paragraph(RevealGroup)
+  case photo(id: String, url: URL?, cacheKey: String?, aspectRatio: CGFloat)
+
+  var id: String {
+    switch self {
+    case .paragraph(let group): return "p\(group.id)"
+    case .photo(let id, _, _, _): return "photo-\(id)"
+    }
+  }
+}
 
 private struct RevealLine: Identifiable {
   let id: Int  // 전역 줄 인덱스(계단식 지연에 사용)
@@ -79,26 +117,44 @@ private struct RevealLine: Identifiable {
 
 private struct RevealGroup: Identifiable {
   let id: Int  // 문단 인덱스
+  let text: String
   let lines: [RevealLine]
 }
 
 // MARK: - Reveal 연출 줄
 
 /// 스크롤로 화면에 들어오면 "위에서 아래로" 페이드-하강하며 한 번 나타나는 한 줄.
-/// 한 번 나타나면 유지한다(스크롤 왕복 재생 없음). 웹 .revealMode .line과 동형.
-/// reduce motion이면 이동은 빼고 페이드만(연출은 유지).
 private struct RevealingLine: View {
   let text: String
   let theme: LetterTheme
   /// 제목 줄이면 heading 타이포로 렌더.
   var isHeading: Bool = false
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @State private var revealed = false
 
   var body: some View {
     styledText
       // 짧은 줄도 왼쪽 정렬 폭을 유지(가운데로 쏠리지 않게).
       .frame(maxWidth: .infinity, alignment: .leading)
+      .modifier(RevealOnScroll())
+  }
+
+  @ViewBuilder private var styledText: some View {
+    if isHeading {
+      Text(text).letterHeading(theme)
+    } else {
+      Text(text.isEmpty ? " " : text).letterBody(theme)
+    }
+  }
+}
+
+/// 화면에 들어오는 순간 한 번 페이드-하강으로 나타난다(줄·사진 공용).
+/// 한 번 나타나면 유지한다(스크롤 왕복 재생 없음). 웹 .revealMode .line과 동형.
+/// reduce motion이면 이동은 빼고 페이드만(연출은 유지).
+private struct RevealOnScroll: ViewModifier {
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var revealed = false
+
+  func body(content: Content) -> some View {
+    content
       .opacity(revealed ? 1 : 0)
       // reduce motion: 이동 없이 페이드만. 그 외엔 위(-10)에서 아래로 내려오며 나타남.
       .offset(y: (revealed || reduceMotion) ? 0 : -10)
@@ -109,14 +165,6 @@ private struct RevealingLine: View {
           withAnimation(.easeOut(duration: 0.5)) { revealed = true }
         }
       }
-  }
-
-  @ViewBuilder private var styledText: some View {
-    if isHeading {
-      Text(text).letterHeading(theme)
-    } else {
-      Text(text.isEmpty ? " " : text).letterBody(theme)
-    }
   }
 }
 

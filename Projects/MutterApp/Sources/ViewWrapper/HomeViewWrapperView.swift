@@ -13,7 +13,7 @@ struct HomeViewWrapperView: View, HomeViewable {
   private let receiptUsecase: ReceiptUsecasable
 
   init() {
-    self.letterUsecase = LetterUsecase(repository: LetterRepository())
+    self.letterUsecase = LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository())
     self.receiptUsecase = ReceiptUsecase(repository: ReceiptRepository())
   }
 

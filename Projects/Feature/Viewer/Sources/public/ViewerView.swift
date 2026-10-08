@@ -173,7 +173,7 @@ public struct ViewerView: View {
           // 스크롤해야 한 줄씩 뷰포트에 들어오며 나타나게 한다(웹과 동일).
           ScrollPromptView(foreground: theme.foreground)
 
-          LetterPaperView(theme: theme, title: payload.title, text: payload.body, revealOnScroll: true)
+          LetterPaperView(theme: theme, title: payload.title, blocks: model.paperBlocks(payload), revealOnScroll: true)
             .frame(maxWidth: .infinity)
 
           // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.

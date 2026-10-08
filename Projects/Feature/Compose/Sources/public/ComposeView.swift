@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import UIKit
 
@@ -7,6 +8,8 @@ import UIComponent
 /// 편지 제작 화면 — 편지지(테마) + 본문 + 음악 1곡 + 저장/발송.
 public struct ComposeView: View {
   @State private var model: ComposeModelData
+  @State private var pickedPhotos: [PhotosPickerItem] = []
+  @FocusState private var focusedBlockId: String?
   private let navTitle: String
   private let onBack: () -> Void
 
@@ -57,6 +60,7 @@ public struct ComposeView: View {
           VStack(alignment: .leading, spacing: 20) {
             templatePicker
             paper
+            photoSection
             musicSection
             if let message = model.errorMessage {
               Text(message).fonts(.caption).foregroundStyle(Asset.Colors.goldDeep.color)
@@ -83,6 +87,12 @@ public struct ComposeView: View {
     .task { await model.load() }
     .sheet(isPresented: $model.showSendSheet) {
       SendSheet(model: model)
+    }
+    .sheet(isPresented: $model.showSoundCloudPicker) {
+      SoundCloudPickerSheet(
+        onPick: { url in Task { await model.applyPickedSoundCloud(url) } },
+        onClose: { model.showSoundCloudPicker = false }
+      )
     }
   }
 
@@ -123,24 +133,99 @@ public struct ComposeView: View {
         .font(.system(size: model.theme.headingSize, weight: .semibold, design: model.theme.fontDesign))
         .foregroundStyle(model.theme.foreground)
 
-      TextEditor(text: $model.content)
-        .font(.system(size: model.theme.bodySize, design: model.theme.fontDesign))
-        .foregroundStyle(model.theme.foreground)
-        .frame(minHeight: 260)
-        .scrollContentBackground(.hidden)
-        .overlay(alignment: .topLeading) {
-          if model.content.isEmpty {
-            Text(L10n.composeBodyPlaceholder)
-              .font(.system(size: model.theme.bodySize, design: model.theme.fontDesign))
-              .foregroundStyle(model.theme.muted)
-              .padding(.top, 8).padding(.leading, 5)
-              .allowsHitTesting(false)
-          }
+      ForEach($model.blocks) { $block in
+        if let photo = block.photo {
+          photoCard(blockId: block.id, photo: photo)
+        } else {
+          textBlock($block)
         }
+      }
     }
     .padding(20)
     .background(model.theme.background, in: RoundedRectangle(cornerRadius: MutterRadius.lg))
     .overlay(RoundedRectangle(cornerRadius: MutterRadius.lg).stroke(model.theme.border, lineWidth: 1))
+  }
+
+  /// 텍스트 칸. 사진이 없을 땐 예전처럼 넉넉한 한 장, 사진 사이 칸은 짧게 시작해 내용만큼 늘어난다.
+  private func textBlock(_ block: Binding<ComposeBlock>) -> some View {
+    let isFirst = model.blocks.first?.id == block.wrappedValue.id
+    return TextEditor(text: block.text)
+      .font(.system(size: model.theme.bodySize, design: model.theme.fontDesign))
+      .foregroundStyle(model.theme.foreground)
+      .frame(minHeight: model.blocks.count == 1 ? 260 : 80)
+      .scrollContentBackground(.hidden)
+      .focused($focusedBlockId, equals: block.wrappedValue.id)
+      .overlay(alignment: .topLeading) {
+        if isFirst && block.wrappedValue.text.isEmpty {
+          Text(L10n.composeBodyPlaceholder)
+            .font(.system(size: model.theme.bodySize, design: model.theme.fontDesign))
+            .foregroundStyle(model.theme.muted)
+            .padding(.top, 8).padding(.leading, 5)
+            .allowsHitTesting(false)
+        }
+      }
+  }
+
+  private func photoCard(blockId: String, photo: LetterPhoto) -> some View {
+    LetterPhotoView(
+      url: photo.path.flatMap { model.photoURLs[$0] },
+      cacheKey: photo.path,
+      localImage: model.previewImages[photo.id],
+      aspectRatio: photo.height > 0 ? CGFloat(photo.width) / CGFloat(photo.height) : 0,
+      tint: model.theme.muted
+    )
+    .overlay(alignment: .topTrailing) {
+      Button { model.removePhoto(blockId: blockId) } label: {
+        MutterIcon(Asset.Images.trash, size: 16)
+          .foregroundStyle(Asset.Colors.ivory.color)
+          .padding(8)
+          .background(Asset.Colors.ink.color.opacity(0.6), in: Circle())
+      }
+      .padding(8)
+      .accessibilityLabel(L10n.composePhotoRemove)
+    }
+  }
+
+  // MARK: - Photos
+
+  /// "사진 넣기" — 마지막으로 포커스된 텍스트 칸 뒤에 들어간다. 남은 장수만큼만 고를 수 있다.
+  private var photoSection: some View {
+    // PhotosPicker 라벨 클로저는 메인 액터 밖에서 불리므로 상태를 미리 값으로 꺼내 둔다.
+    let isAdding = model.isAddingPhotos
+    return VStack(alignment: .leading, spacing: 6) {
+      PhotosPicker(
+        selection: $pickedPhotos,
+        maxSelectionCount: max(1, model.remainingPhotoSlots),
+        selectionBehavior: .ordered,
+        matching: .images
+      ) {
+        HStack(spacing: 6) {
+          if isAdding {
+            ProgressView().tint(Asset.Colors.goldDeep.color)
+          } else {
+            Image(systemName: "photo.badge.plus")
+          }
+          Text(L10n.composePhotoAdd)
+        }
+        .fonts(.captionBold)
+        .foregroundStyle(Asset.Colors.goldDeep.color)
+      }
+      .disabled(model.remainingPhotoSlots == 0 || isAdding)
+
+      if model.remainingPhotoSlots == 0 {
+        Text(L10n.composePhotoLimit).fonts(.caption).foregroundStyle(Asset.Colors.inkFaint.color)
+      }
+    }
+    .onChange(of: pickedPhotos) { _, items in
+      guard !items.isEmpty else { return }
+      Task {
+        await model.addPhotos(items)
+        pickedPhotos = []
+      }
+    }
+    .onChange(of: focusedBlockId) { _, id in
+      if let id { model.lastFocusedTextId = id }
+    }
   }
 
   // MARK: - Music
@@ -159,6 +244,10 @@ public struct ComposeView: View {
           sourceURL: model.cue?.sourceUrl.flatMap { URL(string: $0) },
           onToggle: { Task { await model.previewAudio() } }
         )
+      }
+
+      MutterButton(L10n.composeSoundcloudBrowse, style: .secondary) {
+        model.showSoundCloudPicker = true
       }
 
       HStack(spacing: 8) {

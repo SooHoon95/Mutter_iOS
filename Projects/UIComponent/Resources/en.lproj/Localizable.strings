@@ -55,6 +55,11 @@
 "compose.music.soundcloudTrack" = "SoundCloud Track";
 "compose.music.default" = "Built-in music";
 "compose.soundcloud.placeholder" = "Paste a SoundCloud link";
+"compose.soundcloud.browse" = "Find on SoundCloud";
+"compose.soundcloud.picker.title" = "Pick from SoundCloud";
+"compose.soundcloud.picker.hint" = "Open a track page to add it";
+"compose.soundcloud.picker.ready" = "Add this track to your letter?";
+"compose.soundcloud.pick" = "Add this track";
 "compose.applying" = "Checking…";
 "compose.apply" = "Apply";
 "compose.reply.send" = "Send Reply";
@@ -65,6 +70,11 @@
 "compose.error.privateTrack" = "This track is private or region-restricted. Please choose another.";
 "compose.error.notFound" = "Track not found. Please check the link again.";
 "compose.error.embedDisabled" = "This track doesn't allow external playback. Please choose another.";
+"compose.photo.add" = "Add photo";
+"compose.photo.remove" = "Remove photo";
+"compose.photo.limit" = "You can add up to 5 photos per letter.";
+"compose.error.photoLoad" = "Couldn't load that photo. Please choose another.";
+"compose.error.photoUpload" = "Couldn't upload the photos. Check your connection and save again.";
 
 /* ===== Send sheet ===== */
 "send.method.link" = "Share Link";
@@ -202,6 +212,7 @@
 "viewer.error.cantOpen" = "Can't open this letter";
 "viewer.error.load" = "Couldn't load the letter.";
 "viewer.error.notFound" = "Letter not found.";
+"letter.photo" = "Photo";
 
 /* ===== Force update ===== */
 "forceUpdate.title" = "Update Required";

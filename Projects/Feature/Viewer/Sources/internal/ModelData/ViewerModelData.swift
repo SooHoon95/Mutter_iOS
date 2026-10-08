@@ -32,6 +32,8 @@ final class ViewerModelData {
   /// 받은함 저장 완료 여부(중복 탭 방지 + "저장됨" 표시).
   /// 서버가 열람 시 자동 저장(0022) — 성공 로드 후 클라이언트가 true로 설정해 "저장됨" 표시.
   var savedToInbox = false
+  /// 사진 서명 URL(Storage 경로 → URL). 본문을 받은 직후 한 번 채운다. 비어 있으면 사진 자리는 플레이스홀더.
+  private(set) var photoURLs: [String: URL] = [:]
 
   let player: LetterAudioPlayer
 
@@ -98,7 +100,7 @@ final class ViewerModelData {
       let payload = try await deliveryUsecase.open(token: token, password: password)
       // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자라면 이미 저장됨.
       if inboxUsecase != nil { savedToInbox = true }
-      await present(payload)
+      await present(payload, password: password)
     } catch let error as MutterError {
       switch error.define {
       case .wrongPassword:
@@ -123,12 +125,12 @@ final class ViewerModelData {
       let payload = LetterPayload(
         id: letter.id,
         title: letter.title,
-        body: letter.body,
+        blocks: letter.blocks,
         templateId: letter.templateId,
         cue: letter.cue,
         audioDisabled: false
       )
-      await present(payload)
+      await present(payload, password: nil)
     } catch let error as MutterError {
       state = .failed(error.userMessage)
     } catch {
@@ -136,11 +138,45 @@ final class ViewerModelData {
     }
   }
 
-  private func present(_ payload: LetterPayload) async {
+  /// 편지지에 넘길 블록 — 사진은 받아 둔 서명 URL을 붙이고, 캐시 키는 경로로 둔다.
+  func paperBlocks(_ payload: LetterPayload) -> [LetterPaperBlock] {
+    payload.blocks.map { block in
+      switch block {
+      case .text(let text):
+        return .text(text)
+      case .photo(let photo):
+        return .photo(
+          id: photo.id,
+          url: photo.path.flatMap { photoURLs[$0] },
+          cacheKey: photo.path,
+          aspectRatio: photo.height > 0 ? CGFloat(photo.width) / CGFloat(photo.height) : 0
+        )
+      }
+    }
+  }
+
+  private func present(_ payload: LetterPayload, password: String?) async {
     state = .ready(payload, LetterTheme.theme(id: payload.templateId))
+    // 서명 URL과 오디오 준비는 서로 독립이라 함께 진행한다.
+    async let photos: Void = loadPhotoURLs(for: payload, password: password)
     // 무음0: 오디오가 꺼진 편지가 아니면 큐를 준비(SC 실패 시 CC0 폴백).
     if !payload.audioDisabled, let cue = payload.cue {
       await player.prepare(cue: cue)
     }
+    await photos
+  }
+
+  /// 본문을 연 것과 같은 모드(토큰+암호 / 소유자)로 서명 URL을 한 번 받는다.
+  /// 실패해도 본문은 그대로 보여야 하므로 에러를 올리지 않고 플레이스홀더로 둔다.
+  private func loadPhotoURLs(for payload: LetterPayload, password: String?) async {
+    guard !payload.blocks.photoPaths.isEmpty else { return }
+    let urls: [String: URL]?
+    switch source {
+    case .token(let token):
+      urls = try? await letterUsecase.photoURLs(token: token, password: password)
+    case .myLetter(let id):
+      urls = try? await letterUsecase.photoURLs(letterId: id)
+    }
+    photoURLs = urls ?? [:]
   }
 }

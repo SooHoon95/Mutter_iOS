@@ -7,11 +7,13 @@ import Domain
 private struct FakeLetterUsecase: LetterUsecasable {
   var lettersWithStatus: [LetterWithStatus]
   func create(_ draft: LetterDraft) async throws -> Letter { fatalError("unused in test") }
-  func update(id: String, _ draft: LetterDraft) async throws {}
+  func update(id: String, _ draft: LetterDraft) async throws -> [LetterBlock] { draft.blocks }
   func letter(id: String) async throws -> Letter? { nil }
   func myLetters() async throws -> [Letter] { lettersWithStatus.map(\.letter) }
   func myLettersWithStatus() async throws -> [LetterWithStatus] { lettersWithStatus }
   func delete(id: String) async throws {}
+  func photoURLs(token: String, password: String?) async throws -> [String: URL] { [:] }
+  func photoURLs(letterId: String) async throws -> [String: URL] { [:] }
 }
 
 private struct FakeReceiptUsecase: ReceiptUsecasable {

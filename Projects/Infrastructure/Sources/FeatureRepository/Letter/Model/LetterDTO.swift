@@ -2,7 +2,7 @@ import Foundation
 
 import Domain
 
-/// letters 테이블 row(조회용). paragraphs는 jsonb(단락별 큐) — 도메인에선 단일 body+cue로 평탄화.
+/// letters 테이블 row(조회용). paragraphs는 jsonb(단락별 큐·사진) — 도메인에선 blocks+단일 cue로 변환.
 struct LetterRow: Decodable {
   let id: String
   let ownerId: String
@@ -20,7 +20,7 @@ struct LetterRow: Decodable {
     Letter(
       id: id,
       title: title,
-      body: LetterContentCodec.body(from: paragraphs),
+      blocks: LetterContentCodec.blocks(from: paragraphs),
       templateId: templateId,
       cue: LetterContentCodec.cue(from: paragraphs)
     )
@@ -46,7 +46,7 @@ struct LetterWithStatusRow: Decodable {
       letter: Letter(
         id: id,
         title: title,
-        body: LetterContentCodec.body(from: paragraphs),
+        blocks: LetterContentCodec.blocks(from: paragraphs),
         templateId: templateId,
         cue: LetterContentCodec.cue(from: paragraphs)
       ),

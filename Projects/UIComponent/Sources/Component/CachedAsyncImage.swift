@@ -4,6 +4,8 @@ import SwiftUI
 /// `ImageCache`(환경 주입)에서 로드하고, 로딩/실패 시 placeholder를 보여준다.
 public struct CachedAsyncImage<Content: View, Placeholder: View>: View {
   private let url: URL?
+  /// URL 대신 쓸 캐시 키(서명 URL의 Storage 경로 등). nil이면 URL이 키.
+  private let cacheKey: String?
   private let content: (Image) -> Content
   private let placeholder: () -> Placeholder
 
@@ -12,10 +14,12 @@ public struct CachedAsyncImage<Content: View, Placeholder: View>: View {
 
   public init(
     url: URL?,
+    cacheKey: String? = nil,
     @ViewBuilder content: @escaping (Image) -> Content,
     @ViewBuilder placeholder: @escaping () -> Placeholder
   ) {
     self.url = url
+    self.cacheKey = cacheKey
     self.content = content
     self.placeholder = placeholder
   }
@@ -41,7 +45,7 @@ public struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     }
     // url이 바뀌면 .task(id:)가 재실행된다. 이전 이미지를 그대로 두면 stale이 되므로
     // 캐시에서 새로 로드한다(메모리 히트면 즉시). 취소 시 상태를 갱신하지 않는다.
-    let loaded = await cache.image(for: url)
+    let loaded = await cache.image(for: url, cacheKey: cacheKey)
     guard !Task.isCancelled, let loaded else { return }
     withAnimation(.easeOut(duration: 0.2)) {
       uiImage = loaded

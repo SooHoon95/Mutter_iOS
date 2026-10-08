@@ -128,7 +128,7 @@ struct LetterPayloadDTO: Decodable {
     LetterPayload(
       id: id,
       title: title,
-      body: LetterContentCodec.body(from: paragraphs),
+      blocks: LetterContentCodec.blocks(from: paragraphs),
       templateId: templateId,
       cue: LetterContentCodec.cue(from: paragraphs),
       audioDisabled: audioDisabled

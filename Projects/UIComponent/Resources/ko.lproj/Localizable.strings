@@ -55,6 +55,11 @@
 "compose.music.soundcloudTrack" = "SoundCloud 트랙";
 "compose.music.default" = "기본 제공 음악";
 "compose.soundcloud.placeholder" = "SoundCloud 링크 붙여넣기";
+"compose.soundcloud.browse" = "SoundCloud에서 찾기";
+"compose.soundcloud.picker.title" = "SoundCloud에서 고르기";
+"compose.soundcloud.picker.hint" = "곡 페이지를 열면 이 곡을 넣을 수 있어요";
+"compose.soundcloud.picker.ready" = "이 곡을 편지에 넣을까요?";
+"compose.soundcloud.pick" = "이 곡 넣기";
 "compose.applying" = "확인 중…";
 "compose.apply" = "적용";
 "compose.reply.send" = "답장 보내기";
@@ -65,6 +70,11 @@
 "compose.error.privateTrack" = "비공개이거나 지역 제한이 있는 트랙이에요. 다른 곡을 골라 주세요.";
 "compose.error.notFound" = "트랙을 찾을 수 없어요. 링크를 다시 확인해 주세요.";
 "compose.error.embedDisabled" = "이 트랙은 외부 재생이 허용되지 않아요. 다른 곡을 골라 주세요.";
+"compose.photo.add" = "사진 넣기";
+"compose.photo.remove" = "사진 빼기";
+"compose.photo.limit" = "사진은 한 통에 5장까지 넣을 수 있어요.";
+"compose.error.photoLoad" = "사진을 불러오지 못했어요. 다른 사진을 골라 주세요.";
+"compose.error.photoUpload" = "사진을 올리지 못했어요. 연결을 확인하고 다시 저장해 주세요.";
 
 /* ===== 보내기 시트 ===== */
 "send.method.link" = "전달 링크";
@@ -202,6 +212,7 @@
 "viewer.error.cantOpen" = "편지를 열 수 없어요";
 "viewer.error.load" = "편지를 불러올 수 없어요.";
 "viewer.error.notFound" = "편지를 찾을 수 없어요.";
+"letter.photo" = "사진";
 
 /* ===== 강제 업데이트 ===== */
 "forceUpdate.title" = "업데이트가 필요해요";

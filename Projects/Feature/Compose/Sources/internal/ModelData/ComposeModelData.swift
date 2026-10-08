@@ -1,4 +1,6 @@
 import Foundation
+import PhotosUI
+import SwiftUI
 
 import AppFoundation
 import Domain
@@ -16,10 +18,21 @@ final class ComposeModelData {
   }
 
   var title = ""
-  var content = ""         // 본문(View.body 충돌 회피 위해 content)
+  /// 본문 블록(텍스트 칸·사진 칸). 항상 텍스트 칸이 하나 이상 있다.
+  var blocks: [ComposeBlock] = [.text("")]
+  /// "사진 넣기" 위치 — 마지막으로 포커스된 텍스트 칸. nil이면 맨 끝.
+  var lastFocusedTextId: String?
+  /// 사진 고르는 중(로드·축소) — 버튼 중복 탭 방지 + 로딩 표시.
+  private(set) var isAddingPhotos = false
+  /// 저장된 사진의 서명 URL(이어쓰기 때 소유자 모드로 한 번 받는다).
+  private(set) var photoURLs: [String: URL] = [:]
+  /// 이번 세션에서 고른 사진 미리보기(photo.id 키). 업로드 뒤에도 다시 받지 않도록 유지한다.
+  private(set) var previewImages: [String: UIImage] = [:]
   var templateId = LetterTheme.defaultTheme.id
   var cue: MusicCue?
   var soundcloudURL = ""
+  /// 인앱 SoundCloud 탐색 시트 표시 여부.
+  var showSoundCloudPicker = false
 
   var isSaving = false
   var errorMessage: String?
@@ -77,9 +90,10 @@ final class ComposeModelData {
   func load() async {
     if case .edit(let id) = mode, let letter = try? await letterUsecase.letter(id: id) {
       title = letter.title
-      content = letter.body
+      blocks = Self.editableBlocks(letter.blocks)
       templateId = letter.templateId
       cue = letter.cue
+      await loadPhotoURLs(letterId: id, paths: letter.blocks.photoPaths)
       await backfillCueTitleIfNeeded()
     }
   }
@@ -96,6 +110,76 @@ final class ComposeModelData {
         title: title.isEmpty ? nil : title,
         author: author.isEmpty ? nil : author
       )
+    }
+  }
+
+  // MARK: - Photos
+
+  var photoCount: Int { blocks.filter { $0.photo != nil }.count }
+  var remainingPhotoSlots: Int { max(0, LetterPhoto.maxCount - photoCount) }
+
+  /// PhotosPicker에서 고른 사진을 축소해 마지막 포커스 텍스트 칸 뒤에 넣는다.
+  /// 고른 순서대로 사진 칸을 잇고, 뒤에 이어 쓸 빈 텍스트 칸을 둔다(바로 뒤가 텍스트 칸이면 그 칸을 쓴다).
+  func addPhotos(_ items: [PhotosPickerItem]) async {
+    let picked = Array(items.prefix(remainingPhotoSlots))
+    guard !picked.isEmpty, !isAddingPhotos else { return }
+    isAddingPhotos = true
+    errorMessage = nil
+    defer { isAddingPhotos = false }
+
+    var newBlocks: [ComposeBlock] = []
+    for item in picked {
+      guard let data = try? await item.loadTransferable(type: Data.self),
+            let output = await Task.detached(operation: { PhotoJPEGEncoder.encode(data) }).value else {
+        errorMessage = L10n.composeErrorPhotoLoad
+        continue
+      }
+      let photo = LetterPhoto(width: output.width, height: output.height, pendingJPEG: output.jpeg)
+      previewImages[photo.id] = UIImage(data: output.jpeg)
+      newBlocks.append(.photo(photo))
+    }
+    guard !newBlocks.isEmpty else { return }
+
+    let insertAt = lastFocusedTextId
+      .flatMap { id in blocks.firstIndex { $0.id == id } }
+      .map { $0 + 1 } ?? blocks.endIndex
+    let nextIsText = insertAt < blocks.endIndex && blocks[insertAt].photo == nil
+    if !nextIsText { newBlocks.append(.text("")) }
+    blocks.insert(contentsOf: newBlocks, at: insertAt)
+  }
+
+  /// 사진 칸을 빼고, 그 때문에 맞닿게 된 두 텍스트 칸은 하나로 합친다(저장 시에도 합쳐지므로 편집 화면을 미리 맞춘다).
+  func removePhoto(blockId: String) {
+    guard let index = blocks.firstIndex(where: { $0.id == blockId }) else { return }
+    blocks.remove(at: index)
+    if index > 0, index < blocks.endIndex, blocks[index - 1].photo == nil, blocks[index].photo == nil {
+      let merged = [blocks[index - 1].text, blocks[index].text].filter { !$0.isEmpty }.joined(separator: "\n\n")
+      blocks[index - 1].text = merged
+      if lastFocusedTextId == blocks[index].id { lastFocusedTextId = blocks[index - 1].id }
+      blocks.remove(at: index)
+    }
+  }
+
+  /// 저장된 블록 → 편집 칸. 사진으로 끝나거나 비어 있으면 이어 쓸 빈 텍스트 칸을 붙인다.
+  private static func editableBlocks(_ letterBlocks: [LetterBlock]) -> [ComposeBlock] {
+    var result = letterBlocks.map(ComposeBlock.init)
+    if result.last?.photo != nil || result.isEmpty { result.append(.text("")) }
+    return result
+  }
+
+  /// 이어쓰기 화면의 저장된 사진 표시용. 실패하면 플레이스홀더로 두고 편집은 계속한다.
+  private func loadPhotoURLs(letterId: String, paths: [String]) async {
+    guard !paths.isEmpty else { return }
+    photoURLs = (try? await letterUsecase.photoURLs(letterId: letterId)) ?? [:]
+  }
+
+  /// 업로드로 경로가 채워진 사진을 편집 칸에 반영한다. 저장 중 사용자가 칸을 바꿨을 수 있어 사진 id로 맞춘다.
+  private func applySaved(_ saved: [LetterBlock]) {
+    let photos = Dictionary(saved.photos.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    for index in blocks.indices {
+      if let id = blocks[index].photo?.id, let updated = photos[id] {
+        blocks[index].photo = updated
+      }
     }
   }
 
@@ -132,6 +216,13 @@ final class ComposeModelData {
     case .fail(let reason):
       errorMessage = Self.scErrorMessage(reason)
     }
+  }
+
+  /// 인앱 탐색 시트에서 고른 트랙을 붙여넣기와 같은 검증 경로로 적용한다.
+  func applyPickedSoundCloud(_ url: URL) async {
+    showSoundCloudPicker = false
+    soundcloudURL = url.absoluteString
+    await applySoundCloudURL()
   }
 
   static func scErrorMessage(_ reason: ScValidationFailReason) -> String {
@@ -173,21 +264,28 @@ final class ComposeModelData {
     isSaving = true
     errorMessage = nil
     defer { isSaving = false }
-    let draft = LetterDraft(title: title, body: content, templateId: templateId, cue: cue)
+    let draft = LetterDraft(title: title, blocks: blocks.map(\.letterBlock), templateId: templateId, cue: cue)
     do {
       switch mode {
       case .edit(let id):
-        try await letterUsecase.update(id: id, draft)
+        applySaved(try await letterUsecase.update(id: id, draft))
         return id
       case .new:
         let letter = try await letterUsecase.create(draft)
         mode = .edit(letter.id)   // 이후 저장은 갱신 — 반복 저장 시 중복 생성 방지.
+        applySaved(letter.blocks)
         return letter.id
       case .reply:
         let letter = try await letterUsecase.create(draft)
         mode = .edit(letter.id)   // 답장도 첫 저장 후 갱신 — 중복 생성 방지(isReply는 유지).
+        applySaved(letter.blocks)
         return letter.id
       }
+    } catch let error as LetterPhotoSaveError {
+      // 행은 이미 있으므로 다음 저장은 갱신으로 — 재시도 때 같은 편지가 또 만들어지지 않는다.
+      mode = .edit(error.letterId)
+      errorMessage = L10n.composeErrorPhotoUpload
+      return nil
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSave
       return nil

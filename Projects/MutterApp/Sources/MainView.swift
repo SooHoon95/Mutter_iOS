@@ -141,7 +141,7 @@ struct MainView: View {
     ViewerViewFactory(
       deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
       receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
-      letterUsecase: LetterUsecase(repository: LetterRepository()),
+      letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
       inboxUsecase: nil,
       audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
       onBack: { pendingLetter = nil }

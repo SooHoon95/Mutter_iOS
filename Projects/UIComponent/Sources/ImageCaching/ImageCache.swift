@@ -6,7 +6,7 @@ import SwiftUI
 public final class ImageCache: @unchecked Sendable {
   public static let shared = ImageCache()
 
-  private let memory = NSCache<NSURL, UIImage>()
+  private let memory = NSCache<NSString, UIImage>()
   private let session: URLSession
 
   public init(session: URLSession = .shared) {
@@ -16,8 +16,10 @@ public final class ImageCache: @unchecked Sendable {
 
   /// 캐시에 있으면 즉시, 없으면 다운로드 후 캐시에 저장하고 반환한다.
   /// 실패 시 nil(호출부가 placeholder 유지).
-  public func image(for url: URL) async -> UIImage? {
-    let key = url as NSURL
+  /// - Parameter cacheKey: URL과 다른 안정 키. 서명 URL처럼 매번 바뀌는 주소는 Storage 경로를 넘겨
+  ///   같은 사진을 다시 받지 않게 한다. nil이면 URL 문자열이 키다.
+  public func image(for url: URL, cacheKey: String? = nil) async -> UIImage? {
+    let key = (cacheKey ?? url.absoluteString) as NSString
     if let cached = memory.object(forKey: key) {
       return cached
     }

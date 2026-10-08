@@ -6,7 +6,7 @@ import AppFoundation
 import Domain
 import Networking
 
-/// `LetterRepositorable` 구현 — letters 테이블 CRUD. paragraphs↔body 변환은 `LetterContentCodec`.
+/// `LetterRepositorable` 구현 — letters 테이블 CRUD. paragraphs↔blocks 변환은 `LetterContentCodec`.
 public final class LetterRepository: LetterRepositorable {
   private let provider: SupabaseProvider
 
@@ -27,7 +27,7 @@ public final class LetterRepository: LetterRepositorable {
       let dto = LetterInsertDTO(
         ownerId: uid,
         title: draft.title,
-        paragraphs: LetterContentCodec.paragraphs(body: draft.body, cue: draft.cue),
+        paragraphs: LetterContentCodec.paragraphs(blocks: draft.blocks, cue: draft.cue),
         templateId: draft.templateId
       )
       let row: LetterRow = try await provider.client
@@ -47,7 +47,7 @@ public final class LetterRepository: LetterRepositorable {
     do {
       let dto = LetterUpdateDTO(
         title: draft.title,
-        paragraphs: LetterContentCodec.paragraphs(body: draft.body, cue: draft.cue),
+        paragraphs: LetterContentCodec.paragraphs(blocks: draft.blocks, cue: draft.cue),
         templateId: draft.templateId,
         updatedAt: ISO8601.string(from: Date())
       )

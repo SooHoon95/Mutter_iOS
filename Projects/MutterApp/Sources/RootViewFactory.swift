@@ -36,7 +36,7 @@ struct RootViewFactory {
     case .compose(let composeRoute):
       // navbar는 ComposeView 내부에서 Component로 직접 얹는다(모디파이어 제거).
       ComposeViewFactory(
-        letterUsecase: LetterUsecase(repository: LetterRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
         connectionUsecase: ConnectionUsecase(repository: ConnectionRepository()),
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
@@ -51,7 +51,7 @@ struct RootViewFactory {
       ViewerViewFactory(
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
         receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
-        letterUsecase: LetterUsecase(repository: LetterRepository()),
+        letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
         inboxUsecase: InboxUsecase(repository: InboxRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
         onBack: { coordinator.pop() }
