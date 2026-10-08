@@ -131,7 +131,17 @@ platform :ios do
   lane :generate do
     Dir.chdir(PROJECT_ROOT) do
       sh("mise exec -- tuist install")
-      sh("mise exec -- tuist generate --no-open")
+      # supabase-swift는 옛 이름(xctest-dynamic-overlay), swift-clocks는 새 이름(swift-issue-reporting)으로
+      # 같은 _IssueReporting 타겟을 끌어와 Tuist 4.208이 순서에 따라 간헐적으로 "circular dependency"를 낸다
+      # (2026-10-08 측정: 5회 중 4회 실패). 업스트림이 이름을 통일할 때까지 재시도로 흡수한다.
+      attempts = 0
+      begin
+        attempts += 1
+        sh("mise exec -- tuist generate --no-open")
+      rescue FastlaneCore::Interface::FastlaneShellError
+        retry if attempts < 10
+        raise
+      end
     end
   end
 
