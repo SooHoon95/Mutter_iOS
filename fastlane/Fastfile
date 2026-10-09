@@ -33,6 +33,20 @@ platform :ios do
   # App Store Connect API 키. Key ID + .p8 경로만 있으면 키 객체를, 없으면 nil을 반환한다.
   # Issuer ID는 팀 키에만 필요하고 개인 키(Individual Key)는 불필요 → 있을 때만 전달한다.
   # nil이면 각 액션이 Appfile의 Apple ID 로그인으로 폴백한다.
+  # XCConfigs/MarketingVersion.xcconfig의 MARKETING_VERSION(스토어 표시 버전).
+  def marketing_version
+    File.read(File.join(PROJECT_ROOT, "XCConfigs/MarketingVersion.xcconfig"))[/MARKETING_VERSION\s*=\s*([\d.]+)/, 1]
+  end
+
+  # 업로드 성공 후 Supabase app_config.latest_version 갱신(웹 저장소 스크립트 재사용).
+  # min_version(강제 업데이트)은 건드리지 않는다. 실패해도 업로드는 이미 끝났으니 경고만 남긴다.
+  def set_latest_version(platform, version)
+    web_dir = ENV["MUTTER_WEB_DIR"] || File.expand_path("../letter-app", PROJECT_ROOT)
+    sh("#{web_dir}/scripts/set-latest-version.sh", platform, version.to_s)
+  rescue StandardError => e
+    UI.important("app_config.latest_version 갱신 실패(#{platform} #{version}) — 수동 실행: #{web_dir}/scripts/set-latest-version.sh #{platform} #{version}\n#{e.message}")
+  end
+
   def asc_api_key
     return nil unless ENV["ASC_KEY_ID"] && ENV["ASC_KEY_PATH"]
     issuer = ENV["ASC_ISSUER_ID"]
@@ -206,6 +220,7 @@ platform :ios do
       force: true                 # HTML 미리보기 확인 프롬프트 생략
     )
     UI.success("App Store 업로드 완료 (빌드 #{next_build}). App Store Connect에서 메타데이터 후 제출하세요.")
+    set_latest_version("ios", marketing_version)
   end
 
   # 재빌드/재업로드 없이, 이미 처리 완료된 최신 빌드를 심사에 제출한다.
