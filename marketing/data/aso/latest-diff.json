@@ -1,19 +1,67 @@
 {
   "keyword_changes": [
     {
+      "term": "음악편지",
+      "priority": true,
+      "from": null,
+      "to": 15,
+      "kind": "gained",
+      "material": false
+    },
+    {
       "term": "노래편지",
       "priority": true,
-      "from": 6,
-      "to": 5,
+      "from": 5,
+      "to": 1,
       "kind": "rise",
       "material": false
     },
     {
       "term": "음악선물",
       "priority": true,
-      "from": 4,
-      "to": 3,
+      "from": 3,
+      "to": 2,
       "kind": "rise",
+      "material": false
+    },
+    {
+      "term": "고백편지",
+      "priority": true,
+      "from": 1,
+      "to": 2,
+      "kind": "drop",
+      "material": false
+    },
+    {
+      "term": "편지앱",
+      "priority": false,
+      "from": null,
+      "to": 28,
+      "kind": "gained",
+      "material": false
+    },
+    {
+      "term": "편지쓰기",
+      "priority": false,
+      "from": null,
+      "to": 29,
+      "kind": "gained",
+      "material": false
+    },
+    {
+      "term": "손편지",
+      "priority": false,
+      "from": null,
+      "to": 35,
+      "kind": "gained",
+      "material": false
+    },
+    {
+      "term": "편지봉투",
+      "priority": false,
+      "from": 1,
+      "to": 2,
+      "kind": "drop",
       "material": false
     }
   ],
@@ -22,18 +70,27 @@
       "id": "1615253712",
       "name": "Dearyou",
       "fields": [
+        "version",
         "rating_count"
       ],
       "from": {
-        "rating_count": 113
+        "version": "1.8.0",
+        "rating_count": 114
       },
       "to": {
-        "rating_count": 114
+        "version": "1.8.1",
+        "rating_count": 115
       },
       "release_notes": "버그를 수정하고 안정성을 개선했습니다."
     }
   ],
-  "app_changes": [],
-  "date": "2026-10-07",
-  "prev_date": "2026-10-05"
+  "app_changes": [
+    {
+      "field": "version",
+      "from": "1.0.4",
+      "to": "1.0.5"
+    }
+  ],
+  "date": "2026-10-12",
+  "prev_date": "2026-10-07"
 }
