@@ -78,6 +78,8 @@ struct ParagraphDTO: Codable {
 enum LetterContentCodec {
   /// 단락 배열 → 블록. 연속된 텍스트 단락은 빈 줄로 이어 하나의 텍스트 블록으로 합친다
   /// (편집기에서 텍스트 칸 하나가 사진 사이 구간 하나에 대응하도록).
+  /// 중간의 빈 단락은 작성자가 넣은 여분의 빈 줄이라 그대로 잇고, 블록 앞뒤의 공백만 걷어낸다
+  /// (사진만 있는 편지의 큐 자리채움 단락은 이렇게 사라진다).
   static func blocks(from paragraphs: [ParagraphDTO]) -> [LetterBlock] {
     var blocks: [LetterBlock] = []
     for paragraph in paragraphs.sorted(by: { $0.order < $1.order }) {
@@ -85,15 +87,18 @@ enum LetterContentCodec {
         blocks.append(.photo(LetterPhoto(id: paragraph.id, path: photo.path, width: photo.width, height: photo.height)))
         continue
       }
-      // 빈 단락은 사진 앞뒤 자리채움이거나 구버전 잔재라 블록으로 만들지 않는다.
-      guard !paragraph.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+      let text = trimmingTrailingWhitespace(paragraph.text)
       if case .text(let previous) = blocks.last {
-        blocks[blocks.count - 1] = .text(previous + "\n\n" + paragraph.text)
+        blocks[blocks.count - 1] = .text(previous + "\n\n" + text)
       } else {
-        blocks.append(.text(paragraph.text))
+        blocks.append(.text(text))
       }
     }
-    return blocks
+    return blocks.compactMap { block in
+      guard case .text(let text) = block else { return block }
+      let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+      return trimmed.isEmpty ? nil : .text(trimmed)
+    }
   }
 
   /// 단락 배열 → 단일 큐(첫 큐 채택).
@@ -111,7 +116,7 @@ enum LetterContentCodec {
     )
   }
 
-  /// 블록+큐 → 단락 배열(저장용). 텍스트 블록은 빈 줄로 나눠 단락으로, 사진 블록은 사진 단락으로 만든다.
+  /// 블록+큐 → 단락 배열(저장용). 텍스트 블록은 빈 줄(\n\n)로 나눠 단락으로, 사진 블록은 사진 단락으로 만든다.
   /// 큐는 첫 텍스트 단락에 붙는다. 텍스트가 하나도 없으면 큐를 실을 빈 텍스트 단락을 맨 앞에 둔다.
   /// 아직 업로드되지 않은(path 없는) 사진은 저장할 수 없으므로 건너뛴다.
   static func paragraphs(blocks: [LetterBlock], cue: MusicCue?) -> [ParagraphDTO] {
@@ -124,11 +129,12 @@ enum LetterContentCodec {
     for block in blocks {
       switch block {
       case .text(let text):
-        items += text
-          .components(separatedBy: "\n\n")
-          .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-          .filter { !$0.isEmpty }
-          .map(Item.text)
+        // 빈 조각은 버리지 않는다 — 빈 줄을 여러 번 넣은 자리는 빈 단락("")이나 "\n"으로 시작하는 단락으로 남아
+        // 편지지에서 그만큼 빈 줄로 보인다(구 형식과 같은 저장 모양). 조각 끝 공백만 걷고(공백뿐인 줄은 "")
+        // 앞 들여쓰기·개행은 둔다. 웹·Android 코덱과 동일.
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { continue }
+        items += trimmed.components(separatedBy: "\n\n").map { Item.text(trimmingTrailingWhitespace($0)) }
       case .photo(let photo):
         guard let path = photo.path else { continue }
         items.append(.photo(id: photo.id, ParagraphPhotoDTO(path: path, width: photo.width, height: photo.height)))
@@ -148,6 +154,10 @@ enum LetterContentCodec {
         return ParagraphDTO(id: id, order: index, text: "", cue: nil, photo: photo)
       }
     }
+  }
+
+  private static func trimmingTrailingWhitespace(_ text: String) -> String {
+    String(text.reversed().drop(while: \.isWhitespace).reversed())
   }
 
   private static func toDTO(_ cue: MusicCue) -> MusicCueDTO {

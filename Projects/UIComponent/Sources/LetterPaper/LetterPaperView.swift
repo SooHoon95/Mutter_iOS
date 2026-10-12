@@ -21,12 +21,11 @@ public struct LetterPaperView: View {
     self.init(theme: theme, title: title, blocks: [.text(text)], revealOnScroll: revealOnScroll)
   }
 
-  /// 빈 줄 기준 단락 분리(웹과 동일한 문단 호흡).
+  /// 빈 줄 기준 단락 분리(웹과 동일한 문단 호흡). 빈 조각은 버리지 않는다 —
+  /// 작성자가 빈 줄을 더 넣은 자리라 빈 단락(한 줄 높이)으로 그려야 웹 뷰어와 같은 여백이 된다.
   private static func paragraphs(of text: String) -> [String] {
-    text
-      .components(separatedBy: "\n\n")
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .filter { !$0.isEmpty }
+    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty ? [] : trimmed.components(separatedBy: "\n\n")
   }
 
   /// 렌더 순서대로 펼친 단락·사진. 각 단락은 개행(\n) 기준 줄로 쪼개고, 전체 줄에 연속 인덱스를 부여한다
@@ -82,7 +81,8 @@ public struct LetterPaperView: View {
         ForEach(items) { item in
           switch item {
           case .paragraph(let group):
-            Text(group.text).letterBody(theme)
+            // 빈 단락도 한 줄 높이를 차지하게 공백 한 칸으로 그린다(웹 &nbsp;와 동형).
+            Text(group.text.isEmpty ? " " : group.text).letterBody(theme)
           case .photo(_, let url, let cacheKey, let aspectRatio):
             LetterPhotoView(url: url, cacheKey: cacheKey, aspectRatio: aspectRatio, tint: theme.muted)
           }
