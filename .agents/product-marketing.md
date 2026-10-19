@@ -10,7 +10,7 @@
 <!-- auto:begin -->
 ## 자동 생성 사실 (코드·수집 데이터 기준 — 손으로 고치지 않는다)
 
-- verified_commit: `a7ea60c` · verified_at: 2026-10-12 · 생성: `scripts/marketing/context_sync.py`
+- verified_commit: `55a8647` · verified_at: 2026-10-19 · 생성: `scripts/marketing/context_sync.py`
 - iOS: 저장소 MARKETING_VERSION 1.0.5 · 스토어 라이브 1.0.5(iTunes lookup) · App Store id 6790086549 · 번들 com.efreedom.mutter
 - Android: 1.3.0 (versionCode 5) · 패키지 com.efreedom.mutter
 - 웹 뷰어 베이스 URL: `https://letter-app-nine-kohl.vercel.app` (`AppLink.swift`) · 커스텀 도메인 `[확인 필요]`
@@ -26,9 +26,9 @@
 | vintage-typewriter | `#F8F4EC` | `#1C1C1C` | `#444033` |
 | pure-space | `#F9F9F9` | `#222222` | `#222222` |
 
-- 키워드 순위(iTunes Search API KR, 2026-10-12 — 실제 스토어 순위와 토크나이징이 달라 추세 지표로만): 음악편지 15/44 · 음악 편지 1/43 · 노래선물 1/4 · 노래편지 1/47 · 음악선물 2/43 · 고백편지 2/16 · 뮤터 1/7
+- 키워드 순위(iTunes Search API KR, 2026-10-19 — 실제 스토어 순위와 토크나이징이 달라 추세 지표로만): 음악편지 미노출/44 · 음악 편지 21/43 · 노래선물 1/3 · 노래편지 28/48 · 음악선물 17/42 · 고백편지 5/18 · 뮤터 1/8
 - 앱 평점: 0 (0건) · 수집 리뷰 0건
-- 경쟁앱: Dearyou v1.8.1 4.57★(115건, 2026-10-10) · Sincerely v1.94.0 4.86★(14건, 2026-09-30)
+- 경쟁앱: Dearyou v1.8.2 4.57★(117건, 2026-10-15) · Sincerely v1.95.01 4.86★(14건, 2026-10-13)
 <!-- auto:end -->
 
 ## Product Overview

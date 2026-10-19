@@ -3,66 +3,74 @@
     {
       "term": "음악편지",
       "priority": true,
-      "from": null,
-      "to": 15,
-      "kind": "gained",
-      "material": false
+      "from": 15,
+      "to": null,
+      "kind": "lost",
+      "material": true
+    },
+    {
+      "term": "음악 편지",
+      "priority": true,
+      "from": 1,
+      "to": 21,
+      "kind": "drop",
+      "material": true
     },
     {
       "term": "노래편지",
       "priority": true,
-      "from": 5,
-      "to": 1,
-      "kind": "rise",
-      "material": false
+      "from": 1,
+      "to": 28,
+      "kind": "drop",
+      "material": true
     },
     {
       "term": "음악선물",
       "priority": true,
-      "from": 3,
-      "to": 2,
-      "kind": "rise",
-      "material": false
+      "from": 2,
+      "to": 17,
+      "kind": "drop",
+      "material": true
     },
     {
       "term": "고백편지",
       "priority": true,
-      "from": 1,
-      "to": 2,
+      "from": 2,
+      "to": 5,
       "kind": "drop",
-      "material": false
+      "material": true
     },
     {
       "term": "편지앱",
       "priority": false,
-      "from": null,
-      "to": 28,
-      "kind": "gained",
-      "material": false
+      "from": 28,
+      "to": null,
+      "kind": "lost",
+      "material": true
     },
     {
       "term": "편지쓰기",
       "priority": false,
-      "from": null,
-      "to": 29,
-      "kind": "gained",
-      "material": false
+      "from": 29,
+      "to": null,
+      "kind": "lost",
+      "material": true
     },
     {
       "term": "손편지",
       "priority": false,
-      "from": null,
-      "to": 35,
-      "kind": "gained",
-      "material": false
+      "from": 35,
+      "to": null,
+      "kind": "lost",
+      "material": true
     },
     {
       "term": "편지봉투",
       "priority": false,
-      "from": 1,
-      "to": 2,
+      "from": 2,
+      "to": 6,
       "kind": "drop",
-      "material": false
+      "material": true
     }
   ],
   "competitor_changes": [
@@ -74,23 +82,31 @@
         "rating_count"
       ],
       "from": {
-        "version": "1.8.0",
-        "rating_count": 114
-      },
-      "to": {
         "version": "1.8.1",
         "rating_count": 115
       },
+      "to": {
+        "version": "1.8.2",
+        "rating_count": 117
+      },
       "release_notes": "버그를 수정하고 안정성을 개선했습니다."
-    }
-  ],
-  "app_changes": [
+    },
     {
-      "field": "version",
-      "from": "1.0.4",
-      "to": "1.0.5"
+      "id": "6443709181",
+      "name": "Sincerely",
+      "fields": [
+        "version"
+      ],
+      "from": {
+        "version": "1.94.0"
+      },
+      "to": {
+        "version": "1.95.01"
+      },
+      "release_notes": "앱 최적화 및 버그 수정.\n더욱 쾌적해진 서비스를 경험해보세요!"
     }
   ],
-  "date": "2026-10-12",
-  "prev_date": "2026-10-07"
+  "app_changes": [],
+  "date": "2026-10-19",
+  "prev_date": "2026-10-12"
 }
