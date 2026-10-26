@@ -1,4 +1,13 @@
 {
-  "date": "2026-10-19",
-  "active": []
+  "date": "2026-10-26",
+  "active": [
+    {
+      "key": "pepero-day",
+      "name": "빼빼로데이",
+      "date": "2026-11-11",
+      "days_left": 16,
+      "hint": "과자 대신 노래 한 곡을 담은 편지",
+      "already_drafted": false
+    }
+  ]
 }
