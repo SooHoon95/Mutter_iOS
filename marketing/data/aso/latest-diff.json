@@ -1,69 +1,80 @@
 {
   "keyword_changes": [
     {
+      "term": "음악편지",
+      "priority": true,
+      "from": null,
+      "to": 4,
+      "kind": "gained",
+      "material": false
+    },
+    {
       "term": "음악 편지",
       "priority": true,
-      "from": 21,
-      "to": 1,
-      "kind": "rise",
+      "from": 1,
+      "to": 2,
+      "kind": "drop",
       "material": false
     },
     {
       "term": "노래편지",
       "priority": true,
-      "from": 28,
-      "to": 6,
+      "from": 6,
+      "to": 2,
       "kind": "rise",
       "material": false
     },
     {
       "term": "음악선물",
       "priority": true,
-      "from": 17,
-      "to": 4,
+      "from": 4,
+      "to": 2,
       "kind": "rise",
       "material": false
     },
     {
       "term": "고백편지",
       "priority": true,
-      "from": 5,
-      "to": 2,
+      "from": 2,
+      "to": 1,
       "kind": "rise",
+      "material": false
+    },
+    {
+      "term": "편지앱",
+      "priority": false,
+      "from": null,
+      "to": 31,
+      "kind": "gained",
+      "material": false
+    },
+    {
+      "term": "편지쓰기",
+      "priority": false,
+      "from": null,
+      "to": 26,
+      "kind": "gained",
+      "material": false
+    },
+    {
+      "term": "손편지",
+      "priority": false,
+      "from": null,
+      "to": 31,
+      "kind": "gained",
       "material": false
     },
     {
       "term": "편지봉투",
       "priority": false,
-      "from": 6,
-      "to": 3,
+      "from": 3,
+      "to": 2,
       "kind": "rise",
       "material": false
     }
   ],
-  "competitor_changes": [
-    {
-      "id": "1615253712",
-      "name": "Dearyou",
-      "fields": [
-        "version",
-        "description_sha",
-        "rating_count"
-      ],
-      "from": {
-        "version": "1.8.2",
-        "description_sha": "54725fe94cab",
-        "rating_count": 117
-      },
-      "to": {
-        "version": "1.9.0",
-        "description_sha": "a9d7cea429a3",
-        "rating_count": 119
-      },
-      "release_notes": "• 12월 1일, 올해의 기록을 담은 편지가 우편함에 도착해요.\n• 봉투와 우표에 입체감을 더했어요.\n• 이름·나이·사는 나라 같은 자기소개는 편지에 써도 돼요. 편지가 보내지지 않으면 이유를 알려 드려요.\n• '문의하기'를 '개발자에게 문의하기'로 바꿨어요. 답변은 가입한 이메일로 보내 드려요.\n• 여러 언어의 번역을 다듬었어요."
-    }
-  ],
+  "competitor_changes": [],
   "app_changes": [],
-  "date": "2026-10-26",
-  "prev_date": "2026-10-19"
+  "date": "2026-11-02",
+  "prev_date": "2026-10-26"
 }

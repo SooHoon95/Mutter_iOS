@@ -1,12 +1,20 @@
 {
-  "date": "2026-10-26",
+  "date": "2026-11-02",
   "active": [
     {
       "key": "pepero-day",
       "name": "빼빼로데이",
       "date": "2026-11-11",
-      "days_left": 16,
+      "days_left": 9,
       "hint": "과자 대신 노래 한 곡을 담은 편지",
+      "already_drafted": true
+    },
+    {
+      "key": "suneung-2026",
+      "name": "수능",
+      "date": "2026-11-19",
+      "days_left": 17,
+      "hint": "시험 끝난 친구·동생에게 수고했다는 편지",
       "already_drafted": false
     }
   ]
