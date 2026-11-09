@@ -1,0 +1,194 @@
+{
+  "date": "2026-11-09",
+  "collected_at": "2026-11-09T09:00:51+09:00",
+  "app": {
+    "version": "1.0.5",
+    "rating": 0,
+    "rating_count": 0,
+    "released": "2026-10-09"
+  },
+  "keywords": {
+    "음악편지": {
+      "priority": true,
+      "rank": 39,
+      "total": 44,
+      "top3": [
+        "비바비디오 - Vlog 동영상 편집 & 제작",
+        "VITA - 동영상 편집 어플",
+        "VideoShow - 비디오 편집 및 사진 편집"
+      ]
+    },
+    "음악 편지": {
+      "priority": true,
+      "rank": 1,
+      "total": 44,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "오디오 편집 - 음악 편집기, 벨소리 메이커",
+        "GarageBand"
+      ]
+    },
+    "노래선물": {
+      "priority": true,
+      "rank": 1,
+      "total": 6,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "SongWish: AI 노래 선물 메이커",
+        "Tubissime: 맞춤 노래 선물"
+      ]
+    },
+    "노래편지": {
+      "priority": true,
+      "rank": 3,
+      "total": 47,
+      "top3": [
+        "Moises: 뮤지션의 앱",
+        "Lingokids: 영어 게임",
+        "뮤터 - 음악 편지, 노래 선물"
+      ]
+    },
+    "음악선물": {
+      "priority": true,
+      "rank": 2,
+      "total": 44,
+      "top3": [
+        "벨팡-벨소리 컬러링 통화연결음",
+        "뮤터 - 음악 편지, 노래 선물",
+        "AI 노래 만들기: 작곡 음악 생성기"
+      ]
+    },
+    "고백편지": {
+      "priority": true,
+      "rank": 1,
+      "total": 23,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "Yours - 마음이 담긴 손편지",
+        "Sincerely: 고민 상담 및 고백"
+      ]
+    },
+    "편지지": {
+      "priority": false,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "Dearyou : 편지 펜팔",
+        "폰편지",
+        "VLLO 블로 - AI 영상 편집기"
+      ]
+    },
+    "편지앱": {
+      "priority": false,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "이지온메일-앱으로 쓰는 손편지!",
+        "Dearyou : 편지 펜팔",
+        "폰편지"
+      ]
+    },
+    "편지쓰기": {
+      "priority": false,
+      "rank": 39,
+      "total": 45,
+      "top3": [
+        "폰편지",
+        "편지 AI - AI를 이용해 편지쓰세요",
+        "Yours - 마음이 담긴 손편지"
+      ]
+    },
+    "손편지": {
+      "priority": false,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "Yours - 마음이 담긴 손편지",
+        "이지온메일-앱으로 쓰는 손편지!",
+        "폰편지"
+      ]
+    },
+    "안부": {
+      "priority": false,
+      "rank": null,
+      "total": 46,
+      "top3": [
+        "안부 : 마음을 전하는 습관",
+        "안부 - 부모님 돌봄 기록",
+        "원터치 아임온 - 안부 체크온"
+      ]
+    },
+    "위로": {
+      "priority": false,
+      "rank": null,
+      "total": 44,
+      "top3": [
+        "옹심이 the 감자",
+        "Dearyou : 편지 펜팔",
+        "하루냥"
+      ]
+    },
+    "축하": {
+      "priority": false,
+      "rank": null,
+      "total": 50,
+      "top3": [
+        "생일 축하 - 사진 프레임",
+        "생일 축하 카드 이미지",
+        "인사2026-추석,명절,인사,인사말,경조사,축하,장례"
+      ]
+    },
+    "엽서": {
+      "priority": false,
+      "rank": null,
+      "total": 39,
+      "top3": [
+        "오늘도 엽서",
+        "퍼블로그 사진인화 포토북 굿즈제작 스티커 포토카드",
+        "스냅스 - SNAPS"
+      ]
+    },
+    "편지봉투": {
+      "priority": false,
+      "rank": 2,
+      "total": 14,
+      "top3": [
+        "Yours - 마음이 담긴 손편지",
+        "뮤터 - 음악 편지, 노래 선물",
+        "사랑의 편지: 커플을 위한 선물"
+      ]
+    },
+    "뮤터": {
+      "priority": true,
+      "rank": 1,
+      "total": 7,
+      "top3": [
+        "뮤터 - 음악 편지, 노래 선물",
+        "터렛 키우기 TD",
+        "디아블로 이모탈"
+      ]
+    }
+  },
+  "competitors": {
+    "1615253712": {
+      "name": "Dearyou",
+      "track_name": "Dearyou : 편지 펜팔",
+      "version": "1.9.1",
+      "rating": 4.59349,
+      "rating_count": 123,
+      "updated": "2026-11-05",
+      "description_sha": "576716f38475",
+      "release_notes": "• 12월 1일, 올해의 기록을 담은 편지가 우편함에 도착해요.\n• 봉투와 우표에 입체감을 더했어요.\n• 이름·나이·사는 나라 같은 자기소개는 편지에 써도 돼요. 편지가 보내지지 않으면 이유를 알려 드려요.\n• '문의하기'를 '개발자에게 문의하기'로 바꿨어요. 답변은 가입한 이메일로 보내 드려요.\n• 여러 언어의 번역을 다듬었어요."
+    },
+    "6443709181": {
+      "name": "Sincerely",
+      "track_name": "Sincerely: 고민 상담 및 고백",
+      "version": "1.95.02",
+      "rating": 4.85714,
+      "rating_count": 14,
+      "updated": "2026-11-02",
+      "description_sha": "8c2267a02bdd",
+      "release_notes": "앱 최적화 및 오류 수정 완료.\n즐겁게 이용해 주세요!"
+    }
+  }
+}
