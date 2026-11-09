@@ -6,7 +6,7 @@ import AppFoundation
 
 /// Supabase/네트워크 에러를 도메인 `MutterError`로 정규화한다.
 /// 서버 RPC가 raise하는 코드 문자열(웹 data 레이어와 동일 계약)을 의미 케이스로 매핑한다:
-///   WRONG_PASSWORD·LINK_REVOKED·LINK_EXPIRED·*_NOT_FOUND·FORBIDDEN·NOT_YET_REVEALED:<ISO>.
+///   WRONG_PASSWORD·LINK_REVOKED·LINK_EXPIRED·*_NOT_FOUND·AUTH_REQUIRED·FORBIDDEN·NOT_YET_REVEALED:<ISO>.
 enum SupabaseErrorMapper {
   static func map(_ error: Error) -> MutterError {
     if let mutter = error as? MutterError { return mutter }
@@ -33,6 +33,8 @@ enum SupabaseErrorMapper {
     if message.contains("TOKEN_NOT_FOUND")
       || message.contains("LETTER_NOT_FOUND")
       || message.contains("NOT_FOUND") { return MutterError(.notFound) }
+    // 비로그인 호출(RPC가 auth.uid() null이면 raise). 세션 만료 신호가 아니라 접근 거부로만 다룬다.
+    if message.contains("AUTH_REQUIRED") { return MutterError(.unauthorized) }
     if message.contains("FORBIDDEN") || message.contains("not_authorized") {
       return MutterError(.unauthorized)
     }

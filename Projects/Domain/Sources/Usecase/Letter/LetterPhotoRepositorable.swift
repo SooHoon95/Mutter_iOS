@@ -7,7 +7,7 @@ public protocol LetterPhotoRepositorable {
   /// 이 편지 폴더에 실제로 올라가 있는 객체 경로.
   func storedPaths(letterId: String) async throws -> [String]
   func delete(paths: [String]) async throws
-  /// 편지 폴더 전체 삭제(편지 삭제 시).
+  /// 편지 폴더 전체 삭제(삭제함에서 영구 삭제한 뒤).
   func deleteAll(letterId: String) async throws
   /// 수신자 모드 서명 URL(path → URL). 링크 검증은 서버가 get_letter_by_token으로 재사용한다.
   func signedURLs(token: String, password: String?) async throws -> [String: URL]

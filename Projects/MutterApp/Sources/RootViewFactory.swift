@@ -10,6 +10,7 @@ import AuthFeature
 import Compose
 import Connections
 import Delivery
+import Home
 import Legal
 import Viewer
 
@@ -83,6 +84,12 @@ struct RootViewFactory {
         takedownUsecase: TakedownUsecase(repository: TakedownRepository()),
         onBack: { coordinator.pop() }
       ).makeView(legalRoute)
+
+    case .trash:
+      TrashView(
+        letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
+        onBack: { coordinator.pop() }
+      )
     }
   }
 }

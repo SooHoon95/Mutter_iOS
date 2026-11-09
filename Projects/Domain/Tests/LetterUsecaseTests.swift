@@ -18,6 +18,9 @@ final class LetterUsecaseTests: XCTestCase {
     func myLetters() async throws -> [Letter] { [] }
     func myLettersWithStatus() async throws -> [LetterWithStatus] { [] }
     func delete(id: String) async throws { deleted.append(id) }
+    func deletedLetters() async throws -> [DeletedLetter] { [] }
+    func restore(id: String) async throws {}
+    func purge(id: String) async throws {}
   }
 
   private struct UploadFailed: Error {}
@@ -104,13 +107,14 @@ final class LetterUsecaseTests: XCTestCase {
     XCTAssertEqual(photos.removed, ["u/L1/old.jpg"])
   }
 
-  func test_delete_alsoRemovesPhotoFolder() async throws {
+  /// 삭제는 30일 보관이라 복구될 수 있으므로 사진 폴더를 지우지 않는다(삭제함 스펙 2.3).
+  func test_delete_keepsPhotoFolder() async throws {
     let photos = FakePhotoRepository()
     let usecase = LetterUsecase(repository: FakeLetterRepository(), photoRepository: photos)
 
     try await usecase.delete(id: "L1")
 
-    XCTAssertEqual(photos.deletedAll, ["L1"])
+    XCTAssertEqual(photos.deletedAll, [])
   }
 
   func test_body_joinsOnlyTextBlocks() {

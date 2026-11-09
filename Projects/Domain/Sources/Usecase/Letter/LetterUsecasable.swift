@@ -13,7 +13,14 @@ public protocol LetterUsecasable {
   func myLetters() async throws -> [Letter]
   /// 내 편지 + 발송 여부(홈 세그먼트: 보낸 편지 vs 임시저장 분리).
   func myLettersWithStatus() async throws -> [LetterWithStatus]
+  /// 삭제함으로 옮긴다(30일 보관). 사진은 복구될 수 있으므로 지우지 않는다.
   func delete(id: String) async throws
+  /// 삭제함 목록(최근 삭제순).
+  func deletedLetters() async throws -> [DeletedLetter]
+  /// 삭제함에서 되살린다(삭제 직후 "되돌리기"도 같은 경로).
+  func restore(id: String) async throws
+  /// 삭제함에서 완전히 삭제한다. 사진 폴더 정리는 best effort.
+  func purge(id: String) async throws
   /// 수신자 모드 사진 서명 URL(path → URL, 1시간 유효).
   func photoURLs(token: String, password: String?) async throws -> [String: URL]
   /// 소유자 모드 사진 서명 URL(path → URL, 1시간 유효).

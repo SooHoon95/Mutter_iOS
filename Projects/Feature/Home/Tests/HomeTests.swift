@@ -12,6 +12,9 @@ private struct FakeLetterUsecase: LetterUsecasable {
   func myLetters() async throws -> [Letter] { lettersWithStatus.map(\.letter) }
   func myLettersWithStatus() async throws -> [LetterWithStatus] { lettersWithStatus }
   func delete(id: String) async throws {}
+  func deletedLetters() async throws -> [DeletedLetter] { [] }
+  func restore(id: String) async throws {}
+  func purge(id: String) async throws {}
   func photoURLs(token: String, password: String?) async throws -> [String: URL] { [:] }
   func photoURLs(letterId: String) async throws -> [String: URL] { [:] }
 }

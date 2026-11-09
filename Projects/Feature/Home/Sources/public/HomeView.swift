@@ -35,12 +35,15 @@ public struct HomeView: View {
           coordinator.push(.compose(.new))
         }
 
-        // 세그먼트 — 임시저장을 보낸 편지와 분리(통계·목록 혼입 방지).
-        Picker("", selection: $selectedTab) {
-          Text(L10n.homeTabSent).tag(HomeTab.sent)
-          Text(L10n.homeTabDraft).tag(HomeTab.draft)
+        // 세그먼트 — 임시저장을 보낸 편지와 분리(통계·목록 혼입 방지). 옆에 삭제함 진입점.
+        HStack(spacing: 12) {
+          Picker("", selection: $selectedTab) {
+            Text(L10n.homeTabSent).tag(HomeTab.sent)
+            Text(L10n.homeTabDraft).tag(HomeTab.draft)
+          }
+          .pickerStyle(.segmented)
+          trashButton
         }
-        .pickerStyle(.segmented)
 
         if displayRows.isEmpty && !model.isLoading {
           ScrollView {
@@ -78,7 +81,30 @@ public struct HomeView: View {
       .padding(20)
       .frame(maxWidth: 600)
     }
+    .overlay(alignment: .bottom) {
+      if model.undoableLetterId != nil {
+        MutterActionToast(L10n.homeMovedToTrash, actionTitle: L10n.commonUndo) {
+          Task { await model.undoDelete() }
+        }
+      }
+    }
+    .animation(.snappy, value: model.undoableLetterId)
+    // 삭제함에서 되살리고 돌아오면 다시 보여야 하므로 나타날 때마다 새로 받는다.
     .task { await model.load() }
+  }
+
+  // MARK: - 삭제함 진입
+
+  private var trashButton: some View {
+    Button {
+      coordinator.push(.trash)
+    } label: {
+      Image(systemName: "trash")
+        .font(.system(size: 17, weight: .regular))
+        .foregroundStyle(Asset.Colors.inkSoft.color)
+        .frame(width: 32, height: 32)
+    }
+    .accessibilityLabel(L10n.homeTrash)
   }
 
   // MARK: - 골드 통계 카드

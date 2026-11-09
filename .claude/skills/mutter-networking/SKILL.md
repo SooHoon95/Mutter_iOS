@@ -48,6 +48,7 @@ public final class InboxRepository: InboxRepositorable {
 | `WRONG_PASSWORD` / `LINK_REVOKED` / `LINK_EXPIRED` | `.wrongPassword` / `.linkRevoked` / `.linkExpired` |
 | `NOT_CONNECTED` / `INVITE_ALREADY_USED` | `.notConnected` / `.inviteAlreadyUsed` |
 | `*_NOT_FOUND` | `.notFound` |
+| `AUTH_REQUIRED` | `.unauthorized`(비로그인 RPC 호출 — 세션 무효 신호는 안 쏨) |
 | `FORBIDDEN` / `not_authorized` | `.unauthorized`(비즈니스 403 — 세션 무효 신호는 안 쏨) |
 | `URLError` | `.network` |
 | 그 외 | `error.toMutterError() ?? MutterError(.unknown)` |

@@ -5,6 +5,7 @@ import UIComponent
 
 /// 받은함 탭 — 보관한 편지 목록. 탭하면 수신 화면으로 연다.
 public struct InboxView: View {
+  @Environment(\.scenePhase) private var scenePhase
   @State private var model: InboxModelData
   private let onOpen: (String) -> Void
 
@@ -53,7 +54,7 @@ public struct InboxView: View {
                 .listRowBackground(Color.clear)
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                   Button(role: .destructive) {
-                    Task { await model.delete(item) }
+                    model.delete(item)
                   } label: {
                     Label(L10n.commonDelete, systemImage: "trash")
                   }
@@ -69,7 +70,20 @@ public struct InboxView: View {
         }
       }
     }
+    .overlay(alignment: .bottom) {
+      if model.pendingRemoval != nil {
+        MutterActionToast(L10n.inboxRemoved, actionTitle: L10n.commonUndo) {
+          model.undoRemoval()
+        }
+      }
+    }
+    .animation(.snappy, value: model.pendingRemoval?.item.id)
     .task { await model.load() }
+    // 되돌리기 창이 열린 채 화면을 떠나거나 앱이 내려가면 그 자리에서 삭제를 확정한다(앱 종료로 요청이 사라지지 않게).
+    .onDisappear { Task { await model.commitPendingRemoval() } }
+    .onChange(of: scenePhase) { _, newPhase in
+      if newPhase == .background { Task { await model.commitPendingRemoval() } }
+    }
   }
 
   // MARK: - 편지 카드 (HomeView letterCard 스타일 미러)

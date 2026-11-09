@@ -108,12 +108,46 @@ public final class LetterRepository: LetterRepositorable {
     }
   }
 
+  /// 삭제 요청은 그대로지만 서버 `letters` 뷰의 INSTEAD OF DELETE 트리거가 30일 보관(`deleted_at`)으로 바꾼다.
   public func delete(id: String) async throws {
     do {
       try await provider.client
         .from("letters")
         .delete()
         .eq("id", value: id)
+        .execute()
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  public func deletedLetters() async throws -> [DeletedLetter] {
+    _ = try currentUserId()   // 미인증 조기 차단(RPC도 AUTH_REQUIRED로 거부).
+    do {
+      let rows: [DeletedLetterRow] = try await provider.client
+        .rpc("get_my_deleted_letters")
+        .execute()
+        .value
+      return rows.map { $0.toDomain() }
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  public func restore(id: String) async throws {
+    do {
+      try await provider.client
+        .rpc("restore_letter", params: LetterIdParams(letterId: id))
+        .execute()
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  public func purge(id: String) async throws {
+    do {
+      try await provider.client
+        .rpc("purge_letter", params: LetterIdParams(letterId: id))
         .execute()
     } catch {
       throw SupabaseErrorMapper.map(error)

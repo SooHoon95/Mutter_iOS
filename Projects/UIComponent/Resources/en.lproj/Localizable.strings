@@ -9,6 +9,7 @@
 "common.nickname" = "Nickname";
 "common.untitledLetter" = "Untitled Letter";
 "common.retryLater" = "Please try again in a moment.";
+"common.undo" = "Undo";
 
 /* ===== Common errors ===== */
 "error.save" = "Couldn't save.";
@@ -16,6 +17,7 @@
 "error.linkCreate" = "Couldn't create the link.";
 "error.nicknameSave" = "Couldn't save your nickname.";
 "error.delete" = "Couldn't delete.";
+"error.restore" = "Couldn't restore.";
 "error.inviteLoad" = "Couldn't load the invitation.";
 "error.inviteAccept" = "Couldn't accept the invitation.";
 "error.takedown" = "Couldn't submit the report. Please try again in a moment.";
@@ -144,10 +146,27 @@
 "home.unread" = "Unread";
 "home.empty.sent" = "No sent letters yet";
 "home.empty.draft" = "No saved drafts";
+"home.trash" = "Trash";
+"home.movedToTrash" = "Moved to Trash";
+
+/* ===== Trash ===== */
+"trash.title" = "Trash";
+"trash.notice" = "Deleted letters are kept for 30 days, then permanently deleted.";
+"trash.untitled" = "Untitled";
+"trash.daysLeft" = "Deleted permanently in %d days";
+"trash.purgeToday" = "Deleted permanently today";
+"trash.restore" = "Restore";
+"trash.purge" = "Delete Permanently";
+"trash.purgeConfirm" = "Delete permanently?";
+"trash.purgeConfirmDetail" = "This can't be undone.";
+"trash.restored" = "Letter restored";
+"trash.empty" = "Trash is empty";
+"trash.error.load" = "Couldn't load Trash.";
 
 /* ===== Inbox ===== */
 "inbox.title" = "Inbox";
 "inbox.empty" = "No letters received";
+"inbox.removed" = "Removed from Inbox";
 
 /* ===== Legal / report ===== */
 "legal.contact" = "Contact";

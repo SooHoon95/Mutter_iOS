@@ -55,8 +55,22 @@ public final class LetterUsecase: LetterUsecasable {
   }
 
   public func delete(id: String) async throws {
+    // 삭제는 서버에서 30일 보관으로 바뀐다. 복구하면 사진도 그대로 보여야 하므로 여기서 사진을 지우지 않는다.
+    // (보관 중 사진은 Storage 정책이 삭제를 막고, 30일 정리 작업이 편지와 함께 지운다.)
     try await repository.delete(id: id)
-    // 사진 정리는 best effort — 편지 삭제 자체는 이미 끝났으므로 실패를 사용자에게 올리지 않는다.
+  }
+
+  public func deletedLetters() async throws -> [DeletedLetter] {
+    try await repository.deletedLetters()
+  }
+
+  public func restore(id: String) async throws {
+    try await repository.restore(id: id)
+  }
+
+  public func purge(id: String) async throws {
+    try await repository.purge(id: id)
+    // 사진 정리는 best effort — 편지 영구 삭제 자체는 이미 끝났으므로 실패를 사용자에게 올리지 않는다.
     try? await photoRepository.deleteAll(letterId: id)
   }
 

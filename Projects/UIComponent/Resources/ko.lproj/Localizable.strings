@@ -9,6 +9,7 @@
 "common.nickname" = "닉네임";
 "common.untitledLetter" = "제목 없는 편지";
 "common.retryLater" = "잠시 후 다시 시도해 주세요.";
+"common.undo" = "되돌리기";
 
 /* ===== 공통 에러 ===== */
 "error.save" = "저장하지 못했어요.";
@@ -16,6 +17,7 @@
 "error.linkCreate" = "링크를 만들지 못했어요.";
 "error.nicknameSave" = "닉네임을 저장하지 못했어요.";
 "error.delete" = "삭제하지 못했어요.";
+"error.restore" = "되살리지 못했어요.";
 "error.inviteLoad" = "초대를 불러올 수 없어요.";
 "error.inviteAccept" = "수락에 실패했어요.";
 "error.takedown" = "신고 접수에 실패했어요. 잠시 후 다시 시도해 주세요.";
@@ -144,10 +146,27 @@
 "home.unread" = "안읽음";
 "home.empty.sent" = "아직 보낸 편지가 없어요";
 "home.empty.draft" = "임시저장한 편지가 없어요";
+"home.trash" = "삭제함";
+"home.movedToTrash" = "편지를 삭제함으로 옮겼어요";
+
+/* ===== 삭제함 ===== */
+"trash.title" = "삭제함";
+"trash.notice" = "삭제한 편지는 30일 동안 보관된 뒤 완전히 지워져요.";
+"trash.untitled" = "제목 없음";
+"trash.daysLeft" = "%d일 후 완전히 삭제";
+"trash.purgeToday" = "오늘 완전히 삭제";
+"trash.restore" = "복구";
+"trash.purge" = "완전히 삭제";
+"trash.purgeConfirm" = "완전히 삭제할까요?";
+"trash.purgeConfirmDetail" = "되돌릴 수 없어요.";
+"trash.restored" = "편지를 되살렸어요";
+"trash.empty" = "삭제함이 비어 있어요";
+"trash.error.load" = "삭제함을 불러오지 못했어요.";
 
 /* ===== 받은함 ===== */
 "inbox.title" = "받은 편지함";
 "inbox.empty" = "받은 편지가 없어요";
+"inbox.removed" = "보관함에서 뺐어요";
 
 /* ===== 법적/신고 ===== */
 "legal.contact" = "문의하기";
