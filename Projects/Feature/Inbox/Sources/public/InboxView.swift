@@ -74,8 +74,12 @@ public struct InboxView: View {
           .scrollContentBackground(.hidden)
           .contentMargins(.bottom, 20, for: .scrollContent)
           .animation(.default, value: model.items)
-          // 편집 모드에선 당겨서 새로고침을 끈다(선택 중 목록이 바뀌지 않게).
-          .applyIf(!model.isEditing) { $0.refreshable { await model.load() } }
+          // 편집 모드에선 새로고침을 건너뛴다(선택 중 목록이 바뀌지 않게). 수식어를 조건부로 붙였다 떼면
+          // List 정체성이 바뀌어 편집 모드를 켜고 끌 때마다 스크롤이 맨 위로 돌아가므로 항상 붙여 둔다.
+          .refreshable {
+            guard !model.isEditing else { return }
+            await model.load()
+          }
         }
 
         if model.isEditing { editBar }
@@ -108,6 +112,9 @@ public struct InboxView: View {
           .foregroundStyle(Asset.Colors.gold.color)
       }
       .accessibilityLabel(L10n.inboxTrashTitle)
+      // 선택 중엔 화면을 떠나지 않게 막는다(Android·웹과 동일).
+      .disabled(model.isEditing)
+      .opacity(model.isEditing ? 0.35 : 1)
       Button { model.toggleEditing() } label: {
         Text(model.isEditing ? L10n.commonDone : L10n.inboxEdit)
           .fonts(.bodyMediumBold)
