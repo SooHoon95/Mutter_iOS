@@ -18,7 +18,8 @@ struct InboxViewWrapperView: View, InboxViewable {
   var body: some View {
     InboxView(
       inboxUsecase: inboxUsecase,
-      onOpen: { coordinator.push(.viewer(.token($0, password: nil))) }
+      onOpen: { coordinator.push(.viewer(.token($0, password: nil))) },
+      onOpenTrash: { coordinator.push(.inboxTrash) }
     )
   }
 }

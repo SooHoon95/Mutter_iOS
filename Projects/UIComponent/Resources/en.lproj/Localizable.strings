@@ -146,11 +146,11 @@
 "home.unread" = "Unread";
 "home.empty.sent" = "No sent letters yet";
 "home.empty.draft" = "No saved drafts";
-"home.trash" = "Trash";
+"home.trash" = "Sent Letters Trash";
 "home.movedToTrash" = "Moved to Trash";
 
 /* ===== Trash ===== */
-"trash.title" = "Trash";
+"trash.title" = "Sent Letters Trash";
 "trash.notice" = "Deleted letters are kept for 30 days, then permanently deleted.";
 "trash.untitled" = "Untitled";
 "trash.daysLeft" = "Deleted permanently in %d days";
@@ -166,7 +166,17 @@
 /* ===== Inbox ===== */
 "inbox.title" = "Inbox";
 "inbox.empty" = "No letters received";
-"inbox.removed" = "Removed from Inbox";
+"inbox.edit" = "Edit";
+"inbox.selectAll" = "Select All";
+"inbox.deselectAll" = "Deselect All";
+"inbox.deleteSelected" = "Delete (%d)";
+"inbox.movedToTrash" = "Moved to Trash";
+"inbox.movedToTrashMany" = "Moved %d letters to Trash";
+"inbox.trash.title" = "Received Letters Trash";
+"inbox.trash.notice" = "Deleted letters are kept for 30 days, then permanently removed from your Inbox.";
+"inbox.trash.sender" = "From: %@";
+"inbox.trash.unknownSender" = "Unknown";
+"inbox.trash.purgeConfirmDetail" = "It's removed only from your Inbox. Opening the link again will add it back.";
 
 /* ===== Legal / report ===== */
 "legal.contact" = "Contact";

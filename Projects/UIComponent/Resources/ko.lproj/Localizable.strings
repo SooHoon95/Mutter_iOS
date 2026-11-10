@@ -146,11 +146,11 @@
 "home.unread" = "안읽음";
 "home.empty.sent" = "아직 보낸 편지가 없어요";
 "home.empty.draft" = "임시저장한 편지가 없어요";
-"home.trash" = "삭제함";
+"home.trash" = "보낸 편지 삭제함";
 "home.movedToTrash" = "편지를 삭제함으로 옮겼어요";
 
 /* ===== 삭제함 ===== */
-"trash.title" = "삭제함";
+"trash.title" = "보낸 편지 삭제함";
 "trash.notice" = "삭제한 편지는 30일 동안 보관된 뒤 완전히 지워져요.";
 "trash.untitled" = "제목 없음";
 "trash.daysLeft" = "%d일 후 완전히 삭제";
@@ -166,7 +166,17 @@
 /* ===== 받은함 ===== */
 "inbox.title" = "받은 편지함";
 "inbox.empty" = "받은 편지가 없어요";
-"inbox.removed" = "보관함에서 뺐어요";
+"inbox.edit" = "편집";
+"inbox.selectAll" = "전체 선택";
+"inbox.deselectAll" = "선택 해제";
+"inbox.deleteSelected" = "삭제 (%d)";
+"inbox.movedToTrash" = "편지를 삭제함으로 옮겼어요";
+"inbox.movedToTrashMany" = "%d통을 삭제함으로 옮겼어요";
+"inbox.trash.title" = "받은 편지 삭제함";
+"inbox.trash.notice" = "삭제한 편지는 30일 동안 보관된 뒤 받은 편지함에서 완전히 지워져요.";
+"inbox.trash.sender" = "보낸이: %@";
+"inbox.trash.unknownSender" = "알 수 없음";
+"inbox.trash.purgeConfirmDetail" = "받은 편지함에서만 지워지고, 링크를 다시 열면 다시 담겨요.";
 
 /* ===== 법적/신고 ===== */
 "legal.contact" = "문의하기";

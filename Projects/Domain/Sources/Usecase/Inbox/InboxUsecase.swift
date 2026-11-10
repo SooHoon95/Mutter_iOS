@@ -16,7 +16,24 @@ public final class InboxUsecase: InboxUsecasable {
     try await repository.myInbox()
   }
 
-  public func remove(letterId: String) async throws {
-    try await repository.remove(letterId: letterId)
+  public func remove(letterIds: [String]) async throws {
+    guard !letterIds.isEmpty else { return }
+    try await repository.remove(letterIds: letterIds)
+  }
+
+  public func deletedInbox() async throws -> [DeletedInboxItem] {
+    try await repository.deletedInbox()
+  }
+
+  @discardableResult
+  public func restore(letterIds: [String]) async throws -> Int {
+    guard !letterIds.isEmpty else { return 0 }
+    return try await repository.restore(letterIds: letterIds)
+  }
+
+  @discardableResult
+  public func purge(letterIds: [String]) async throws -> Int {
+    guard !letterIds.isEmpty else { return 0 }
+    return try await repository.purge(letterIds: letterIds)
   }
 }

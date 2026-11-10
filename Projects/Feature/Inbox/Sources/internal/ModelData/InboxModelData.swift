@@ -1,89 +1,128 @@
 import Foundation
 
+import AppFoundation
 import Domain
+import UIComponent
 
-/// 받은함 탭 — 보관한 편지 목록.
+/// 받은함 탭 — 보관한 편지 목록 + 편집 모드(여러 통 선택 삭제).
+/// 삭제는 서버 `inbox` 뷰가 30일 보관(받은 편지 삭제함)으로 바꾸므로 즉시 요청하고, 되돌리기는 restore RPC로 한다.
 @MainActor
 @Observable
 final class InboxModelData {
-  /// 지연 삭제 대기 중인 항목과 원래 자리.
-  struct PendingRemoval {
-    let item: InboxItem
-    let index: Int
-  }
-
   var items: [InboxItem] = []
   var isLoading = false
-  /// "보관함에서 뺐어요" 토스트가 떠 있는 동안의 대기 항목. nil이면 토스트 없음.
-  private(set) var pendingRemoval: PendingRemoval?
+  var errorMessage: String?
+
+  /// 편집 모드 — 카드 탭이 열기 대신 선택 토글이 되고, 스와이프·당겨서 새로고침을 끈다.
+  var isEditing = false
+  /// 선택된 항목(InboxItem.id).
+  var selectedIds: Set<String> = []
+
+  /// 방금 삭제함으로 옮긴 편지들 — "되돌리기" 토스트가 떠 있는 동안만 비어 있지 않다.
+  var undoableLetterIds: [String] = []
 
   /// 되돌리기 창(세 플랫폼 공통 5초).
   private static let undoWindow: Duration = .seconds(5)
   private let inboxUsecase: InboxUsecasable
-  @ObservationIgnored private var commitTask: Task<Void, Never>?
+  @ObservationIgnored private var undoToastTask: Task<Void, Never>?
 
   init(inboxUsecase: InboxUsecasable) {
     self.inboxUsecase = inboxUsecase
   }
 
+  var isAllSelected: Bool { !items.isEmpty && selectedIds.count == items.count }
+
+  /// 토스트 문구 — 한 통 / 여러 통.
+  var undoToastMessage: String {
+    undoableLetterIds.count > 1 ? L10n.inboxMovedToTrashMany(undoableLetterIds.count) : L10n.inboxMovedToTrash
+  }
+
   func load() async {
     isLoading = true
     defer { isLoading = false }
-    let loaded = (try? await inboxUsecase.myInbox()) ?? []
-    // 되돌리기 창 안의 항목은 아직 서버에 남아 있으므로, 새로고침해도 다시 나타나지 않게 거른다.
-    items = loaded.filter { $0.id != pendingRemoval?.item.id }
+    items = (try? await inboxUsecase.myInbox()) ?? []
+    // 사라진 항목의 선택은 남기지 않는다(삭제 버튼 개수가 실제와 어긋나지 않게).
+    selectedIds.formIntersection(items.map(\.id))
   }
 
-  /// 스와이프 삭제 — 지연 삭제. 목록에서 바로 숨기고 되돌리기 창(5초)이 닫힐 때 실제로 지운다.
-  /// 받은함은 서버 보관(삭제함)이 없어 지운 뒤 다시 넣어야 하는데, 재-insert는 `on_inbox_insert` 푸시 트리거를
-  /// 또 울리므로 "요청을 늦추는" 방식으로 되돌리기를 만든다(세 플랫폼 공통).
-  func delete(_ item: InboxItem) {
-    // 앞선 대기 항목은 새 삭제가 들어오는 순간 확정한다 — 토스트는 하나라 되돌리기 대상도 하나만 둔다.
-    if let previous = takePendingRemoval() {
-      Task { await send(previous) }
-    }
-    guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-    let removed = items.remove(at: index)
-    pendingRemoval = PendingRemoval(item: removed, index: index)
-    commitTask = Task { [weak self] in
-      try? await Task.sleep(for: Self.undoWindow)
-      guard !Task.isCancelled, let self else { return }
-      // 자기 자신을 취소하면 이어지는 삭제 요청까지 취소되므로, 확정 전에 핸들만 비운다.
-      self.commitTask = nil
-      await self.commitPendingRemoval()
+  // MARK: - 편집 모드
+
+  func toggleEditing() {
+    isEditing.toggle()
+    selectedIds = []
+  }
+
+  func toggleSelection(_ item: InboxItem) {
+    if selectedIds.contains(item.id) {
+      selectedIds.remove(item.id)
+    } else {
+      selectedIds.insert(item.id)
     }
   }
 
-  /// 토스트의 "되돌리기" — 아직 요청을 보내지 않았으므로 원래 자리에 다시 보여주기만 한다.
-  func undoRemoval() {
-    guard let pending = takePendingRemoval() else { return }
-    items.insert(pending.item, at: min(pending.index, items.count))
+  /// "전체 선택" / 모두 선택돼 있으면 "선택 해제".
+  func toggleSelectAll() {
+    selectedIds = isAllSelected ? [] : Set(items.map(\.id))
   }
 
-  /// 대기 중인 삭제를 실제로 보낸다(시간 만료·화면 이탈·앱 백그라운드).
-  func commitPendingRemoval() async {
-    guard let pending = takePendingRemoval() else { return }
-    await send(pending)
+  func deleteSelected() async {
+    await delete(items.filter { selectedIds.contains($0.id) })
+  }
+
+  // MARK: - 삭제·되돌리기
+
+  /// 삭제(편집 모드·스와이프 공통) — 목록에서 먼저 빼고 서버에 삭제한 뒤 편집 모드를 끝내고 되돌리기 토스트.
+  /// 실패하면 뺀 항목만 원래 자리로 되살린다(전체 스냅샷 복원은 연속 삭제 중 다른 항목까지 부활시킨다).
+  func delete(_ targets: [InboxItem]) async {
+    guard !targets.isEmpty else { return }
+    errorMessage = nil
+    let targetIds = Set(targets.map(\.id))
+    // 원래 순서대로 (자리, 항목)을 기억해 두고 뺀다.
+    let removed = items.enumerated().filter { targetIds.contains($0.element.id) }
+    items.removeAll { targetIds.contains($0.id) }
+    let letterIds = removed.map(\.element.letterId)
+    do {
+      try await inboxUsecase.remove(letterIds: letterIds)
+      isEditing = false
+      selectedIds = []
+      showUndoToast(for: letterIds)
+    } catch {
+      for (index, item) in removed where !items.contains(where: { $0.id == item.id }) {
+        items.insert(item, at: min(index, items.count))
+      }
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorDelete
+    }
+  }
+
+  /// 토스트의 "되돌리기" — 삭제함에서 되살린 뒤 목록을 새로 받는다.
+  func undoDelete() async {
+    let letterIds = undoableLetterIds
+    guard !letterIds.isEmpty else { return }
+    hideUndoToast()
+    errorMessage = nil
+    do {
+      try await inboxUsecase.restore(letterIds: letterIds)
+      await load()
+    } catch {
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorRestore
+    }
   }
 
   // MARK: - Private
 
-  /// 대기 항목을 꺼내고 타이머를 멈춘다(토스트도 함께 닫힌다).
-  private func takePendingRemoval() -> PendingRemoval? {
-    guard let pending = pendingRemoval else { return nil }
-    commitTask?.cancel()
-    commitTask = nil
-    pendingRemoval = nil
-    return pending
+  private func showUndoToast(for letterIds: [String]) {
+    undoToastTask?.cancel()
+    undoableLetterIds = letterIds
+    undoToastTask = Task { [weak self] in
+      try? await Task.sleep(for: Self.undoWindow)
+      guard !Task.isCancelled else { return }
+      self?.undoableLetterIds = []
+    }
   }
 
-  /// 서버 삭제. 실패하면 그 항목만 되살린다(전체 스냅샷 복원은 연속 삭제 중 다른 항목까지 부활시킨다).
-  private func send(_ pending: PendingRemoval) async {
-    do {
-      try await inboxUsecase.remove(letterId: pending.item.letterId)
-    } catch {
-      guard !items.contains(where: { $0.id == pending.item.id }) else { return }
-      items.insert(pending.item, at: min(pending.index, items.count))
-    }
+  private func hideUndoToast() {
+    undoToastTask?.cancel()
+    undoToastTask = nil
+    undoableLetterIds = []
   }
 }

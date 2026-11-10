@@ -11,6 +11,7 @@ import Compose
 import Connections
 import Delivery
 import Home
+import Inbox
 import Legal
 import Viewer
 
@@ -88,6 +89,12 @@ struct RootViewFactory {
     case .trash:
       TrashView(
         letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
+        onBack: { coordinator.pop() }
+      )
+
+    case .inboxTrash:
+      InboxTrashView(
+        inboxUsecase: InboxUsecase(repository: InboxRepository()),
         onBack: { coordinator.pop() }
       )
     }

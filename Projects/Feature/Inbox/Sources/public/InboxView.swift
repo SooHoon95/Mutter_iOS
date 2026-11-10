@@ -4,14 +4,20 @@ import Domain
 import UIComponent
 
 /// 받은함 탭 — 보관한 편지 목록. 탭하면 수신 화면으로 연다.
+/// 헤더의 편집 버튼으로 여러 통을 골라 지우고, 삭제함 버튼으로 받은 편지 삭제함에 들어간다.
 public struct InboxView: View {
-  @Environment(\.scenePhase) private var scenePhase
   @State private var model: InboxModelData
   private let onOpen: (String) -> Void
+  private let onOpenTrash: () -> Void
 
-  public init(inboxUsecase: InboxUsecasable, onOpen: @escaping (String) -> Void) {
+  public init(
+    inboxUsecase: InboxUsecasable,
+    onOpen: @escaping (String) -> Void,
+    onOpenTrash: @escaping () -> Void
+  ) {
     _model = State(initialValue: InboxModelData(inboxUsecase: inboxUsecase))
     self.onOpen = onOpen
+    self.onOpenTrash = onOpenTrash
   }
 
   public var body: some View {
@@ -19,20 +25,15 @@ public struct InboxView: View {
       Asset.Colors.ivory.color.ignoresSafeArea()
 
       VStack(alignment: .leading, spacing: 0) {
-        // MARK: 헤더
-        HStack {
-          Text(L10n.inboxTitle)
-            .fonts(.titleLarge)
-            .foregroundStyle(Asset.Colors.ink.color)
-          Spacer()
-          Button { } label: {
-            MutterIcon(Asset.Images.settings, size: 22)
-              .foregroundStyle(Asset.Colors.gold.color)
-          }
+        header
+
+        if let message = model.errorMessage {
+          Text(message)
+            .fonts(.caption)
+            .foregroundStyle(Asset.Colors.danger.color)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, 16)
 
         // MARK: 목록 / 빈 상태
         if model.items.isEmpty && !model.isLoading {
@@ -45,7 +46,11 @@ public struct InboxView: View {
         } else {
           List {
             ForEach(model.items) { item in
-              Button { onOpen(item.token) } label: { letterCard(item) }
+              Button {
+                if model.isEditing { model.toggleSelection(item) } else { onOpen(item.token) }
+              } label: {
+                letterCard(item)
+              }
                 .buttonStyle(PressableButtonStyle())
                 .frame(maxWidth: 600)
                 .frame(maxWidth: .infinity)
@@ -53,10 +58,13 @@ public struct InboxView: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                  Button(role: .destructive) {
-                    model.delete(item)
-                  } label: {
-                    Label(L10n.commonDelete, systemImage: "trash")
+                  // 편집 모드에선 액션을 비워 스와이프를 끈다(선택 탭과 제스처가 겹치지 않게).
+                  if !model.isEditing {
+                    Button(role: .destructive) {
+                      Task { await model.delete([item]) }
+                    } label: {
+                      Label(L10n.commonDelete, systemImage: "trash")
+                    }
                   }
                 }
             }
@@ -66,30 +74,86 @@ public struct InboxView: View {
           .scrollContentBackground(.hidden)
           .contentMargins(.bottom, 20, for: .scrollContent)
           .animation(.default, value: model.items)
-          .refreshable { await model.load() }
+          // 편집 모드에선 당겨서 새로고침을 끈다(선택 중 목록이 바뀌지 않게).
+          .applyIf(!model.isEditing) { $0.refreshable { await model.load() } }
         }
+
+        if model.isEditing { editBar }
       }
     }
     .overlay(alignment: .bottom) {
-      if model.pendingRemoval != nil {
-        MutterActionToast(L10n.inboxRemoved, actionTitle: L10n.commonUndo) {
-          model.undoRemoval()
+      if !model.undoableLetterIds.isEmpty {
+        MutterActionToast(model.undoToastMessage, actionTitle: L10n.commonUndo) {
+          Task { await model.undoDelete() }
         }
       }
     }
-    .animation(.snappy, value: model.pendingRemoval?.item.id)
+    .animation(.snappy, value: model.undoableLetterIds)
+    .animation(.snappy, value: model.isEditing)
+    // 받은 편지 삭제함에서 복구하고 돌아오면 다시 보여야 하므로 나타날 때마다 새로 받는다.
     .task { await model.load() }
-    // 되돌리기 창이 열린 채 화면을 떠나거나 앱이 내려가면 그 자리에서 삭제를 확정한다(앱 종료로 요청이 사라지지 않게).
-    .onDisappear { Task { await model.commitPendingRemoval() } }
-    .onChange(of: scenePhase) { _, newPhase in
-      if newPhase == .background { Task { await model.commitPendingRemoval() } }
+  }
+
+  // MARK: - 헤더
+
+  private var header: some View {
+    HStack(spacing: 16) {
+      Text(L10n.inboxTitle)
+        .fonts(.titleLarge)
+        .foregroundStyle(Asset.Colors.ink.color)
+      Spacer()
+      Button(action: onOpenTrash) {
+        Image(systemName: "trash")
+          .font(.system(size: 19, weight: .regular))
+          .foregroundStyle(Asset.Colors.gold.color)
+      }
+      .accessibilityLabel(L10n.inboxTrashTitle)
+      Button { model.toggleEditing() } label: {
+        Text(model.isEditing ? L10n.commonDone : L10n.inboxEdit)
+          .fonts(.bodyMediumBold)
+          .foregroundStyle(Asset.Colors.gold.color)
+      }
+      .disabled(model.items.isEmpty && !model.isEditing)
     }
+    .padding(.horizontal, 20)
+    .padding(.top, 20)
+    .padding(.bottom, 16)
+  }
+
+  // MARK: - 편집 모드 하단 바
+
+  private var editBar: some View {
+    HStack {
+      Button { model.toggleSelectAll() } label: {
+        Text(model.isAllSelected ? L10n.inboxDeselectAll : L10n.inboxSelectAll)
+          .fonts(.bodyMediumBold)
+          .foregroundStyle(Asset.Colors.ink.color)
+      }
+      Spacer()
+      Button { Task { await model.deleteSelected() } } label: {
+        Text(L10n.inboxDeleteSelected(model.selectedIds.count))
+          .fonts(.bodyMediumBold)
+          .foregroundStyle(model.selectedIds.isEmpty ? Asset.Colors.inkFaint.color : Asset.Colors.danger.color)
+      }
+      .disabled(model.selectedIds.isEmpty)
+    }
+    .padding(.horizontal, 20)
+    .padding(.vertical, 14)
+    .background(Asset.Colors.surface.color)
+    .transition(.move(edge: .bottom).combined(with: .opacity))
   }
 
   // MARK: - 편지 카드 (HomeView letterCard 스타일 미러)
 
   private func letterCard(_ item: InboxItem) -> some View {
     HStack(spacing: 12) {
+      // 편집 모드 선택 원.
+      if model.isEditing {
+        let selected = model.selectedIds.contains(item.id)
+        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+          .font(.system(size: 22, weight: .regular))
+          .foregroundStyle(selected ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
+      }
       // 봉투 아이콘 — 열람 여부 필드 없으므로 항상 envelope(미열람 강조 스타일)
       ZStack {
         Circle()
