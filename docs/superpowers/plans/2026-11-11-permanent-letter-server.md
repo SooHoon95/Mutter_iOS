@@ -50,7 +50,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
 -- 서버 권한으로 돌아갈 때: set_config('role','postgres',true)
 ```
 검사 블록 공통 규칙:
-- 첫 줄에서 `delete from private.push_config;` — 검사 중 inbox insert 등이 실제 푸시를 큐에 넣지 않게 한다(트랜잭션이 되돌린다).
+- `pre.sql`이 `private.push_config`를 비워 두므로 검사 중 inbox insert 등이 실제 푸시를 큐에 넣지 않는다(트랜잭션이 되돌린다).
 - 편지 작성·삭제·복구는 반드시 `role=authenticated`로 **`letters` 뷰를 통해** 실행한다(실제 앱 경로). 서버 권한으로만 검사하면 권한 결함을 못 잡는다.
 - 예외를 잡는 `begin … exception` 블록이 되돌아가면 `set_config(…, true)`도 되돌아간다. 하위 검사마다 역할·claims를 다시 설정한다.
 
@@ -63,7 +63,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
 3. **같은 영수증을 두 번 보낸다 / 두 기기가 동시에 편지권 1장을 쓴다** → 지급 1회, 차감 1회(Task 3 검사 D·E, Task 6 검사 B).
 4. **받은 사람이 편지권을 붙인 편지를 보낸 사람이 삭제함으로 보냈다가 복구한다** → 환급은 정확히 1장, 복구된 편지는 영구가 아니다(Task 3 검사 F).
 5. **잠긴 편지의 사진 URL을 직접 요청한다** → 403(Task 2 검사 F).
-6. **보낸 사람이 "되돌리기"로 편지를 복구한다** → 환급으로 영구가 풀린 편지라도 바로 삭제 대상이 되지 않고 최소 30일의 잠김 유예를 갖는다(Task 3 검사 F).
+6. **보낸 사람이 "되돌리기"로 편지를 복구한다** → 환급으로 영구가 풀린 편지라도 바로 삭제 대상이 되지 않는다. 최악의 경우 '잠김'이고 삭제 기한은 지운 날부터 30일로 센다(Task 3 검사 F).
 
 ---
 
@@ -95,7 +95,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
   - C. authenticated(U)로 `update letter_access set permanent_at = now()` → 권한 오류. `select * from letter_access` → 권한 오류.
   - D. `insert into app_admins(U)` → U의 metered 편지가 `permanent`, 이후 새 편지도 `permanent`·`permanent_source='admin'`. `delete from app_admins` 뒤에도 그 편지들은 `permanent`.
   - E. authenticated(U)로 `select is_admin()` → 관리자일 때 true, 아닐 때 false. anon으로 `select * from monetization_config` → 1행.
-  기대 출력: `RESULT: A=ok B=ok C=ok D=ok E=ok`.
+  기대 출력: `RESULT: task1[A=ok B=ok C=ok D=ok E=ok]`.
 - [ ] **Step 4: 되돌림 확인.** `select to_regclass('public.letter_access')` → NULL.
 - [ ] **Step 5: Commit.** `git add supabase/migrations/0036_monetization_base.sql && git commit -m "feat: 수익화 기반 — 설정·편지 상태(letter_access)·관리자·테스터 테이블"`
 
@@ -129,7 +129,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
   - E. `get_letter_cover(T1)`: anon에게 `sealed=false`, 제목·닉네임 있음, `login_required=true`, D 상태에서 `state='locked'`. 암호 걸린 링크는 `{"sealed":true}`만.
   - F. D 상태에서 B가 `get_letter_photo_access(T1,null)` → `LETTER_LOCKED:`. 열림 상태에서는 `letter_readers.open_count`가 늘지 않는다.
   - G. A가 `get_letter_readers(L1)` → B 1행. B가 부르면 `FORBIDDEN`. B가 `get_letter_access_states(array[L1, <남의 편지>])` → L1 1행만.
-  기대: `RESULT: A=ok … G=ok`.
+  기대: `RESULT: task2[A=ok … G=ok]`.
 - [ ] **Step 3: `letter-photo-urls` 수정.** `deno check supabase/functions/letter-photo-urls/index.ts` 통과, 기존 `handler` 단위 테스트(`npx vitest run supabase/functions/letter-photo-urls`)가 있으면 통과(깨지면 최소 수정).
 - [ ] **Step 4: Commit.** `git commit -m "feat: 편지 읽기 게이트 — 로그인 요구·14일 잠김·열람자 기록, 봉투/상태/열람자 RPC"`
 
@@ -148,7 +148,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
   - `get_my_ticket_history() returns table(created_at timestamptz, delta int, reason text, letter_title text)` — 최근 순.
   - `private.spend_ticket_on(p_user uuid, p_letter_id uuid) returns void` — 공통 본체. 잠금 순서 고정: ① `select … from letter_access where letter_id = p_letter_id for update`(편지 행) ② `pg_advisory_xact_lock(hashtext(p_user::text))`(사용자). 보낸 사람과 받은 사람이 같은 편지에 동시에 써도 한 명만 차감된다. 그 뒤 → 상태가 `gone`이면 `LETTER_GONE` → 이미 영구면 아무것도 안 하고 반환 → 관리자가 아니면 잔액 < 1일 때 `NO_TICKET`, 아니면 원장 `-1, 'use'` → `letter_access`에 `permanent_at=now(), permanent_by=p_user, permanent_source = 관리자면 'admin' 아니면 'ticket'`, `refunded_at = null`.
   - `make_letter_permanent(p_letter_id uuid) returns void` — 소유자 아니면 `FORBIDDEN`.
-  - `keep_received_letter(p_token text, p_password text) returns void` — 비로그인 `AUTH_REQUIRED`. `private.open_letter`의 ①~⑦(토큰·revoke·만료·예약 공개·암호·편지 존재)을 그대로 지난다 — 이를 위해 `open_letter`에 상태 검사(⑧)를 건너뛰는 내부 인자를 두거나 ①~⑦을 `private.check_link(p_token, p_password) returns delivery_links`로 뽑아 둘 다 쓴다(Task 2에서 이 모양으로 만든다). 성공하면 호출자가 **소유자가 아닐 때만** `inbox`에 upsert한다(잠긴 뒤 처음 온 사람도 받은 편지함에서 다시 찾을 수 있게; 소유자를 넣으면 자기 편지가 받은 편지함에 생기고 "편지가 도착했어요" 푸시가 간다 — `0022:203`과 같은 규칙). 편지 소유자가 불러도 된다.
+  - `keep_received_letter(p_token text, p_password text) returns void` — 비로그인 `AUTH_REQUIRED`. `private.open_letter`의 ①~⑦(토큰·revoke·만료·예약 공개·암호·편지 존재)을 `private.check_link`(Task 2)로 그대로 지난다. 성공하면 호출자가 **소유자가 아닐 때만** `inbox`에 upsert한다(잠긴 뒤 처음 온 사람도 받은 편지함에서 다시 찾을 수 있게; 소유자를 넣으면 자기 편지가 받은 편지함에 생기고 "편지가 도착했어요" 푸시가 간다 — `0022:203`과 같은 규칙). 편지 소유자가 불러도 된다.
   - `private.credit_purchase(p_user uuid, p_platform text, p_product_id text, p_transaction_id text, p_tickets int, p_environment text, p_raw jsonb) returns boolean` — 새로 지급하면 true, 같은 `(platform, transaction_id)`가 이미 있으면 false(원장 불변). `service_role`에만 grant, PostgREST로 부를 수 있게 `public.credit_purchase` 래퍼를 같은 grant로 둔다.
   - 환급 트리거 `letters_refund_on_remove`(security definer) — `letters_all`의 `before delete`, 그리고 `after update of deleted_at`(null → 값): `letter_access.permanent_source='ticket'` 이고 `permanent_by <> owner_id` 이고 `refunded_at is null`이면 `permanent_by`에게 `+1,'refund'`를 넣고 **영구 표시를 지운다**(`permanent_at = null, permanent_by = null, permanent_source = null, refunded_at = now()`). 이때 `first_opened_at`이 null이 아니면 `greatest(first_opened_at, now() - free_days일)`로 맞추고(null이면 null 그대로 — 열린 적 없는 편지가 복구 직후 잠기지 않게), `lock_warned_at`·`lock_notified_at`도 null로 되돌린다(다시 잠길 때 보낸 사람에게 알림이 가게) — 편지는 최악의 경우에도 "방금 잠긴" 상태가 되어 30일 유예를 온전히 갖는다(보낸 사람이 되돌리기로 복구했는데 다음 날 새벽 정리 작업이 편지와 사진을 지워 버리는 사고 방지. 아무도 공짜로 읽지는 못한다). 판단 전에 `letter_access` 행을 `for update`로 잠근다(같은 순간에 끝난 편지권 사용을 놓치지 않게). 그래서 보낸 사람이 삭제 → 복구를 반복해도 환급받은 편지가 영구로 남지 않는다(계정 두 개로 공짜 영구화 불가). 복구(값 → null) 때는 아무것도 하지 않는다. `permanent_by` 계정이 이미 없으면 환급 없이 표시만 지운다. PostgREST로 `letters_all.deleted_at`을 직접 바꾸는 경로도 같은 트리거가 잡는다.
   - `ticket_ledger`에 `environment text` 열을 둔다(구매 행은 `ticket_purchases.environment` 값, 그 외 null). `private.ticket_balance`는 전부 합산한다 — 테스트 편지권 정리는 실판매 전환 계획의 단계다(아래 "이 계획 밖").
@@ -165,7 +165,7 @@ perform set_config('request.jwt.claims', json_build_object('sub',v_user,'role','
   - F3. 받은 사람 B가 잠긴 편지에 `keep_received_letter(T3, null)` → B의 `inbox`에 L3 행이 있다. 암호 걸린 링크에 틀린 암호 → `WRONG_PASSWORD`, 차감 없음.
   - G. 관리자 C가 metered 편지를 만든 뒤(이미 영구) `get_my_entitlements()` → `is_admin=true`. 관리자가 남의 잠긴 편지에 `keep_received_letter` → 차감 없이 영구, `permanent_source='admin'`.
   - H. authenticated·anon이 `select credit_purchase(...)` → 권한 오류. `select * from ticket_ledger`는 본인 행만, insert는 권한 오류.
-  기대: `RESULT: A=ok … H=ok`.
+  기대: `RESULT: task3[A=ok … H=ok]`.
 - [ ] **Step 3: Commit.** `git commit -m "feat: 영구 편지권 — 구매 기록·원장·사용 RPC·삭제 시 자동 환급"`
 
 ### Task 4: 사본 보내기 (`duplicate-letter` Edge Function)
