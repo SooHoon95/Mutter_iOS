@@ -26,6 +26,7 @@
 | 기록 | macOS 알림 + `chore(marketing-loop): <date>` 커밋(push 없음) | `marketing/data/logs/<date>.log` |
 
 - **승인**: `/marketing-approve <queue-id>` — 프로모션 텍스트는 `fastlane promo_text`(dry-run 먼저), Threads/Instagram 카드는 본문·실제 이미지·미래 시각을 검수하고 승인 스냅샷을 예약. 실행 설정은 [SOCIAL_PUBLISHING.md](SOCIAL_PUBLISHING.md). 릴스는 클립/영상 구현 전까지 촬영·붙여넣기용.
+- **노션 공유**: 리포트가 생기면 `scripts/marketing/notion_weekly.py`가 '한눈에·이번 주 초안·사용자가 결정할 것'을 노션 프로젝트 "Daily iOS Marketing"에 `뮤터 주간 계획 <날짜>`로 올린다. 토큰은 `.env.marketing`의 `NOTION_TOKEN`, 같은 날짜는 한 번만(`marketing/data/notion_state.json`), 실패해도 루프는 계속. 노트 DB에 통합이 연결돼 있으면 노트로, 아니면 프로젝트 하위 페이지로 올라간다. 수동: `notion_weekly.py <날짜> [--dry-run|--force]`.
 - **수동 실행**: `/marketing-loop`(대화형) 또는 `scripts/marketing/weekly.sh [--collect-only|--no-commit]`.
 - **멈추기**: `touch marketing/LOOP_DISABLED`. 연속 3회 실패하면 스크립트가 스스로 이 파일을 만든다. 재개는 파일 삭제.
 - **회귀 테스트**: `scripts/marketing/eval.sh` — 플러그인 업데이트나 에이전트 수정 뒤 5케이스.

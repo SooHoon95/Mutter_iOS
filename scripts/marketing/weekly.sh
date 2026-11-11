@@ -89,6 +89,8 @@ if [ -f "$REPORT" ]; then
   HEAD3=$(sed -n '/## 한눈에/,/^## /p' "$REPORT" | sed '1d;$d' | head -3 | tr '\n' ' ')
   osascript -e "display notification \"${HEAD3//\"/\\\"}\" with title \"뮤터 주간 마케팅 리포트 $DATE\"" 2>/dev/null || true
   echo "리포트: $REPORT"; echo "$HEAD3"
+  # 노션 프로젝트에 이번 주 계획을 노트로 올린다. 실패해도 루프는 계속(스크립트가 항상 0).
+  python3 scripts/marketing/notion_weekly.py "$DATE"
 else
   osascript -e "display notification \"리포트가 생성되지 않았습니다. 로그: $LOG\" with title \"뮤터 마케팅 루프 실패\"" 2>/dev/null || true
 fi

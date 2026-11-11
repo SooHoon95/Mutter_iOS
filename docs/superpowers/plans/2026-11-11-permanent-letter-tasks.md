@@ -47,7 +47,7 @@
 | I1 | 도메인·인프라: 접근 상태·권한·편지권 | `LetterAccessState`(permanent/open/locked/gone + accessUntil/deleteAt), `Entitlements`, 새 UseCase·Repository가 S의 RPC를 호출. `MutterError`에 `loginRequired`·`letterLocked(deleteAt)`·`letterGone`·`noTicket` 매핑. Debug 컴파일 통과, `/arch-check` 위반 0 |
 | I2 | 수신 화면: 로그인 봉투·잠김 화면·닫힘 예고 한 줄 | 로그아웃 상태에서 링크로 들어오면 `get_letter_cover` 봉투(제목·보낸 사람·"편지 열기") → 로그인 → 같은 편지로 복귀. 잠긴 편지를 열면 본문 대신 잠김 화면(제목·보낸 사람·"○월 ○일까지"). 남은 기간 3일 이하일 때만 한 줄. 시뮬레이터에서 테스터 편지로 두 상태 스크린샷 |
 | I3 | 받은 편지함·보낸 편지 상태 표시 | 목록에 영구/"○일 남음"/자물쇠. 보낸 편지 상세에 열람자 목록과 "같은 내용으로 한 통 더 보내기" 동작. **증거:** 시뮬레이터에서 테스터 계정으로 세 상태 편지가 든 목록 스크린샷 1장, 열람자 목록 스크린샷 1장, 사본 보내기 뒤 `select count(*) from letters where owner_id = <테스터>`가 1 증가 |
-| I4 | 편지권 화면·사용·푸시 | 새 푸시 타입 `letter_lock_soon`·`letter_locked`를 탭하면 그 보낸 편지 상세로 이동. 받은 사람이 편지권을 쓸 때 확인 문구에 "보낸 사람이 편지를 지우면 함께 사라지고 편지권은 돌려드려요". 편지권 잔액이 있는 계정이 탈퇴하려 하면 "남은 편지권 N장이 사라져요" 경고. 프로필에 편지권(잔액·1장/5장·내역). "영구 편지로 만들기"가 `make_letter_permanent`, 잠김 화면의 "편지권으로 간직하기"가 `keep_received_letter` 호출. 관리자·`paid_enabled=false`면 구매 UI 숨김. **증거:** `xcrun simctl push booted com.efreedom.mutter <payload.apns>`(type `letter_locked`)를 탭해 해당 편지 상세가 뜨는 스크린샷, 영구화 전후 `get_letter_access_states` 결과(`open`→`permanent`)와 잔액 -1, 일반 계정(`paid_enabled=false`)에서 프로필에 편지권 항목이 없는 스크린샷 |
+| I4 | 편지권 화면·사용·푸시 | 새 푸시 타입 `letter_lock_soon`·`letter_locked`를 탭하면 그 보낸 편지 상세로 이동. 받은 사람이 편지권을 쓸 때 확인 문구에 "보낸 사람이 편지를 지우면 함께 사라지고 편지권은 돌려드려요". 보낸 사람이 받은 사람이 간직한 편지를 지우려 하면 삭제 확인에 "받은 분이 편지권으로 간직한 편지예요. 지우면 영구가 풀려요". 편지권 잔액이 있는 계정이 탈퇴하려 하면 "남은 편지권 N장이 사라져요" 경고. 프로필에 편지권(잔액·1장/5장·내역). "영구 편지로 만들기"가 `make_letter_permanent`, 잠김 화면의 "편지권으로 간직하기"가 `keep_received_letter` 호출. 관리자·`paid_enabled=false`면 구매 UI 숨김. **증거:** `xcrun simctl push booted com.efreedom.mutter <payload.apns>`(type `letter_locked`)를 탭해 해당 편지 상세가 뜨는 스크린샷, 영구화 전후 `get_letter_access_states` 결과(`open`→`permanent`)와 잔액 -1, 일반 계정(`paid_enabled=false`)에서 프로필에 편지권 항목이 없는 스크린샷 |
 | I5 | StoreKit 2 테스트 구매 | `Mutter.storekit` 설정 파일에 상품 2개, 구매 → `verify-purchase` → 잔액 증가 후에만 `finish()`. 앱 시작 시 미완료 트랜잭션 재전송. 시뮬레이터에서 구매 1회로 잔액 +1 확인 |
 
 ### Android (Mutter_android)
@@ -66,7 +66,7 @@
 |---|---|---|
 | W1 | 데이터 계층 | `src/data`에 상태·권한·편지권 호출과 오류 매핑. `npx tsc -b` 통과, 기존 vitest 통과 |
 | W2 | 뷰어 `/l/:token`: 로그인 봉투·잠김 화면·닫힘 예고 | 남은 기간 3일 이하일 때 "이 편지는 ○일 뒤 닫혀요" 한 줄(앱과 같은 문구). 비로그인 + `login_required`면 봉투(제목·보낸 사람·"편지 열기") → 로그인 → 같은 편지로 복귀. 잠김 화면. 스위치 꺼진 기존 편지는 지금처럼 바로 열림. 브라우저로 세 경우 확인 |
-| W3 | 목록 상태·열람자·사본·편지권 사용 | 보낸 편지·받은 편지함에 상태 표시, 편지권 잔액이 있으면 사용, 없으면 "뮤터 앱에서 살 수 있어요" 안내. 구매 UI 없음. 받은 사람이 편지권을 쓸 때 환급 안내 문구, 편지권이 남은 계정 탈퇴 시 경고(앱과 같은 문구). **증거:** `npm run dev`로 띄워 Playwright로 테스터 계정 로그인 → 보낸 편지 목록(세 상태)·열람자·편지권 사용 전후 스크린샷, 사용 뒤 상태 조회가 `permanent` |
+| W3 | 목록 상태·열람자·사본·편지권 사용 | 보낸 편지·받은 편지함에 상태 표시, 편지권 잔액이 있으면 사용, 없으면 "뮤터 앱에서 살 수 있어요" 안내. 구매 UI 없음. 받은 사람이 편지권을 쓸 때 환급 안내 문구, 받은 사람이 간직한 편지 삭제 시 경고, 편지권이 남은 계정 탈퇴 시 경고(앱과 같은 문구). **증거:** `npm run dev`로 띄워 Playwright로 테스터 계정 로그인 → 보낸 편지 목록(세 상태)·열람자·편지권 사용 전후 스크린샷, 사용 뒤 상태 조회가 `permanent` |
 
 ### 마무리
 
