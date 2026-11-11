@@ -47,6 +47,10 @@ public final class InboxRepository: InboxRepositorable {
 | `NOT_YET_REVEALED:<ISO8601>` | `.linkNotYetRevealed(Date)` |
 | `WRONG_PASSWORD` / `LINK_REVOKED` / `LINK_EXPIRED` | `.wrongPassword` / `.linkRevoked` / `.linkExpired` |
 | `NOT_CONNECTED` / `INVITE_ALREADY_USED` | `.notConnected` / `.inviteAlreadyUsed` |
+| `LOGIN_REQUIRED` | `.loginRequired`(편지를 열려면 로그인 필요 — 봉투 화면으로) |
+| `LETTER_LOCKED:<ISO8601>` | `.letterLocked(Date)`(무료 기간 종료. 시각 = 삭제 예정) |
+| `LETTER_GONE` | `.letterGone` |
+| `NO_TICKET` | `.noTicket` |
 | `*_NOT_FOUND` | `.notFound` |
 | `AUTH_REQUIRED` | `.unauthorized`(비로그인 RPC 호출 — 세션 무효 신호는 안 쏨) |
 | `FORBIDDEN` / `not_authorized` | `.unauthorized`(비즈니스 403 — 세션 무효 신호는 안 쏨) |
@@ -54,6 +58,10 @@ public final class InboxRepository: InboxRepositorable {
 | 그 외 | `error.toMutterError() ?? MutterError(.unknown)` |
 
 새 서버 에러 코드를 추가하면 `MutterErrorDefine` 케이스 + `MutterError.userMessage` 문구 + 이 매퍼를 같이 갱신하고, Android `SupabaseErrorMapper.kt`도 맞춘다. UI 표시 방식은 `mutter-swiftui`.
+
+## 영구 편지권 계약
+
+편지 접근 상태(`permanent`/`open`/`locked`/`gone`)·새 RPC·Edge Function(`verify-purchase`, `duplicate-letter`)·푸시 타입(`letter_lock_soon`, `letter_locked`)·세 플랫폼 공통 문구는 `docs/specs/permanent-letter-contract.md`에 있다. 이 기능을 건드릴 때는 그 문서가 기준이다.
 
 ## 자가 점검
 
