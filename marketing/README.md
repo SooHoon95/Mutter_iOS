@@ -25,7 +25,7 @@
 | 판단 | `codex exec`(리드 지침 + 주간 루프 모드, `LOOP_ENGINE=claude`면 `claude -p --agent mutter-marketer`) → 행동 조건 판정 → `mutter-aso-analyst`·`mutter-copywriter` 위임 | `marketing/reports/<date>-weekly.md`, `marketing/aso/<date>-analysis.md`, `marketing/queue/*.md`(status: draft) |
 | 기록 | macOS 알림 + `chore(marketing-loop): <date>` 커밋(push 없음) | `marketing/data/logs/<date>.log` |
 
-- **승인**: `/marketing-approve <queue-id>` — 프로모션 텍스트는 `fastlane promo_text`(dry-run 먼저), 소셜 글은 붙여넣기용으로 표시.
+- **승인**: `/marketing-approve <queue-id>` — 프로모션 텍스트는 `fastlane promo_text`(dry-run 먼저), Threads/Instagram 카드는 본문·실제 이미지·미래 시각을 검수하고 승인 스냅샷을 예약. 실행 설정은 [SOCIAL_PUBLISHING.md](SOCIAL_PUBLISHING.md). 릴스는 클립/영상 구현 전까지 촬영·붙여넣기용.
 - **수동 실행**: `/marketing-loop`(대화형) 또는 `scripts/marketing/weekly.sh [--collect-only|--no-commit]`.
 - **멈추기**: `touch marketing/LOOP_DISABLED`. 연속 3회 실패하면 스크립트가 스스로 이 파일을 만든다. 재개는 파일 삭제.
 - **회귀 테스트**: `scripts/marketing/eval.sh` — 플러그인 업데이트나 에이전트 수정 뒤 5케이스.

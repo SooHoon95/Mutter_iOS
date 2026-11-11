@@ -40,8 +40,8 @@ color: pink
    - (a) 우선 키워드가 `latest-diff.json`에서 `material: true`로 하락·미노출 → `mutter-aso-analyst` 위임.
    - (b) 경쟁앱 변화(`competitor_changes`) → `mutter-aso-analyst` 위임(a와 한 번에).
    - (c) 신규 리뷰(`reviews.jsonl`에 오늘 `pulled`) → `mutter-aso-analyst` 위임(고객 언어 추출 포함).
-   - (d) `season-active.json`에 `already_drafted: false`인 시즌 → `mutter-copywriter`에 브리프(시즌·hint·핵심 메시지·CTA) 위임: `promo_text` 1 + `threads` 2 + `reel_caption` 1. 완료 후 `state.cooldowns["season:<key>"]`를 60일 뒤로.
-   - (e) 활성 시즌이 없거나 모두 `already_drafted: true`이면 주간 소셜 유지: `mutter-copywriter`에 `threads` 2편(Customer Language 중 지난 4주 안 쓴 문장 우선). `state.handled`에 사용 문장 키 기록.
+   - (d) `season-active.json`에 `already_drafted: false`인 시즌 → `mutter-copywriter`에 브리프(시즌·hint·핵심 메시지·CTA) 위임: `promo_text` 1 + `threads` 2 + `instagram_card` 1. `marketing/assets/clips/{write,theme,music,preview,web-receive,schedule}.mov`가 모두 있고 `marketing/assets/social-ready.md`에 영상 검수 완료가 기록돼 있으면 카드 대신 `reel_caption` 1. 클립이 없을 때 촬영 플랜만을 자동 발행물로 취급하지 않는다. 완료 후 `state.cooldowns["season:<key>"]`를 60일 뒤로.
+   - (e) 활성 시즌이 없거나 모두 `already_drafted: true`이면 주간 소셜 유지: `mutter-copywriter`에 `threads` 2편 + `instagram_card` 1편(Customer Language 중 지난 4주 안 쓴 문장 우선). 카드 제목·본문·캡션은 카피라이터의 큐 스키마를 따른다. `state.handled`에 사용 문장 키 기록.
    - (f) `state.zero_review_weeks ≥ 4` → 리포트에 평점 요청 전략 제안 한 줄(에이전트 위임 없음). 4주마다 1회만.
    - (g) a·b·c가 모두 없어도 4주마다 1회(`state.runs % 4 == 0` — `runs`는 지난 실행까지의 횟수, 스크립트가 관리) `mutter-aso-analyst`에 월간 점검 위임.
    - (h) 네이버 블로그 월 2편: 이번 달 `marketing/queue/*naver_blog*`가 2편 미만이고 지난 블로그 초안에서 14일이 지났으면 `mutter-aso-analyst`에 웹 검색 키워드 플랜(메인·서브 키워드, 타깃, 글 목적) → `mutter-copywriter`에 `naver_blog` 1편 위임. 활성 시즌이 있으면 시즌형, 없으면 방법형·비교형.

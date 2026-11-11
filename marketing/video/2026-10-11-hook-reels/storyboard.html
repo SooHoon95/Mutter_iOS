@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>뮤터 훅 릴스 스토리보드 v1</title>
+<style>
+@font-face { font-family: "MSerif"; font-weight: 400; src: url("../../assets/fonts/NotoSerifCJKkr-Regular.otf"); }
+@font-face { font-family: "MSerif"; font-weight: 700; src: url("../../assets/fonts/NotoSerifCJKkr-Bold.otf"); }
+@font-face { font-family: "MSerif"; font-weight: 900; src: url("../../assets/fonts/NotoSerifCJKkr-Black.otf"); }
+@font-face { font-family: "MSans"; font-weight: 400; src: url("../../assets/fonts/Pretendard-Regular.otf"); }
+@font-face { font-family: "MSans"; font-weight: 600; src: url("../../assets/fonts/Pretendard-SemiBold.otf"); }
+@font-face { font-family: "MSans"; font-weight: 700; src: url("../../assets/fonts/Pretendard-Bold.otf"); }
+@font-face { font-family: "MSans"; font-weight: 800; src: url("../../assets/fonts/Pretendard-ExtraBold.otf"); }
+@font-face { font-family: "MSans"; font-weight: 900; src: url("../../assets/fonts/Pretendard-Black.otf"); }
+
+:root { --sheet-bg: #1a1714; --sheet-fg: #efe8dc; --sheet-dim: #a39887; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--sheet-bg); color: var(--sheet-fg); font-family: "MSans", system-ui, sans-serif; padding: 48px 40px 80px; }
+header { max-width: 1500px; margin: 0 auto 40px; display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+header h1 { font-family: "MSerif"; font-weight: 900; font-size: 34px; }
+header .v { font-size: 14px; padding: 3px 10px; border: 1px solid var(--sheet-dim); border-radius: 99px; color: var(--sheet-dim); }
+header p { flex-basis: 100%; color: var(--sheet-dim); font-size: 15px; line-height: 1.6; }
+
+.reel { max-width: 1500px; margin: 0 auto 56px; }
+.actbar { display: flex; align-items: baseline; gap: 14px; border-top: 2px solid #3a332b; padding-top: 14px; margin-bottom: 18px; }
+.actbar b { font-family: "MSerif"; font-weight: 900; font-size: 22px; }
+.actbar span { color: var(--sheet-dim); font-size: 14px; }
+.row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+
+.cell { display: flex; flex-direction: column; gap: 8px; }
+.frame { word-break: keep-all; position: relative; aspect-ratio: 9 / 16; container-type: inline-size; overflow: hidden; border-radius: 6px; }
+.label { display: flex; justify-content: space-between; font-size: 12px; color: var(--sheet-dim); letter-spacing: .02em; }
+.label b { color: var(--sheet-fg); font-weight: 700; }
+.note { font-size: 12.5px; line-height: 1.55; color: #cfc5b5; }
+.note b { color: var(--sheet-fg); }
+.chip { align-self: flex-start; font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #2c2620; color: var(--sheet-dim); }
+
+/* IG safe zone guide (dashed): top 250 / bottom 380 / right 120 of 1080x1920 */
+.safe { position: absolute; left: 5.5cqw; right: 11cqw; top: 13cqw; bottom: 35cqw; border: 1px dashed rgba(127,127,127,.28); pointer-events: none; z-index: 9; }
+
+/* ---------- shared atoms ---------- */
+.abs { position: absolute; }
+.grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.lockup { display: flex; align-items: baseline; gap: 1.6cqw; }
+.lockup .w { font-family: "MSans"; font-weight: 900; font-size: 7.4cqw; letter-spacing: -.02em; }
+.lockup .d { font-family: "MSans"; font-weight: 600; font-size: 3.4cqw; opacity: .75; }
+
+/* ---------- A · night ---------- */
+.A { background: #0D1B2A; color: #E8DFC8; }
+.A .glow { position: absolute; width: 140cqw; height: 140cqw; left: -20cqw; bottom: -70cqw; border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,162,74,.30) 0%, rgba(200,162,74,.10) 35%, rgba(13,27,42,0) 65%); }
+.A .ghost { position: absolute; font-family: "MSans"; font-weight: 900; font-size: 46cqw; letter-spacing: -.04em; color: rgba(232,223,200,.07); right: -6cqw; top: 22cqw; line-height: 1; }
+.A .clock { position: absolute; left: 7cqw; top: 15cqw; font-family: "MSans"; font-weight: 600; font-size: 3.6cqw; letter-spacing: .14em; color: #C8A24A; display: flex; align-items: center; gap: 2cqw; }
+.A .clock::after { content: ""; width: 14cqw; height: .35cqw; background: #C8A24A; opacity: .7; }
+.A .hero { position: absolute; left: 7cqw; right: 12cqw; font-family: "MSerif"; }
+.A .hero .l1 { font-weight: 900; font-size: 18cqw; line-height: 1.05; letter-spacing: -.03em; }
+.A .hero .l2 { font-weight: 700; font-size: 10.5cqw; line-height: 1.25; margin-top: 2cqw; }
+.A .gold { color: #C8A24A; }
+.A .bubble { position: absolute; left: 7cqw; max-width: 66cqw; background: #1C2F44; border-radius: 4.5cqw 4.5cqw 4.5cqw 1.2cqw; padding: 4cqw 5cqw; font-family: "MSans"; font-weight: 600; font-size: 5.6cqw; line-height: 1.45; }
+.A .who { position: absolute; left: 7cqw; font-family: "MSans"; font-weight: 600; font-size: 3.2cqw; color: rgba(232,223,200,.55); }
+.env { position: absolute; border-radius: 1.6cqw; overflow: hidden; }
+.env .flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.env .seal { position: absolute; width: 13cqw; height: 13cqw; border-radius: 50%; left: 50%; top: 58%; transform: translate(-50%,-50%); }
+.A .env { left: 7cqw; width: 66cqw; height: 42cqw; background: #E8DFC8; box-shadow: 0 3cqw 8cqw rgba(0,0,0,.45); }
+.A .env .flap { background: #D8CDB0; }
+.A .env .seal { background: #C8A24A; box-shadow: inset 0 0 0 1.2cqw rgba(13,27,42,.18); }
+.A .rings { position: absolute; left: 50%; top: 24%; transform: translate(-50%,-50%); }
+.A .rings i { position: absolute; left: 50%; top: 50%; border: .5cqw solid #C8A24A; border-radius: 50%; transform: translate(-50%,-50%); }
+.A .paper { position: absolute; left: 7cqw; right: 12cqw; top: 22cqw; bottom: 40cqw; background: #12263A; border: .35cqw solid rgba(200,162,74,.55); border-radius: 1.4cqw; padding: 9cqw 7cqw; }
+.A .paper .wave { display: flex; gap: 1.1cqw; align-items: center; height: 6cqw; margin-bottom: 7cqw; }
+.A .paper .wave i { width: .9cqw; background: #C8A24A; border-radius: 1cqw; }
+.A .paper p { font-family: "MSerif"; font-weight: 400; font-size: 6.4cqw; line-height: 1.75; }
+.A .paper .to { font-family: "MSerif"; font-weight: 700; font-size: 4.2cqw; color: #C8A24A; margin-bottom: 4cqw; }
+
+/* ---------- C · bright participation ---------- */
+.C { background: #FFF7F8; color: #2D1A1F; }
+.C .ghost { position: absolute; font-family: "MSans"; font-weight: 900; font-size: 120cqw; line-height: .8; color: rgba(212,88,122,.12); right: -18cqw; top: 8cqw; }
+.C .dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(212,88,122,.22) .45cqw, transparent .5cqw); background-size: 6cqw 6cqw; opacity: .7; }
+.C .hero { position: absolute; left: 6.5cqw; right: 11cqw; font-family: "MSans"; font-weight: 900; letter-spacing: -.045em; line-height: 1.02; }
+.C .acc { color: #D4587A; }
+.C .kicker { position: absolute; left: 6.5cqw; font-family: "MSans"; font-weight: 800; font-size: 4cqw; letter-spacing: .02em; color: #D4587A; display: flex; gap: 2cqw; align-items: center; }
+.C .kicker::before { content: ""; width: 8cqw; height: .6cqw; background: #D4587A; }
+.C .slot { position: absolute; left: 6.5cqw; right: 11cqw; top: 58cqw; height: 66cqw; border-top: .6cqw solid #2D1A1F; border-bottom: .6cqw solid #2D1A1F; display: flex; flex-direction: column; justify-content: center; gap: 3cqw; }
+.C .slot span { font-family: "MSans"; font-weight: 900; letter-spacing: -.04em; }
+.C .slot .dim { font-size: 9cqw; color: rgba(45,26,31,.22); }
+.C .slot .on { font-size: 15cqw; color: #D4587A; }
+.C .lp { position: absolute; width: 74cqw; height: 74cqw; left: 13cqw; top: 66cqw; border-radius: 50%;
+  background: repeating-radial-gradient(circle, #2D1A1F 0 .7cqw, #3C252B .7cqw 1.4cqw); box-shadow: 0 4cqw 10cqw rgba(45,26,31,.25); }
+.C .lp .lbl { position: absolute; width: 30cqw; height: 30cqw; left: 22cqw; top: 22cqw; border-radius: 50%; background: #D4587A; display: grid; place-items: center; font-family: "MSans"; font-weight: 900; font-size: 15cqw; color: #FFF7F8; }
+.C .cmt { position: absolute; left: 6.5cqw; right: 11cqw; top: 104cqw; background: #fff; border: .5cqw solid #2D1A1F; border-radius: 4cqw; padding: 4.5cqw 5cqw; display: flex; gap: 3cqw; align-items: center; box-shadow: 1.4cqw 1.4cqw 0 #D4587A; }
+.C .cmt .av { width: 9cqw; height: 9cqw; border-radius: 50%; background: #F3C6D3; flex: none; }
+.C .cmt .tx { font-family: "MSans"; font-weight: 600; font-size: 4.6cqw; color: rgba(45,26,31,.55); }
+.C .cmt .cur { display: inline-block; width: .5cqw; height: 5cqw; background: #D4587A; vertical-align: middle; margin-left: .6cqw; }
+
+/* ---------- D · warm film ---------- */
+.D { background: #F5EDE0; color: #3B2A1A; }
+.D .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(245,237,224,0) 45%, rgba(59,42,26,.28) 100%); }
+.D .rule { position: absolute; left: 7cqw; height: .45cqw; width: 18cqw; background: #C0550A; }
+.D .hero { position: absolute; left: 7cqw; right: 11cqw; font-family: "MSerif"; }
+.D .hero .l1 { font-weight: 700; font-size: 11cqw; line-height: 1.3; }
+.D .hero .l2 { font-weight: 900; font-size: 16.5cqw; line-height: 1.15; letter-spacing: -.03em; }
+.D .acc { color: #C0550A; }
+.D .stack { position: absolute; left: 9cqw; width: 70cqw; height: 46cqw; top: 46cqw; }
+.D .card { position: absolute; inset: 0; border-radius: 1.6cqw; box-shadow: 0 2.4cqw 6cqw rgba(59,42,26,.28); overflow: hidden; }
+.D .card .flap { position: absolute; left: 0; right: 0; top: 0; height: 55%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.D .card .to { position: absolute; left: 6cqw; bottom: 5cqw; font-family: "MSerif"; font-weight: 700; font-size: 6.4cqw; line-height: 1.3; }
+.D .card .stamp { position: absolute; right: 5cqw; bottom: 5cqw; width: 9cqw; height: 11cqw; border: .4cqw dashed currentColor; opacity: .55; }
+.D .t-classic { background: #FAF8F3; color: #2C2416; } .D .t-classic .flap { background: #EFE9DC; } .D .t-classic .to b { color: #8B6914; }
+.D .t-night { background: #0D1B2A; color: #E8DFC8; } .D .t-night .flap { background: #16283C; } .D .t-night .to b { color: #C8A24A; }
+.D .t-spring { background: #FFF7F8; color: #2D1A1F; } .D .t-spring .flap { background: #FBE6EB; } .D .t-spring .to b { color: #D4587A; }
+.D .why { position: absolute; left: 9cqw; right: 11cqw; top: 104cqw; font-family: "MSerif"; font-weight: 400; font-size: 6.4cqw; line-height: 1.6; }
+.D .why::before { content: "“"; display: block; font-weight: 900; font-size: 12cqw; line-height: .6; color: #C0550A; margin-bottom: 1cqw; }
+.D .count { position: absolute; right: 12cqw; top: 15cqw; font-family: "MSans"; font-weight: 700; font-size: 3.4cqw; letter-spacing: .12em; color: rgba(59,42,26,.55); }
+
+/* ---------- E · brand ivory / mauve ---------- */
+.E { background: #FFFDF2; color: #221D14; }
+.E .band { position: absolute; left: 0; right: 0; top: 0; height: 9cqw; background: repeating-linear-gradient(90deg, #F7E8F1 0 6cqw, #FFFDF2 6cqw 12cqw); opacity: .9; }
+.E .stick { position: absolute; width: 4.2cqw; border-radius: 2.1cqw; background: linear-gradient(#5A3A2A 0 74%, #E6C79C 74% 100%); transform-origin: center; box-shadow: .8cqw .8cqw 0 rgba(142,78,126,.18); }
+.E .hero { position: absolute; left: 6.5cqw; right: 11cqw; font-family: "MSans"; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; }
+.E .sub { position: absolute; left: 6.5cqw; font-family: "MSerif"; font-weight: 700; font-size: 8cqw; color: #8E4E7E; }
+.E .acc { color: #C77BAE; }
+.E .memo { position: absolute; left: 9cqw; width: 68cqw; height: 52cqw; background: #F7E8F1; border-radius: 1.2cqw; padding: 8cqw 7cqw; box-shadow: 0 2cqw 5cqw rgba(34,29,20,.14); }
+.E .memo p { font-family: "MSerif"; font-weight: 700; font-size: 7.4cqw; line-height: 1.45; }
+.E .memo .n { position: absolute; right: 5cqw; bottom: 4cqw; font-family: "MSans"; font-weight: 700; font-size: 3.4cqw; color: #8E4E7E; letter-spacing: .1em; }
+.E .flip { position: absolute; left: 6.5cqw; right: 11cqw; top: 66cqw; display: flex; gap: 2cqw; justify-content: center; }
+.E .flip b { width: 17cqw; height: 26cqw; background: #8E4E7E; color: #FFFDF2; border-radius: 1.6cqw; display: grid; place-items: center; font-family: "MSans"; font-weight: 900; font-size: 19cqw; position: relative; }
+.E .flip b::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: .4cqw; background: rgba(34,29,20,.35); }
+.E .flip i { font-family: "MSans"; font-weight: 900; font-size: 19cqw; color: #8E4E7E; align-self: flex-end; line-height: 1; font-style: normal; }
+.E .eq { position: absolute; left: 6.5cqw; right: 11cqw; top: 40cqw; font-family: "MSans"; font-weight: 800; font-size: 11.5cqw; line-height: 1.22; letter-spacing: -.04em; }
+.E .eq .plus { color: #C77BAE; }
+
+/* ---------- closing cells ---------- */
+.tokens { background: #24201b; border-radius: 6px; padding: 18px; font-size: 12.5px; line-height: 1.7; color: #cfc5b5; }
+.tokens h4 { font-family: "MSerif"; font-size: 15px; color: var(--sheet-fg); margin-bottom: 8px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1px solid rgba(255,255,255,.2); }
+.seams { max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 1100px) { .row { grid-template-columns: repeat(3, 1fr); } .seams { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { body { padding: 24px 16px; } .row { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>뮤터 훅 릴스 4편</h1><span class="v">v1 · 1080×1920 · A15s · C12s · D15s · E12s · 19 beats</span>
+  <p>정지 스케치(키 모먼트). 실제 폰트·색·문구 배치만 확정하는 단계이고 모션은 다음 단계. 점선 = 인스타 UI 안전영역(상 250·하 380·우 120px). 무음 마스터 — 업로드 시 앱에서 음악을 붙인다. 예문은 자체 창작.</p>
+</header>
+
+<!-- ======================= A ======================= -->
+<section class="reel">
+  <div class="actbar"><b>A · 새벽 2시의 링크</b><span>받는 순간이 다르다 · night-sky 테마 · 명조 · 15s</span></div>
+  <div class="row">
+    <div class="cell">
+      <div class="frame A" id="frame-a01"><div class="glow"></div><div class="ghost">02</div><div class="safe"></div>
+        <div class="clock">02:14</div>
+        <div class="hero" style="top:52cqw"><div class="l1">새벽 2시,</div><div class="l2">링크 하나가 <span class="gold">왔다</span></div></div>
+      </div>
+      <div class="label"><b>01 · HOOK</b><span>a01 · 0–2.5</span></div>
+      <div class="note"><b>먼저 움직이는 것:</b> "새벽 2시,"가 0.1초에 꽉 차게 찍히고, 시계 숫자가 02:13→02:14로 넘어감. 아래 폰 불빛이 숨 쉬듯 밝아짐.</div>
+      <span class="chip">→ 위로 밀림</span>
+    </div>
+    <div class="cell">
+      <div class="frame A" id="frame-a02"><div class="glow"></div><div class="safe"></div>
+        <div class="who" style="top:30cqw">오래된 친구</div>
+        <div class="bubble" style="top:36cqw">이거 열어 봐.<br>이어폰 끼고.</div>
+        <div class="env" style="top:72cqw"><div class="flap"></div><div class="seal"></div></div>
+      </div>
+      <div class="label"><b>02 · 도착</b><span>a02 · 2.5–5</span></div>
+      <div class="note"><b>말풍선</b>이 아래에서 튀어 오르고, 0.6초 뒤 봉인된 봉투가 따라 올라옴. 카톡 UI·로고 없음 — 중립 말풍선.</div>
+      <span class="chip">→ 봉투로 줌인</span>
+    </div>
+    <div class="cell">
+      <div class="frame A" id="frame-a03"><div class="glow"></div><div class="safe"></div>
+        <div class="rings"><i style="width:40cqw;height:40cqw;opacity:.9"></i><i style="width:62cqw;height:62cqw;opacity:.5"></i><i style="width:86cqw;height:86cqw;opacity:.25"></i><i style="width:112cqw;height:112cqw;opacity:.12"></i></div>
+        <div class="abs" style="left:17cqw;top:20cqw;width:66cqw;height:24cqw;background:#C8B98F;clip-path:polygon(0 100%,50% 0,100% 100%)"></div>
+        <div class="abs" style="left:23cqw;top:28cqw;width:54cqw;height:34cqw;background:#F6F0E0;border-radius:1cqw;padding:5cqw 5cqw"><div style="height:.6cqw;background:#C8A24A;width:60%;margin-bottom:3cqw"></div><div style="height:.6cqw;background:#D9CFB5;width:85%;margin-bottom:3cqw"></div><div style="height:.6cqw;background:#D9CFB5;width:70%"></div></div>
+        <div class="env" style="top:44cqw;left:17cqw;width:66cqw;height:26cqw;border-radius:0 0 1.6cqw 1.6cqw;clip-path:polygon(0 0,50% 45%,100% 0,100% 100%,0 100%)"></div>
+        <div class="hero" style="top:92cqw"><div class="l2" style="font-size:11.5cqw">노래가 <span class="gold">먼저</span><br>흘러나왔다</div></div>
+      </div>
+      <div class="label"><b>03 · 열림</b><span>a03 · 5–8</span></div>
+      <div class="note"><b>봉투 날개가 젖혀지는 순간</b> 금색 음파 고리가 바깥으로 퍼짐. 문장은 단어 단위로 아래서 올라옴.</div>
+      <span class="chip">→ 종이로 디졸브</span>
+    </div>
+    <div class="cell">
+      <div class="frame A" id="frame-a04"><div class="glow" style="opacity:.6"></div><div class="safe"></div>
+        <div class="paper">
+          <div class="wave"><i style="height:30%"></i><i style="height:70%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:35%"></i><i style="height:60%"></i><i style="height:25%"></i></div>
+          <div class="to">To. 민지에게</div>
+          <p>그때 네가 이 노래 들으면서<br>괜찮다고 했잖아.<br>그 말이 아직도 고마워.</p>
+        </div>
+      </div>
+      <div class="label"><b>04 · 편지 (정지)</b><span>a04 · 8–12</span></div>
+      <div class="note"><b>한 줄씩 잉크처럼 번지며</b> 나타나고, 마지막 줄 뒤 1.2초는 아무것도 움직이지 않음(의도된 정지). 음파 막대만 미세하게.</div>
+      <span class="chip">→ 종이가 어둠으로 빠짐</span>
+    </div>
+    <div class="cell">
+      <div class="frame A" id="frame-a05"><div class="glow"></div><div class="safe"></div>
+        <div class="hero" style="top:40cqw"><div class="l2" style="font-size:12cqw;line-height:1.3">말로 못 한<br>마음은,</div><div class="l1" style="font-size:13.5cqw;margin-top:3cqw">노래 <span class="gold">한 곡</span>에.</div></div>
+        <div class="abs" style="left:7cqw;top:118cqw"><div class="lockup"><span class="w">뮤터</span><span class="d">음악 편지</span></div>
+          <div style="font-family:MSans;font-weight:600;font-size:3.8cqw;margin-top:2cqw;color:rgba(232,223,200,.7)">받는 사람은 링크만 열면 돼요</div></div>
+      </div>
+      <div class="label"><b>05 · 가치 + CTA</b><span>a05 · 12–15</span></div>
+      <div class="note"><b>"노래 한 곡에."</b>가 마지막에 금색으로 켜지고, 로고는 끝 1.5초 동안 고정(정지 엔드카드 아님 — 빛이 계속 숨 쉼).</div>
+      <span class="chip">끝</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= C ======================= -->
+<section class="reel">
+  <div class="actbar"><b>C · 노래 한 곡만 보낼 수 있다면</b><span>댓글 참여형 · spring-day 테마 · 굵은 고딕 · 12s</span></div>
+  <div class="row">
+    <div class="cell">
+      <div class="frame C" id="frame-c01"><div class="dots"></div><div class="ghost">1</div><div class="safe"></div>
+        <div class="hero" style="top:44cqw;font-size:17cqw">노래<br><span class="acc">한 곡</span>만<br>보낼 수<br>있다면</div>
+      </div>
+      <div class="label"><b>01 · HOOK</b><span>c01 · 0–3</span></div>
+      <div class="note"><b>단어가 한 줄씩 쾅쾅</b> 찍힘(0.25초 간격). "한 곡"만 분홍. 뒤의 거대한 1이 천천히 회전.</div>
+      <span class="chip">→ 하드컷</span>
+    </div>
+    <div class="cell">
+      <div class="frame C" id="frame-c02"><div class="dots"></div><div class="safe"></div>
+        <div class="hero" style="top:24cqw;font-size:15cqw">누구한테?</div>
+        <div class="slot"><span class="dim">오래된 친구</span><span class="on">연락 끊긴 너</span><span class="dim">나 자신</span></div>
+      </div>
+      <div class="label"><b>02 · 누구</b><span>c02 · 3–5.5</span></div>
+      <div class="note"><b>슬롯이 빠르게 돌다 감속</b>: 엄마 → 오래된 친구 → 연락 끊긴 너 → 나 자신에서 멈춤(스케치는 중간 프레임).</div>
+      <span class="chip">→ 아래로 밀림</span>
+    </div>
+    <div class="cell">
+      <div class="frame C" id="frame-c03"><div class="dots"></div><div class="safe"></div>
+        <div class="hero" style="top:24cqw;font-size:15cqw">무슨<br><span class="acc">노래</span>를?</div>
+        <div class="lp"><div class="lbl">?</div></div>
+      </div>
+      <div class="label"><b>03 · 무엇</b><span>c03 · 5.5–8</span></div>
+      <div class="note"><b>LP가 오른쪽에서 굴러 들어와</b> 회전. 라벨의 "?"가 두 번 튀김. 실제 곡명·앨범아트 없음.</div>
+      <span class="chip">→ LP가 말풍선으로 변형</span>
+    </div>
+    <div class="cell">
+      <div class="frame C" id="frame-c04"><div class="dots"></div><div class="safe"></div>
+        <div class="hero" style="top:40cqw;font-size:21cqw"><span class="acc">댓글</span>로<br>알려줘</div>
+        <div class="cmt"><div class="av"></div><div class="tx">엄마한테, ○○○<span class="cur"></span></div></div>
+      </div>
+      <div class="label"><b>04 · 참여</b><span>c04 · 8–10</span></div>
+      <div class="note"><b>댓글 입력창에 글자가 타이핑</b>되는 느낌(커서 깜빡임). 예시는 "엄마한테, ○○○" — 곡명 비움.</div>
+      <span class="chip">→ 위로 밀림</span>
+    </div>
+    <div class="cell">
+      <div class="frame C" id="frame-c05"><div class="dots"></div><div class="safe"></div>
+        <div class="hero" style="top:42cqw;font-size:10.5cqw;line-height:1.2">진짜 보내고<br>싶어졌다면,</div>
+        <div class="hero" style="top:72cqw;font-size:17cqw"><span class="acc">편지</span>랑<br>같이.</div>
+        <div class="abs" style="left:6.5cqw;top:122cqw"><div class="lockup"><span class="w">뮤터</span><span class="d">노래 한 곡을 담는 편지</span></div></div>
+      </div>
+      <div class="label"><b>05 · CTA</b><span>c05 · 10–12</span></div>
+      <div class="note"><b>"편지랑 같이."</b>가 밑줄 긋듯 분홍 하이라이트 → 뮤터 로고.</div>
+      <span class="chip">끝</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= D ======================= -->
+<section class="reel">
+  <div class="actbar"><b>D · 이 노래 들으면 네 생각나서</b><span>감정 이입 3연타 · warm-craft 테마 · 필름 그레인 · 15s</span></div>
+  <div class="row">
+    <div class="cell">
+      <div class="frame D grain" id="frame-d01"><div class="vig"></div><div class="safe"></div>
+        <div class="rule" style="top:44cqw"></div>
+        <div class="hero" style="top:50cqw"><div class="l1">이 노래 들으면</div><div class="l2" style="font-size:12.5cqw">네 생각나서<span class="acc">.</span></div></div>
+      </div>
+      <div class="label"><b>01 · HOOK</b><span>d01 · 0–2.5</span></div>
+      <div class="note"><b>첫 줄이 먼저, 둘째 줄이 크게</b> 0.4초 뒤. 마침표가 마지막에 주황으로 톡 찍힘.</div>
+      <span class="chip">→ 봉투가 위에서 떨어짐</span>
+    </div>
+    <div class="cell">
+      <div class="frame D grain" id="frame-d02"><div class="vig"></div><div class="safe"></div>
+        <div class="count">01 / 03</div>
+        <div class="stack" style="transform:rotate(-3deg)"><div class="card t-classic"><div class="flap"></div><div class="to"><b>To.</b> 엄마</div><div class="stamp"></div></div></div>
+        <div class="why">어릴 때 차에서<br>맨날 틀던 노래</div>
+      </div>
+      <div class="label"><b>02 · 엄마</b><span>d02 · 2.5–5.5</span></div>
+      <div class="note"><b>봉투가 툭 떨어져 기울어 안착</b>(classic-serif 테마). 아래 이유 한 줄이 손글씨 쓰듯 왼→오.</div>
+      <span class="chip">→ 다음 봉투가 위에 쌓임</span>
+    </div>
+    <div class="cell">
+      <div class="frame D grain" id="frame-d03"><div class="vig"></div><div class="safe"></div>
+        <div class="count">02 / 03</div>
+        <div class="stack" style="transform:rotate(-3deg)"><div class="card t-classic"></div></div>
+        <div class="stack" style="transform:rotate(2.5deg) translate(2cqw,-2cqw)"><div class="card t-night"><div class="flap"></div><div class="to"><b>To.</b> 졸업하고<br>연락 끊긴 너</div><div class="stamp"></div></div></div>
+        <div class="why">야자 끝나고<br>같이 듣던 노래</div>
+      </div>
+      <div class="label"><b>03 · 친구</b><span>d03 · 5.5–8.5</span></div>
+      <div class="note"><b>새 봉투가 이전 봉투 위에 쌓임</b>(누적 장치, night-sky 테마). 이유 줄만 교체.</div>
+      <span class="chip">→ 쌓임</span>
+    </div>
+    <div class="cell">
+      <div class="frame D grain" id="frame-d04"><div class="vig"></div><div class="safe"></div>
+        <div class="count">03 / 03</div>
+        <div class="stack" style="transform:rotate(-3deg)"><div class="card t-classic"></div></div>
+        <div class="stack" style="transform:rotate(2.5deg) translate(2cqw,-2cqw)"><div class="card t-night"></div></div>
+        <div class="stack" style="transform:rotate(-1deg) translate(-1cqw,-4cqw)"><div class="card t-spring"><div class="flap"></div><div class="to"><b>To.</b> 아직<br>말 못 한 사람</div><div class="stamp"></div></div></div>
+        <div class="why">이 가사가<br>내 마음이야</div>
+      </div>
+      <div class="label"><b>04 · 고백</b><span>d04 · 8.5–11.5</span></div>
+      <div class="note"><b>세 번째는 조금 느리게</b> 내려앉음(spring-day 테마) — 감정 정점. 이유 줄 뒤 0.8초 정지.</div>
+      <span class="chip">→ 봉투 더미가 아래로 빠짐</span>
+    </div>
+    <div class="cell">
+      <div class="frame D grain" id="frame-d05"><div class="vig"></div><div class="safe"></div>
+        <div class="rule" style="top:40cqw"></div>
+        <div class="hero" style="top:46cqw"><div class="l1">그 한 문장,</div><div class="l2" style="font-size:13cqw;line-height:1.25">노래랑<br>같이 <span class="acc">보내</span><br>봐요.</div></div>
+        <div class="abs" style="left:7cqw;top:124cqw"><div class="lockup"><span class="w">뮤터</span><span class="d">음악 편지</span></div></div>
+      </div>
+      <div class="label"><b>05 · 가치 + CTA</b><span>d05 · 11.5–15</span></div>
+      <div class="note"><b>훅의 레이아웃으로 돌아옴</b>(콜백: 01과 같은 주황 rule·같은 자리). 로고 고정, 그레인만 흐름.</div>
+      <span class="chip">끝</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= E ======================= -->
+<section class="reel">
+  <div class="actbar"><b>E · 빼빼로 옆에 붙일 한 줄</b><span>시즌(11/11) · 브랜드 아이보리+모브 · 12s</span></div>
+  <div class="row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="cell">
+      <div class="frame E" id="frame-e01"><div class="band"></div><div class="safe"></div>
+        <div class="stick" style="height:70cqw;right:4cqw;top:20cqw;transform:rotate(24deg)"></div>
+        <div class="stick" style="height:62cqw;right:16cqw;top:30cqw;transform:rotate(14deg);opacity:.85"></div>
+        <div class="hero" style="top:40cqw;font-size:15.5cqw">빼빼로<br>옆에<br>붙일 <span class="acc">한 줄</span>,</div>
+        <div class="sub" style="top:106cqw">아직 못 정했으면</div>
+      </div>
+      <div class="label"><b>01 · HOOK</b><span>e01 · 0–2.5</span></div>
+      <div class="note"><b>빼빼로 막대 두 개가 사선으로 꽂히며</b> 등장, 동시에 타이틀 줄별 등장. 실제 상표·포장 없음(일러스트).</div>
+      <span class="chip">→ 메모지가 위에서 붙음</span>
+    </div>
+    <div class="cell">
+      <div class="frame E" id="frame-e02"><div class="band"></div><div class="safe"></div>
+        <div class="memo" style="top:44cqw;transform:rotate(3deg);background:#EFD3E3"></div>
+        <div class="memo" style="top:42cqw;transform:rotate(-2deg);background:#F3DDEA"></div>
+        <div class="memo" style="top:40cqw"><p>올해도 옆에<br>있어 줘서 고마워</p><span class="n">1 / 3</span></div>
+        <div class="sub" style="top:104cqw;font-size:5cqw;color:#221D14;font-family:MSans;font-weight:700">캡처해 두고 쓰세요</div>
+      </div>
+      <div class="label"><b>02 · 문구 3장</b><span>e02 · 2.5–6</span></div>
+      <div class="note"><b>메모지가 1.1초마다 떼어짐</b>: "올해도 옆에 있어 줘서 고마워" → "이 노래 듣고 내 생각 해" → "11월 11일에 열어 봐". 저장 유도.</div>
+      <span class="chip">→ 마지막 메모의 "11일"이 날짜판으로</span>
+    </div>
+    <div class="cell">
+      <div class="frame E" id="frame-e03"><div class="band"></div><div class="safe"></div>
+        <div class="hero" style="top:28cqw;font-size:11cqw">미리 써 두고,</div>
+        <div class="flip"><b>1</b><b>1</b><i>.</i><b>1</b><b>1</b></div>
+        <div class="hero" style="top:100cqw;font-size:11cqw"><span class="acc">11일</span>에 열리게.</div>
+      </div>
+      <div class="label"><b>03 · 예약 공개</b><span>e03 · 6–9</span></div>
+      <div class="note"><b>날짜판이 촤르륵 넘어가</b> 10.12 → 11.11에서 멈춤. 근거 기능: 예약 공개(reveal_at).</div>
+      <span class="chip">→ 날짜판이 위로 빠짐</span>
+    </div>
+    <div class="cell">
+      <div class="frame E" id="frame-e04"><div class="band"></div><div class="safe"></div>
+        <div class="stick" style="height:58cqw;right:6cqw;top:62cqw;transform:rotate(32deg)"></div>
+        <div class="eq">빼빼로<br><span class="plus">+</span> 편지 한 장<br><span class="plus">+</span> 노래 한 곡</div>
+        <div class="abs" style="left:6.5cqw;top:120cqw"><div class="lockup"><span class="w">뮤터</span><span class="d">음악 편지</span></div></div>
+      </div>
+      <div class="label"><b>04 · 가치 + CTA</b><span>e04 · 9–12</span></div>
+      <div class="note"><b>세 줄이 더하기로 쌓이고</b> 마지막 "노래 한 곡"에 모브 하이라이트 → 로고.</div>
+      <span class="chip">끝</span>
+    </div>
+    <div class="cell">
+      <div class="tokens" style="height:100%">
+        <h4>토큰 · 금지</h4>
+        A <span class="sw" style="background:#0D1B2A"></span><span class="sw" style="background:#E8DFC8"></span><span class="sw" style="background:#C8A24A"></span> night-sky<br>
+        C <span class="sw" style="background:#FFF7F8"></span><span class="sw" style="background:#2D1A1F"></span><span class="sw" style="background:#D4587A"></span> spring-day<br>
+        D <span class="sw" style="background:#F5EDE0"></span><span class="sw" style="background:#3B2A1A"></span><span class="sw" style="background:#C0550A"></span> warm-craft<br>
+        E <span class="sw" style="background:#FFFDF2"></span><span class="sw" style="background:#221D14"></span><span class="sw" style="background:#C77BAE"></span><span class="sw" style="background:#8E4E7E"></span> 브랜드<br><br>
+        <b>서체</b> 명조 Noto Serif KR 400/700/900 · 고딕 Pretendard 600–900<br><br>
+        <b>금지</b> 앱 화면 흉내 · 카톡 UI/로고 · 빼빼로 상표 · 실제 곡명/앨범아트 · "모든 노래" 과장 · 카드만 넘기는 슬라이드 · 의미 없는 장식 모션<br><br>
+        <b>정지 장면</b> A04 마지막 1.2초 · D04 0.8초
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

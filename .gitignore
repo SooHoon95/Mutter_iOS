@@ -110,3 +110,19 @@ __pycache__/
 
 # Claude↔Codex 핑퐁 스레드 상태(scripts/ai)
 .ai-pingpong/
+
+# 승인 발행 런타임: 작업/이미지/실행 상태·토큰 지문은 로컬만 유지
+marketing/publishing/
+marketing/assets/fonts/*.otf
+.venv-marketing/
+
+# 로컬 모션 릴스 렌더 툴·재생용 산출물(코드/브리프는 추적)
+marketing/assets/bin/ffmpeg
+marketing/video/**/preview.mp4
+marketing/video/**/poster.jpg
+marketing/video/**/render.log
+marketing/video/**/render-status.json*
+marketing/video/**/metadata.json
+marketing/video/**/preview-payload.json
+marketing/video/**/preview-browser.mp4
+marketing/video/**/*.validation.json

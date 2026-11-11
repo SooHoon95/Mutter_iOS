@@ -57,3 +57,129 @@
 - 계획 1·1주차 승인 큐 4·영상 브리프 1 작성. 릴스 각각 16초로 통일, 제작과 발행 시간 중복 제거.
 - 검증: 큐 draft/대안 2개·Threads 각 안 500자 이내, 주간 예산 165/175/180분, 블로그 14일 간격과 월 2편 연결 확인.
 - 기존 자동 루프와 수동 요청·미구현 계측 구분. 발행·스토어 변경·커밋 없음. 렌더 제작은 별도 핸드오프.
+
+## 현재 작업 — 자동발행 외부 설정 점검 (2026-10-10)
+
+범위: 기존 승인 후 자동발행 계획의 Meta·Supabase·랜딩 준비. 게시·스케줄 활성화·코드 구현은 별도 확인 후 진행.
+- [x] 저장소 자동화와 환경변수 설정 상태 확인(값 출력 없이)
+- [x] Meta 사용 사례·필요 권한 8개 준비. 사용자 지정 전용 계정 mu_sic_letter로 두 테스터 등록·초대 수락·토큰 발급 완료. Threads/Instagram /me 읽기 호출로 계정 검증
+- [x] Supabase marketing-media 공개 버킷 생성·Public 상태 확인. service_role 프로젝트·역할 확인 후 로컬 및 Vault 저장. 버킷 읽기 API HTTP 200·public=true 검증
+- [x] 비로그인 랜딩·App Store/Google Play 설치 링크·로그인 진입 확인. LANDING_URL에 상시 Instagram 프로필 UTM 저장
+- [x] 남은 클립·발행 구현 단계와 검증 결과 기록
+- [ ] [blocked] 원본 클립 6개 없음. 사용자 제공/녹화 필요. 실제 설치·로그인·작성 전체 동선은 미검증
+- [x] 카드 렌더/승인 예약/토큰 갱신 스크립트와 Mac 설치 스크립트는 아래 후속 구현에서 완료. 영상 렌더와 실제 Mac 등록·발행은 별도 보류
+
+### 중간 검증 — 외부 설정
+- Threads API 사용 사례 기등록. 토큰 생성기 'No testers available'. Instagram 메시지 권한 일괄 추가는 사용하지 않고 필요한 4개만 선택.
+- .env.marketing 14개 설정값 저장: 기존 12개 + Instagram 전용 IG_APP_ID·IG_APP_SECRET. 파일 권한 600·gitignore 확인, 시크릿/토큰은 출력 없이 저장·Vault 보관. 실제 게시·스케줄 활성화 없음.
+- 일반 계정에서 공개 비즈니스 계정으로 전환은 사용자 명시 승인 후 진행. 카테고리 제품/서비스, 연락처 사용 안 함. Threads와 Instagram OAuth에서 불필요한 답글 관리·DM 권한 제외.
+- Mac pmset: AC sleep=0, 배터리 sleep=1. 예약 시 전원 연결 권장, 수동 잠자기·덮개 닫음·전원 종료까지 보장하지 않음.
+- 공개 랜딩 설치 링크: iOS id6790086549, Android com.efreedom.mutter. 로그인 화면 진입 정상. 실제 설치·로그인·작성은 검증하지 않음.
+
+## 현재 작업 — 승인 후 소셜 예약 발행 구현 (2026-10-10)
+
+사용자 '하던거 계속 해'로 Threads 글+Instagram 이미지 카드 구현을 이어감. 기존 초안 생성은 재사용하고 실제 테스트 게시 전 확인.
+- [x] 기존 승인 큐 계약·공식 API 확인
+- [x] 승인 내용·시간·이미지 해시를 고정한 JSON 작업 및 실행 상태 분리
+- [x] 한글 카드 렌더·공개 미디어 업로드·토큰 만료 검사/갱신·두 채널 발행 구현
+- [x] 실패/모호한 게시 결과는 수동 확인 상태로 격리, 중복·밀린 게시 폭주 방지
+- [x] 단위 테스트·읽기 API·dry-run·독립 리뷰
+- [x] /marketing-approve 연결 및 Mac launchd 설치 방법·생성 plist/wrapper 문법 검증
+- [x] 실제 LaunchAgent 등록/Terminal 진입점 확인(2026-10-11). 사용자가 실제 Terminal에서 설치 후 launchctl print로 등록·300초 간격·20:30 타이머 확인. 중지 마커 유지한 1회 kickstart: exit 0, 로컬 로그 disabled. 자동 발행 활성화는 여전히 별도 승인 필요
+- [ ] [blocked] 원본 클립 6개 없는 영상은 사용자 녹화/제공 필요. 실제 업로드·컨테이너·발행은 별도 명시 승인 전까지 미실행
+
+### 리뷰 — 승인 후 소셜 예약 발행 구현
+- 생성 루프: Threads 2 + Instagram 카드 1 기본, 클립/영상 검수 전 릴스 대신 카드. 주차·브리프·슬롯 기준 중복 제어. .claude 원본 수정 후 Codex 사본 생성.
+- 실행: SocialAPI/승인 스냅샷/실행 원장/한글 카드/토큰 갱신/명시 승인 CLI/Mac 설치 스크립트. 기본 dry-run, CLI 대상 @mu_sic_letter만 허용. PUBLISH_DISABLED 현재 존재, 승인 job 0개.
+- 검증: unittest 87개 통과, Python compile·zsh syntax·git diff --check 통과. 한글 명조 JPEG 실제 렌더 1080×1350 RGB/125,513 bytes 시각 확인. 임시 디렉터리에서 생성 plist/Terminal wrapper 문법 검증(실제 등록 아님).
+- 읽기 API: Threads /me id=28831850349833395, Instagram /me user_id=17841426222007655, 둘 다 username=mu_sic_letter. 토큰 값/서비스키 출력 없음. 무승인 dry-run [] 및 disabled --live 네트워크 없는 종료 확인.
+- 독립 리뷰: 별도 에이전트 2패스. HIGH 2(미확정 게시 후 다른 작업 허용, 재설치 pause 시점), MEDIUM 4(pause intent 경쟁, 큐 표시 쓰기 실패, 초안 중복 범위, 테스트 누락), LOW 2(env fsync, 오류 창 누적) 모두 코드/회귀 테스트 반영. 추가 MEDIUM 복구 문서도 old uncertain을 사용자 대조 후 cancelled/published로 수동 확정하도록 보완.
+- 한계: 모의 API 테스트는 실제 게시 성공/개발 모드 publishing 권한을 증명하지 않음. 실제 업로드/게시/토큰 갱신 API·앱 전체 설치/로그인/작성은 미검증. Mac 예약은 2026-10-11 실제 등록·중지 상태 진입점 검사 완료. 커밋/실게시/발행 활성화 없음. CLI/Vault 토큰 갱신은 분리돼 env가 최신 정본.
+
+## 현재 작업 — 소셜 첫 주 승인 프리뷰 (2026-10-11)
+
+사용자 '엉 계속해': 게시물/시간 검수·승인 단계 진행. 실제 게시/발행 활성화 승인이 아님.
+- [x] 과거 한글날 콘텐츠 제외, 상시 Threads 2편과 카드 1편 사실·미래 일정 검수
+- [x] 기존 릴스 첫 줄 콘텐츠를 별도 Instagram 카드 초안으로 전환, 로컬 이미지·프리뷰 해시 생성
+- [ ] 전체 본문/이미지/@mu_sic_letter/시각 표시 후 명시 승인 대기. PUBLISH_DISABLED 유지
+
+### 검증 — 첫 주 프리뷰
+- 제안: Instagram 카드 10/12 20:30, Threads 10/13·10/17 20:30 KST. 기존 미래 Threads 추천안 그대로, 릴스는 별도 카드로 재사용하고 영상 게시 승인은 아님.
+- 카드 시각 확인: JPEG 1080×1350 RGB, 명조 한글/여백/문장 누락 없음. 캡션 91자·해시태그 4개, Threads 330/363자. 계정 mu_sic_letter·미래 시각·프리뷰 SHA 생성 확인.
+- 좁은 독립 카피 검수: 기능 근거·가상 예시·금지어·글자수·미래 날짜 통과. 컨텍스트 이후 새 기능 커밋 c3d630b는 확인했으나 이번 카피에 신규 기능/순위/평점 주장 없음.
+- 이미지 저장: /Users/choesuhun/Downloads/aside/mutter-instagram-card-2026-10-12.jpg 및 세션 artifacts 사본. 공개 업로드/승인 job 등록/발행 활성화/실제 게시 없음.
+
+## 현재 작업 — 15초 모션 릴스 제작·발행 경로 (2026-10-11)
+
+사용자 '엉 그렇게': 원본 녹화 없이 15초 모션 릴스 시안 및 릴스 자동발행 지원 구현. 실제 게시·발행 활성화는 미승인.
+- [x] 공식 Instagram Login Reels 계약·렌더링 도구 확인
+- [x] 세로 1080×1920/15초 모션 MP4 실제 렌더. native FFmpeg/Terminal 실패를 독립 브라우저 WebCodecs+Mediabunny 경로로 해결. 실제 450frame·AAC 무음 MP4 생성, 사용자 Terminal 실행 불필요
+- [x] 릴스 승인 스냅샷·고정 MP4 업로드·컨테이너·발행 경로 추가, 기존 안전장치 유지
+- [x] 오프라인 테스트·실제 MP4 전체 디코드/MP4 물리 구조/SHA·native 플레이어 중간/마지막 장면 검증·독립 리뷰·승인 job 0·실제 MP4 승인 프리뷰 생성
+- [ ] 완성 MP4·캡션·대상·미래 시각 표시 후 사용자 승인 대기. 이미지 카드 제안은 보류, PUBLISH_DISABLED 유지
+
+### 리뷰 — 모션 릴스 구현
+- 로컬 render_reel: 종이·명조·모브 핑크·페이드/미세 모션, 고정 5장면/15초/30fps/H264/AAC 무음/+faststart. 실제 앱 UI/라이선스 음원 재현 없음. 현재 고정 문구이므로 매주 새 콘텐츠 자동 생성으로 과장하지 않는다.
+- API: upload_video <=45MiB, 불변 SHA 객체/충돌 바이트 비교, create_reel(REELS/video_url/caption/share_to_feed=true), 동일 Instagram status/publish. 이미지/Threads 유지, 둘 다 같은 Instagram 하루 한도·uncertain 전체 채널 보류 적용.
+- 검증: 155개 실행, 154 PASS/네이티브 인코더 1 SKIP. Python compile/zsh syntax/git diff --check 통과. 별도 독립 리뷰 MEDIUM 2(해시 전에 초과 크기 읽기, probe 외부 프로토콜), LOW 1(helper 자식 누수) 수정·재검토 완료. SHA는 streaming cap, copy는limit+1; MOV demuxer/file,pipe 제한; helper subprocess 제거.
+- 실제 모션 디자인 미리보기 GIF(PIL): 540×960·120frame·14.4초(15초 MP4와 다른 샘플 미리보기), /Users/choesuhun/Downloads/aside/mutter-motion-first-line-preview-2026-10-11.gif 및 session artifacts. 5장면 한글/안전 여백 시각 확인. GIF는 Instagram 게시 asset이 아님.
+- 로컬 Terminal 전용 render-motion-reel.command 준비: 네이티브 smoke·전체 MP4·450frame probe·승인 프리뷰만 작성, 게시 API 없음. 사용자 Terminal 실행 후 render-status/metadata/실파일을 2분 간격 최대1시간 확인하고 결과 전달하는 루틴 등록.
+- 후속 해결: 실제 MP4 4,457,200bytes(SHA d22352031129d39b9ef8d46ad92ce83737db6d607c41f408f5762bd1561a0458) 생성. 새 Mediabunny 입력에서 450프레임/707 AAC 샘플 전체 디코드; 영상 트랙15초, AAC 패딩 포함 파일15.083초. reel_validation.py의 bounded MP4/SPS/AAC/샘플테이블로 1080×1920/30fps/8bit420/progressive/faststart 실제 물리 검증. SHA 결합 trusted same-user 브라우저 decode cache를 native fallback 앞에 연결. 새 경로 독립 리뷰 APPROVE/CRITICAL·HIGH·MEDIUM 없음. 170개 실행169PASS/native1SKIP.
+- 사용자 출력: /Users/choesuhun/Downloads/aside/mutter-motion-reel-2026-10-12.mp4 및 session artifacts. 실제 플레이어 5초·14초 seek/장면 확인. Native 실제 인코더는 여전히 미사용이며 브라우저 독립 경로가 실제 산출물·검증을 제공한다.
+- 사용자 교정: 인코더 한 경로 실패를 전체 작업 중단으로 취급해 수동 명령을 넘긴 오류를 lessons.md에 기록하고 작업 재개로 교정. 이전 Terminal 대기 루틴은 해결됐으므로 paused.
+- 여전히 미검증/미실행: 실제 영상 공개 업로드·Meta 컨테이너/게시. 사용자 최종 영상 승인 미수신, 승인 job0·PUBLISH_DISABLED 유지·커밋 없음.
+
+## 현재 작업 — 2026-10-12 주간 마케팅 루프
+- [x] 제품 신선도·수집 데이터·행동 조건 확인
+- [x] 경쟁 버전 변화 분석과 주간 소셜 3편 위임
+- [x] 리포트·허용 state 필드 갱신
+- [x] 초안·상태 보존·파일 참조 검증
+
+### 리뷰 — 2026-10-12 주간 마케팅 루프
+- 생성: 경쟁 분석 1·승인 대기 Threads 2·카드 텍스트 1·주간 리포트 1.
+- 검증: 독립 ASO 에이전트 리포트 대조 오류 없음; 큐 draft/슬롯/길이/금지어·기능 출처 확인, 파일 참조 존재, state 운영 필드 전부 보존. handled에 경쟁 키·사용 문장 3개 추가, cooldown 유지.
+- 카드 이미지는 승인 준비 단계에서 렌더·검수 필요. 발행·스토어 변경·커밋 없음.
+
+## 현재 작업 — 2026-10-19 주간 마케팅 루프
+- [x] 제품 신선도·수집 데이터·조건 판정
+- [x] ASO 통합 분석·상시 소셜 3편 위임 및 검수
+- [x] 리포트·허용 state 필드 갱신 및 보존 검증
+
+### 리뷰 — 2026-10-19 주간 마케팅 루프
+- 생성: ASO 통합 분석 1·상시 승인 대기 소셜 3·주간 리포트 1. 두 실무 에이전트 각 1회 위임.
+- 검증: 큐 상태·슬롯·대안·추천 이유·공개 본문 금지어·글자수·기능 출처 및 파일 참조 확인. state 운영 필드 전부 보존, handled·cooldowns만 갱신.
+- 메타데이터 유지, 카드 실제 이미지 미생성. 발행·스토어 변경·커밋 없음.
+
+## 현재 작업 — 2026-10-26 주간 마케팅 루프
+- [x] 신선도·수집 데이터·행동 조건 확인
+- [x] 경쟁 분석·시즌 블로그 키워드 플랜 위임
+- [x] 시즌 초안 4편·블로그·인앱 이벤트 통합 위임
+- [x] 리포트·state 허용 필드 갱신 및 검증
+
+### 리뷰 — 2026-10-26 주간 마케팅 루프
+- 생성: ASO 분석·블로그 키워드 플랜 각1, 시즌 승인 대기6편, 카드 PNG1, 주간 리포트1. 실무 에이전트 각1회 위임.
+- 검증: ASO 분석가 독립 카피검수 문제0, 큐 draft·슬롯·대안·추천 이유·기능근거·금지어·길이 확인. 블로그3250자, 프로모션87자, Threads247/242자, 이벤트 모든안30/50/120 이내. 카드1080×1350 한글·잘림·본문일치 시각확인. 리포트 파일참조 존재 확인.
+- state는 handled에 경쟁키·실제사용CL1문장, cooldown에 시즌60일만 추가. 전후 JSON 비교로 runs·last_run·consecutive_failures 등 나머지 전부 보존 확인.
+- 인앱 이벤트는 시즌한정 경험·딥링크 미확인으로 등록 보류. 블로그 실제사례·사진 보강 및 발행은 사람 승인. 발행·스토어 변경·발송·커밋 없음.
+
+## 현재 작업 — 2026-11-02 주간 마케팅 루프
+- [x] 제품 신선도·입력 날짜·행동 조건 검증(verified_commit 이후 대상 커밋 0)
+- [x] 수능 시즌 초안 5건 카피라이터 통합 위임·검수
+- [x] 월간 AI 검색 4질문 점검·리포트 작성
+- [x] state 허용 필드만 갱신·산출물 검증
+
+### 리뷰 — 2026-11-02 주간 마케팅 루프
+- 수능 큐 5건(draft)·리포트 1건 생성. 빼빼로데이·블로그·월간 ASO·평점 요청 조건별 중복/쿨다운 확인.
+- 리드 별도 검수: 제품 주장 출처·카드 4섹션·대안 B/C·ID·글자수·리포트 파일 링크 확인. 이벤트 적격성은 사람 검토로 명시.
+- state 실행 전 사본과 비교: handled/cooldowns만 변경, 수능 60일(2027-01-01)·11월 AI 검색 완료 기록. runs/last_run은 유지. 웹 검색 관찰과 AI 추천율 구분. 발행·스토어 변경·커밋 없음.
+
+## 현재 작업 — 2026-11-09 주간 마케팅 루프
+- [x] 제품 신선도·입력·행동 조건 확인(대상 후속 커밋 0)
+- [x] 경쟁 분석·시즌 블로그 키워드 플랜 통합 위임
+- [x] 상시 소셜 3편·블로그 1편 통합 위임 및 검수
+- [x] 리포트·state 허용 필드 갱신 및 검증
+
+### 리뷰 — 2026-11-09 주간 마케팅 루프
+- 생성: ASO 분석·웹 키워드 플랜 각1, 승인 대기 큐4·카드 PNG1, 주간 리포트1. 실무 에이전트 각1회 위임.
+- 검증: 리드 별도 카피 검수·제품 근거 대조·큐 draft/ID/길이/금지어 및 리포트 파일 링크 확인. Threads 각234자·블로그3237자, 카드1080×1350 시각 확인(카피라이터).
+- state 전후 비교: handled에 경쟁2키·CL1키만 추가, cooldown 및 runs/last_run/consecutive_failures 등 보존. 발행·스토어 변경·발송·커밋 없음.
