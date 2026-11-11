@@ -62,6 +62,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
       configureKakaoLoginInstance()
     }
     configFirebase(application)
+    // 편지권 거래 갱신(승인 대기 후 승인 등)을 앱 수명 동안 듣는다.
+    Task { await StoreKitTicketPurchaser.shared.startObservingTransactions() }
     return true
   }
 
@@ -91,7 +93,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     // 로그인 시점에 캐시된 FCM 토큰을 서버에 등록(토큰 도착·로그인 순서 무관).
     MutterContainer.shared.resolve(SessionManagable.self).isLoggedInStream
       .filter { $0 }
-      .sink { [weak self] _ in self?.syncPushToken() }
+      .sink { [weak self] _ in
+        self?.syncPushToken()
+        // 로그인되면 마무리 못 한 편지권 거래를 서버에 다시 보낸다(200 뒤에만 finish).
+        Task { await StoreKitTicketPurchaser.shared.resendUnfinished() }
+      }
       .store(in: &cancellables)
   }
 

@@ -1,7 +1,11 @@
 import Foundation
 
-/// 편지권 구매 계약. 구매 → 서버 검증(verify-purchase) → 지급까지 끝내고 지급 후 잔액을 돌려준다.
-/// 실제 스토어 연동은 다음 작업(I5)이고, 그 전까지는 "구매 불가"를 던지는 구현이 주입된다.
+/// 편지권 구매 계약. 구매 → 서버 검증(verify-purchase) → 지급까지 끝낸다.
+/// 거래는 서버가 200을 준 뒤에만 마무리하고, 그 외에는 남겨 두었다가 `resendUnfinished`로 다시 보낸다.
 public protocol TicketPurchasing {
-  func purchase(_ product: TicketProductType) async throws -> Int
+  /// 상품별 스토어 표시 가격(현지 통화). 스토어에서 못 받은 상품은 빠진다.
+  func displayPrices() async throws -> [TicketProductType: String]
+  func purchase(_ product: TicketProductType) async throws -> TicketPurchaseResult
+  /// 마무리되지 않은 거래를 서버에 다시 보낸다(앱 시작·로그인·편지권 화면 진입 때). 실패는 다음 기회로 미룬다.
+  func resendUnfinished() async
 }

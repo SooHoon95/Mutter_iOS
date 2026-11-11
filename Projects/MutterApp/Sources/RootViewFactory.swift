@@ -108,10 +108,10 @@ struct RootViewFactory {
       )
 
     case .tickets:
-      // 스토어 연동(I5) 전까지 구매는 "구매 불가" 구현을 주입한다.
+      // 구매자는 거래 갱신 리스너를 쥔 앱 공유 인스턴스(AppDelegate가 시작).
       TicketView(
         ticketUsecase: TicketUsecase(repository: TicketRepository()),
-        purchaser: UnavailableTicketPurchaser(),
+        purchaser: StoreKitTicketPurchaser.shared,
         onBack: { coordinator.pop() }
       )
     }

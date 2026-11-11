@@ -14,7 +14,8 @@ extension Project {
     destinations: Destinations,
     platform: Platform,
     dependencies: [TargetDependency],
-    testDependencies: [TargetDependency]
+    testDependencies: [TargetDependency],
+    storeKitConfigurationPath: Path? = nil
   ) -> Project {
     
     let targets = makeAppTargets(
@@ -35,7 +36,29 @@ extension Project {
         configurations: Configuration.mainAppConfigure()
       ),
       targets: targets,
+      schemes: storeKitConfigurationPath.map { [makeAppScheme(name: name, storeKitConfigurationPath: $0)] } ?? [],
       resourceSynthesizers: []
+    )
+  }
+
+  // MARK: - Scheme
+
+  /// 자동 생성 스킴과 같은 구성(Run·Test=Debug, Profile·Archive=Release)에
+  /// Run 액션의 StoreKit 테스트 설정 파일만 더한 앱 스킴. 같은 이름이라 자동 생성 스킴을 대신한다.
+  private static func makeAppScheme(name: String, storeKitConfigurationPath: Path) -> Scheme {
+    .scheme(
+      name: name,
+      shared: true,
+      buildAction: .buildAction(targets: ["\(name)"]),
+      testAction: .targets(["\(name)Tests"], configuration: Configuration.ConfigScheme.debug.rawValue),
+      runAction: .runAction(
+        configuration: Configuration.ConfigScheme.debug.rawValue,
+        executable: "\(name)",
+        options: .options(storeKitConfigurationPath: storeKitConfigurationPath)
+      ),
+      archiveAction: .archiveAction(configuration: Configuration.ConfigScheme.release.rawValue),
+      profileAction: .profileAction(configuration: Configuration.ConfigScheme.release.rawValue, executable: "\(name)"),
+      analyzeAction: .analyzeAction(configuration: Configuration.ConfigScheme.debug.rawValue)
     )
   }
   

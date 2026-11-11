@@ -34,5 +34,7 @@ let project = Project.app(
     .googleSignIn,
     .external(name: "KakaoSDKCommon")
   ],
-  testDependencies: []
+  testDependencies: [],
+  // 편지권 StoreKit 테스트 구매(로컬 거래) — Run 액션에서만 쓰인다. 리소스가 아니라 번들에 안 들어간다.
+  storeKitConfigurationPath: "Mutter.storekit"
 )

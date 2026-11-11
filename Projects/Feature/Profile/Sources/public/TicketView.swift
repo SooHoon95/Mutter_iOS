@@ -35,10 +35,11 @@ public struct TicketView: View {
               VStack(spacing: 8) {
                 ForEach(model.products, id: \.self) { product in
                   MutterButton(
-                    L10n.ticketProduct(product.ticketCount),
+                    model.prices[product].map { L10n.ticketProductPrice(product.ticketCount, $0) }
+                      ?? L10n.ticketProduct(product.ticketCount),
                     style: product == .one ? .secondary : .primary,
                     isLoading: model.purchasingProduct == product,
-                    isEnabled: model.purchasingProduct == nil
+                    isEnabled: model.canPurchase(product)
                   ) {
                     Task { await model.purchase(product) }
                   }
@@ -59,7 +60,7 @@ public struct TicketView: View {
       }
     }
     .toolbar(.hidden, for: .navigationBar)
-    .task { await model.load() }
+    .task { await model.appear() }
   }
 
   // MARK: - 잔액 카드

@@ -1,0 +1,53 @@
+{
+  "identifier" : "6F3C2B7A-9D41-4E2B-8C55-1A7E0D3B9F21",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1100",
+      "familyShareable" : false,
+      "internalID" : "6740000001",
+      "localizations" : [
+        {
+          "description" : "편지 한 통을 기간 제한 없이 간직해요.",
+          "displayName" : "편지권 1장",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "mutter.ticket.1",
+      "referenceName" : "편지권 1장",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "4400",
+      "familyShareable" : false,
+      "internalID" : "6740000005",
+      "localizations" : [
+        {
+          "description" : "편지 다섯 통을 기간 제한 없이 간직해요.",
+          "displayName" : "편지권 5장",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "mutter.ticket.5",
+      "referenceName" : "편지권 5장",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ko",
+    "_storefront" : "KOR",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
