@@ -16,9 +16,16 @@ public struct HomeView: View {
 
   public init(
     letterUsecase: LetterUsecasable,
-    receiptUsecase: ReceiptUsecasable
+    receiptUsecase: ReceiptUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable
   ) {
-    self.model = HomeModelData(letterUsecase: letterUsecase, receiptUsecase: receiptUsecase)
+    self.model = HomeModelData(
+      letterUsecase: letterUsecase,
+      receiptUsecase: receiptUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase
+    )
   }
 
   /// 현재 탭에 보여줄 행.
@@ -151,6 +158,8 @@ public struct HomeView: View {
             .foregroundStyle(row.isSent && row.isOpened ? Asset.Colors.gold.color : Asset.Colors.inkFaint.color)
         }
         Spacer()
+        // 접근 상태(영구·n일 남음·닫힘) — 상태가 없으면 아무것도 붙이지 않는다.
+        if let badge = model.accessBadge(for: row) { badge.badge }
         if row.isSent { readBadge(row.isOpened) } else { draftBadge }
       }
     }

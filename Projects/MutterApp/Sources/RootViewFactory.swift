@@ -65,10 +65,15 @@ struct RootViewFactory {
       DeliveryView(
         letterId: letterId,
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
+        letterAccessUsecase: LetterAccessUsecase(repository: LetterAccessRepository()),
+        ticketUsecase: TicketUsecase(repository: TicketRepository()),
         linkBaseURL: AppLink.baseURL,
         navTitle: L10n.deliveryNav,
         onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) },
-        onBack: { coordinator.pop() }
+        onBack: { coordinator.pop() },
+        onOpenTickets: {},
+        // 사본은 링크가 없는 새 편지 — 그 편지의 발송(링크 발급) 화면으로 잇는다.
+        onDuplicated: { coordinator.push(.delivery(letterId: $0)) }
       )
 
     case .connect(let connectRoute):

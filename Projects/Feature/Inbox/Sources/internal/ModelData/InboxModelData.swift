@@ -21,13 +21,27 @@ final class InboxModelData {
   /// 방금 삭제함으로 옮긴 편지들 — "되돌리기" 토스트가 떠 있는 동안만 비어 있지 않다.
   var undoableLetterIds: [String] = []
 
+  /// letterId → 접근 상태(영구·n일 남음·닫힘). 조회 실패(배포 전 포함)면 비어 있어 지금처럼 보인다.
+  private(set) var accessStates: [String: LetterAccessState] = [:]
+  /// 편지권 UI 노출 판단. nil이면 "영구" 표시를 숨긴다.
+  private(set) var entitlements: Entitlements?
+
   /// 되돌리기 창(세 플랫폼 공통 5초).
   private static let undoWindow: Duration = .seconds(5)
   private let inboxUsecase: InboxUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
   @ObservationIgnored private var undoToastTask: Task<Void, Never>?
 
-  init(inboxUsecase: InboxUsecasable) {
+  init(inboxUsecase: InboxUsecasable, letterAccessUsecase: LetterAccessUsecasable, ticketUsecase: TicketUsecasable) {
     self.inboxUsecase = inboxUsecase
+    self.letterAccessUsecase = letterAccessUsecase
+    self.ticketUsecase = ticketUsecase
+  }
+
+  /// 목록 행의 접근 상태 배지.
+  func accessBadge(for item: InboxItem) -> LetterAccessBadgeType? {
+    accessStates[item.letterId]?.badge(showsPermanent: entitlements?.showsTicketUI ?? false)
   }
 
   var isAllSelected: Bool { !items.isEmpty && selectedIds.count == items.count }
@@ -43,6 +57,11 @@ final class InboxModelData {
     items = (try? await inboxUsecase.myInbox()) ?? []
     // 사라진 항목의 선택은 남기지 않는다(삭제 버튼 개수가 실제와 어긋나지 않게).
     selectedIds.formIntersection(items.map(\.id))
+    // 상태·권한은 표시용 부가 정보 — 실패하면 조용히 비워 두고 목록은 그대로 보인다.
+    async let statesTask = letterAccessUsecase.accessStates(letterIds: items.map(\.letterId))
+    async let entitlementsTask = ticketUsecase.entitlements()
+    accessStates = (try? await statesTask) ?? [:]
+    entitlements = try? await entitlementsTask
   }
 
   // MARK: - 편집 모드

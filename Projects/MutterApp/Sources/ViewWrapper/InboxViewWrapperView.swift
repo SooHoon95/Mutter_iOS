@@ -10,14 +10,20 @@ import Router
 struct InboxViewWrapperView: View, InboxViewable {
   @EnvironmentObject private var coordinator: NavigationCoordinator<FeatureRoute>
   private let inboxUsecase: InboxUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
 
   init() {
     self.inboxUsecase = InboxUsecase(repository: InboxRepository())
+    self.letterAccessUsecase = LetterAccessUsecase(repository: LetterAccessRepository())
+    self.ticketUsecase = TicketUsecase(repository: TicketRepository())
   }
 
   var body: some View {
     InboxView(
       inboxUsecase: inboxUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase,
       onOpen: { coordinator.push(.viewer(.token($0, password: nil))) },
       onOpenTrash: { coordinator.push(.inboxTrash) }
     )

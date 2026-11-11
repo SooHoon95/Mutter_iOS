@@ -12,10 +12,16 @@ public struct InboxView: View {
 
   public init(
     inboxUsecase: InboxUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable,
     onOpen: @escaping (String) -> Void,
     onOpenTrash: @escaping () -> Void
   ) {
-    _model = State(initialValue: InboxModelData(inboxUsecase: inboxUsecase))
+    _model = State(initialValue: InboxModelData(
+      inboxUsecase: inboxUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase
+    ))
     self.onOpen = onOpen
     self.onOpenTrash = onOpenTrash
   }
@@ -181,6 +187,9 @@ public struct InboxView: View {
       }
 
       Spacer()
+
+      // 접근 상태(영구·n일 남음·닫힘) — 상태가 없으면 아무것도 붙이지 않는다.
+      if let badge = model.accessBadge(for: item) { badge.badge }
 
       // 미열람 골드 점 배지 (열람 상태 필드 없으므로 항상 표시)
       Circle()

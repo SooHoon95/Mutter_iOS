@@ -11,16 +11,22 @@ import Router
 struct HomeViewWrapperView: View, HomeViewable {
   private let letterUsecase: LetterUsecasable
   private let receiptUsecase: ReceiptUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
 
   init() {
     self.letterUsecase = LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository())
     self.receiptUsecase = ReceiptUsecase(repository: ReceiptRepository())
+    self.letterAccessUsecase = LetterAccessUsecase(repository: LetterAccessRepository())
+    self.ticketUsecase = TicketUsecase(repository: TicketRepository())
   }
 
   var body: some View {
     HomeView(
       letterUsecase: letterUsecase,
       receiptUsecase: receiptUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase,
 //      onCompose: { coordinator.push(.compose(.new)) },
 //      onEdit: { coordinator.push(.compose(.edit(letterId: $0))) },
 //      onPreview: { coordinator.push(.viewer(.myLetter(letterId: $0))) }

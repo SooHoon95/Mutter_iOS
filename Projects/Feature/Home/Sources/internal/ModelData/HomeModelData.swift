@@ -22,6 +22,10 @@ final class HomeModelData {
   var errorMessage: String?
   /// 방금 삭제함으로 옮긴 편지 — "되돌리기" 토스트가 떠 있는 동안만 non-nil.
   var undoableLetterId: String?
+  /// letterId → 접근 상태. 조회 실패(배포 전 포함)면 비어 있어 지금처럼 보인다.
+  private(set) var accessStates: [String: LetterAccessState] = [:]
+  /// 편지권 UI 노출 판단. nil이면 "영구" 표시를 숨긴다.
+  private(set) var entitlements: Entitlements?
 
   /// 되돌리기 창(세 플랫폼 공통 5초).
   private static let undoWindow: Duration = .seconds(5)
@@ -29,10 +33,25 @@ final class HomeModelData {
 
   private let letterUsecase: LetterUsecasable
   private let receiptUsecase: ReceiptUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
 
-  init(letterUsecase: LetterUsecasable, receiptUsecase: ReceiptUsecasable) {
+  init(
+    letterUsecase: LetterUsecasable,
+    receiptUsecase: ReceiptUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable
+  ) {
     self.letterUsecase = letterUsecase
     self.receiptUsecase = receiptUsecase
+    self.letterAccessUsecase = letterAccessUsecase
+    self.ticketUsecase = ticketUsecase
+  }
+
+  /// 보낸 편지 행의 접근 상태 배지(임시저장은 없음).
+  func accessBadge(for row: LetterRow) -> LetterAccessBadgeType? {
+    guard row.isSent else { return nil }
+    return accessStates[row.id]?.badge(showsPermanent: entitlements?.showsTicketUI ?? false)
   }
 
   /// 보낸 편지(전달됨) — 통계·"보낸 편지" 탭.
@@ -51,6 +70,11 @@ final class HomeModelData {
     let opens = (try? await opensTask) ?? []
     let openMap = Dictionary(opens.map { ($0.letterId, $0) }, uniquingKeysWith: { first, _ in first })
     rows = letters.map { LetterRow(letter: $0.letter, openSummary: openMap[$0.letter.id], isSent: $0.isSent) }
+    // 상태·권한은 표시용 부가 정보 — 실패하면 조용히 비워 두고 목록은 그대로 보인다.
+    async let statesTask = letterAccessUsecase.accessStates(letterIds: sentRows.map(\.id))
+    async let entitlementsTask = ticketUsecase.entitlements()
+    accessStates = (try? await statesTask) ?? [:]
+    entitlements = try? await entitlementsTask
   }
 
   /// 편지 삭제(임시저장 포함) — 서버에서 30일 보관(삭제함)으로 바뀐다.
