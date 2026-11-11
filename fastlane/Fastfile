@@ -145,9 +145,9 @@ platform :ios do
   lane :generate do
     Dir.chdir(PROJECT_ROOT) do
       sh("mise exec -- tuist install")
-      # supabase-swift는 옛 이름(xctest-dynamic-overlay), swift-clocks는 새 이름(swift-issue-reporting)으로
-      # 같은 _IssueReporting 타겟을 끌어와 Tuist 4.208이 순서에 따라 간헐적으로 "circular dependency"를 낸다
-      # (2026-10-08 측정: 5회 중 4회 실패). 업스트림이 이름을 통일할 때까지 재시도로 흡수한다.
+      # Tuist 4.208은 _IssueReporting 타겟(xctest-dynamic-overlay/swift-issue-reporting 이름 혼용)에서
+      # 간헐적으로 "circular dependency"를 냈다. 4.211.0에서 해소(2026-11-11 측정: 12회 중 0회 실패,
+      # 4.208은 6회 중 3회 실패). 재시도는 안전망으로만 남긴다.
       attempts = 0
       begin
         attempts += 1
