@@ -39,7 +39,7 @@
 |---|---|---|---|
 | `get_letter_by_token` (기존) | anon·로그인 | `p_token text, p_password text` | 기존 키 + `is_permanent boolean`, `access_until timestamptz\|null` |
 | `get_letter_cover` | anon·로그인 | `p_token text` | 아래 "봉투" |
-| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at}]` — 내가 보냈거나 받은 편지함에 가진 편지만 |
+| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 받은 사람이 자기 편지권으로 영구로 만든 편지일 때 **보낸 사람에게만** true(삭제 확인 경고에 쓴다) |
 | `get_letter_readers` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, first_opened_at, last_opened_at, open_count}]` 처음 연 순. 소유자 아니면 `FORBIDDEN` |
 | `get_my_entitlements` | 로그인 | 없음 | `{is_admin, tickets, paid_enabled, free_days, grace_days}` |
 | `get_my_ticket_history` | 로그인 | 없음 | `[{created_at, delta, reason, letter_title}]` 최근 순. `reason` ∈ `purchase`·`use`·`grant`·`refund` |
