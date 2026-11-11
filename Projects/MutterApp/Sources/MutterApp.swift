@@ -162,13 +162,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     completionHandler([.banner, .sound, .badge])
   }
 
-  /// 알림을 탭해 앱을 열면 뱃지를 지운다(이전엔 탭 응답 핸들러 자체가 없어 뱃지가 남았다).
+  /// 알림을 탭해 앱을 열면 뱃지를 지우고, 화면이 정해진 알림(편지 만료 등)이면 그 화면으로 보낸다.
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     didReceive response: UNNotificationResponse,
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
     clearBadge()
+    PushRouteCenter.shared.handle(userInfo: response.notification.request.content.userInfo)
     completionHandler()
   }
 }

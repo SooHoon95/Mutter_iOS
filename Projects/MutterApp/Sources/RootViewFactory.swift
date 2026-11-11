@@ -13,6 +13,7 @@ import Delivery
 import Home
 import Inbox
 import Legal
+import Profile
 import Viewer
 
 /// 마스터 화면 팩토리 — push되는 FeatureRoute를 각 Feature의 ViewFactory로 위임한다.
@@ -58,7 +59,8 @@ struct RootViewFactory {
         letterAccessUsecase: LetterAccessUsecase(repository: LetterAccessRepository()),
         ticketUsecase: TicketUsecase(repository: TicketRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
-        onBack: { coordinator.pop() }
+        onBack: { coordinator.pop() },
+        onOpenTickets: { coordinator.push(.tickets) }
       ).makeView(viewerRoute)
 
     case .delivery(let letterId):
@@ -71,7 +73,7 @@ struct RootViewFactory {
         navTitle: L10n.deliveryNav,
         onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) },
         onBack: { coordinator.pop() },
-        onOpenTickets: {},
+        onOpenTickets: { coordinator.push(.tickets) },
         // 사본은 링크가 없는 새 편지 — 그 편지의 발송(링크 발급) 화면으로 잇는다.
         onDuplicated: { coordinator.push(.delivery(letterId: $0)) }
       )
@@ -102,6 +104,14 @@ struct RootViewFactory {
     case .inboxTrash:
       InboxTrashView(
         inboxUsecase: InboxUsecase(repository: InboxRepository()),
+        onBack: { coordinator.pop() }
+      )
+
+    case .tickets:
+      // 스토어 연동(I5) 전까지 구매는 "구매 불가" 구현을 주입한다.
+      TicketView(
+        ticketUsecase: TicketUsecase(repository: TicketRepository()),
+        purchaser: UnavailableTicketPurchaser(),
         onBack: { coordinator.pop() }
       )
     }

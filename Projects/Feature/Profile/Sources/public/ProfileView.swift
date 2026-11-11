@@ -12,17 +12,23 @@ public struct ProfileView: View {
   @State private var mailFallbackToast = false
   @FocusState private var nicknameFocused: Bool
   @Environment(\.openURL) private var openURL
+  /// 편지권 화면으로(라우팅 레이어가 주입).
+  private let onOpenTickets: () -> Void
 
   public init(
     profileUsecase: ProfileUsecasable,
     authUsecase: AuthUsecasable,
-    onSignedOut: @escaping () -> Void
+    ticketUsecase: TicketUsecasable,
+    onSignedOut: @escaping () -> Void,
+    onOpenTickets: @escaping () -> Void
   ) {
     _model = State(initialValue: ProfileModelData(
       profileUsecase: profileUsecase,
       authUsecase: authUsecase,
+      ticketUsecase: ticketUsecase,
       onSignedOut: onSignedOut
     ))
+    self.onOpenTickets = onOpenTickets
   }
 
   public var body: some View {
@@ -49,7 +55,7 @@ public struct ProfileView: View {
       Button(L10n.commonDelete, role: .destructive) { Task { await model.deleteAccount() } }
       Button(L10n.commonCancel, role: .cancel) {}
     } message: {
-      Text(L10n.profileDeleteDetail)
+      Text(model.deleteAccountDetail)
     }
   }
 
@@ -110,6 +116,18 @@ public struct ProfileView: View {
         value: L10n.profileOn,
         action: nil
       )
+
+      // 편지권 — 유료 스위치가 꺼진 일반 계정에는 항목 자체가 없다.
+      if model.showsTickets {
+        hairlineDivider
+
+        settingsRow(
+          icon: Asset.Images.envelope,
+          label: L10n.ticketTitle,
+          value: L10n.ticketBalance(model.tickets),
+          action: onOpenTickets
+        )
+      }
     }
     .background(Asset.Colors.surface.color)
     .clipShape(RoundedRectangle(cornerRadius: MutterRadius.xl))
