@@ -294,3 +294,6 @@
 "ticket.reason.grant" = "지급";
 "ticket.reason.refund" = "환급";
 "ticket.deleteAccountWarning" = "남은 편지권 %d장이 사라져요.";
+"access.keptDeleteWarning" = "받은 분이 편지권으로 간직한 편지예요. 지우면 영구가 풀려요.";
+"ticket.productPrice" = "편지권 %d장 · %@";
+"ticket.pending" = "결제 승인을 기다리고 있어요. 승인되면 편지권이 들어와요.";

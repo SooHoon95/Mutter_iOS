@@ -294,3 +294,6 @@
 "ticket.reason.grant" = "Granted";
 "ticket.reason.refund" = "Refund";
 "ticket.deleteAccountWarning" = "Your remaining %d tickets will be lost.";
+"access.keptDeleteWarning" = "The recipient kept this letter with a ticket. Deleting it removes its permanent status.";
+"ticket.productPrice" = "%d tickets · %@";
+"ticket.pending" = "Waiting for payment approval. Tickets arrive once approved.";

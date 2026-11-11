@@ -8,18 +8,27 @@ struct LetterAccessStateRow: Decodable {
   let state: String
   let accessUntil: Date?
   let deleteAt: Date?
+  /// 나중에 더해진 키 — 없으면 false.
+  let keptByRecipient: Bool?
 
   enum CodingKeys: String, CodingKey {
     case state
     case letterId = "letter_id"
     case accessUntil = "access_until"
     case deleteAt = "delete_at"
+    case keptByRecipient = "kept_by_recipient"
   }
 
   /// 모르는 state는 nil — 목록에 아무것도 붙이지 않는다(지금과 같은 표시).
   func toDomain() -> LetterAccessState? {
     guard let type = LetterAccessType(rawValue: state) else { return nil }
-    return LetterAccessState(letterId: letterId, type: type, accessUntil: accessUntil, deleteAt: deleteAt)
+    return LetterAccessState(
+      letterId: letterId,
+      type: type,
+      accessUntil: accessUntil,
+      deleteAt: deleteAt,
+      keptByRecipient: keptByRecipient ?? false
+    )
   }
 }
 

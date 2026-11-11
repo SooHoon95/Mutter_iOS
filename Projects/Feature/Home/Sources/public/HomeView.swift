@@ -13,6 +13,8 @@ public struct HomeView: View {
   @EnvironmentObject private var coordinator: NavigationCoordinator<FeatureRoute>
   @State private var model: HomeModelData
   @State private var selectedTab: HomeTab = .sent
+  /// 받은 사람이 간직한 편지를 지우려 할 때 확인을 기다리는 편지 id.
+  @State private var keptDeleteLetterId: String?
 
   public init(
     letterUsecase: LetterUsecasable,
@@ -69,7 +71,12 @@ public struct HomeView: View {
                 .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                   Button(role: .destructive) {
-                    Task { await model.delete(row.letter.id) }
+                    // 받은 사람이 편지권으로 간직한 편지만 한 번 묻는다. 나머지는 지금처럼 바로 지우고 되돌리기.
+                    if model.isKeptByRecipient(row.letter.id) {
+                      keptDeleteLetterId = row.letter.id
+                    } else {
+                      Task { await model.delete(row.letter.id) }
+                    }
                   } label: {
                     Label(L10n.commonDelete, systemImage: "trash")
                   }
@@ -96,6 +103,18 @@ public struct HomeView: View {
       }
     }
     .animation(.snappy, value: model.undoableLetterId)
+    .confirmationDialog(
+      L10n.accessKeptDeleteWarning,
+      isPresented: Binding(get: { keptDeleteLetterId != nil }, set: { if !$0 { keptDeleteLetterId = nil } }),
+      titleVisibility: .visible
+    ) {
+      Button(L10n.commonDelete, role: .destructive) {
+        guard let letterId = keptDeleteLetterId else { return }
+        keptDeleteLetterId = nil
+        Task { await model.delete(letterId) }
+      }
+      Button(L10n.commonCancel, role: .cancel) { keptDeleteLetterId = nil }
+    }
     // 삭제함에서 되살리고 돌아오면 다시 보여야 하므로 나타날 때마다 새로 받는다.
     .task { await model.load() }
   }

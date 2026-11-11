@@ -48,6 +48,11 @@ final class HomeModelData {
     self.ticketUsecase = ticketUsecase
   }
 
+  /// 받은 사람이 편지권으로 간직한 편지 — 지우기 전에 영구가 풀린다고 한 번 묻는다.
+  func isKeptByRecipient(_ letterId: String) -> Bool {
+    accessStates[letterId]?.keptByRecipient ?? false
+  }
+
   /// 보낸 편지 행의 접근 상태 배지(임시저장은 없음).
   func accessBadge(for row: LetterRow) -> LetterAccessBadgeType? {
     guard row.isSent else { return nil }

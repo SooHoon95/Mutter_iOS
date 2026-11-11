@@ -9,12 +9,15 @@ public struct LetterAccessState: Equatable {
   public let accessUntil: Date?
   /// 삭제 예정 시각(open이고 아직 안 열렸으면 nil).
   public let deleteAt: Date?
+  /// 받은 사람이 자기 편지권으로 영구로 만든 편지(보낸 사람에게만 true) — 지우면 영구가 풀린다는 경고용.
+  public let keptByRecipient: Bool
 
-  public init(letterId: String, type: LetterAccessType, accessUntil: Date?, deleteAt: Date?) {
+  public init(letterId: String, type: LetterAccessType, accessUntil: Date?, deleteAt: Date?, keptByRecipient: Bool = false) {
     self.letterId = letterId
     self.type = type
     self.accessUntil = accessUntil
     self.deleteAt = deleteAt
+    self.keptByRecipient = keptByRecipient
   }
 
   /// 목록에 붙일 상태 표시. `showsPermanent`가 false면 영구 편지에는 아무것도 붙이지 않는다 —
