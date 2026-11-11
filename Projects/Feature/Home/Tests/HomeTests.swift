@@ -25,6 +25,21 @@ private struct FakeReceiptUsecase: ReceiptUsecasable {
   func myLetterOpens() async throws -> [LetterOpenSummary] { opens }
 }
 
+/// 영구 편지권 RPC가 없는 서버(배포 전)처럼 항상 실패 — 목록은 기존대로 보여야 한다.
+private struct FakeLetterAccessUsecase: LetterAccessUsecasable {
+  func cover(token: String) async throws -> LetterCover { throw URLError(.badServerResponse) }
+  func accessStates(letterIds: [String]) async throws -> [String: LetterAccessState] { throw URLError(.badServerResponse) }
+  func readers(letterId: String) async throws -> [LetterReader] { throw URLError(.badServerResponse) }
+  func duplicate(letterId: String) async throws -> String { throw URLError(.badServerResponse) }
+}
+
+private struct FakeTicketUsecase: TicketUsecasable {
+  func entitlements() async throws -> Entitlements { throw URLError(.badServerResponse) }
+  func history() async throws -> [TicketHistoryItem] { throw URLError(.badServerResponse) }
+  func makePermanent(letterId: String) async throws { throw URLError(.badServerResponse) }
+  func keepReceived(token: String, password: String?) async throws { throw URLError(.badServerResponse) }
+}
+
 final class HomeTests: XCTestCase {
   private func letter(_ id: String) -> Letter {
     Letter(id: id, title: "t\(id)", body: "b", templateId: "classic-serif")
@@ -41,7 +56,9 @@ final class HomeTests: XCTestCase {
     let opens = [LetterOpenSummary(letterId: "1", openCount: 2, lastOpenedAt: Date())]
     let model = HomeModelData(
       letterUsecase: FakeLetterUsecase(lettersWithStatus: rows),
-      receiptUsecase: FakeReceiptUsecase(opens: opens)
+      receiptUsecase: FakeReceiptUsecase(opens: opens),
+      letterAccessUsecase: FakeLetterAccessUsecase(),
+      ticketUsecase: FakeTicketUsecase()
     )
 
     await model.load()
@@ -59,7 +76,9 @@ final class HomeTests: XCTestCase {
     let opens = [LetterOpenSummary(letterId: "d", openCount: 5, lastOpenedAt: Date())]
     let model = HomeModelData(
       letterUsecase: FakeLetterUsecase(lettersWithStatus: rows),
-      receiptUsecase: FakeReceiptUsecase(opens: opens)
+      receiptUsecase: FakeReceiptUsecase(opens: opens),
+      letterAccessUsecase: FakeLetterAccessUsecase(),
+      ticketUsecase: FakeTicketUsecase()
     )
 
     await model.load()
