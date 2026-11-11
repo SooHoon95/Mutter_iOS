@@ -30,6 +30,8 @@ struct MainView: View {
   @State private var pendingLetter: DeeplinkToken?
   /// 미인증/splash 중 수신된 초대 딥링크 — 로그인 완료 시 소비(EC-5.2/5.5).
   @State private var pendingConnectToken: String?
+  /// 봉투 화면에서 "편지 열기"로 로그인하러 간 편지 — 로그인 완료 시 같은 편지를 다시 연다.
+  @State private var pendingLoginLetterToken: String?
   /// 최신 버전 미설치 시 전면 차단(강제 업데이트).
   @State private var forceUpdateRequired = false
   @Inject private var sessionManager: SessionManagable
@@ -57,6 +59,7 @@ struct MainView: View {
       isSplashDone = true
       // splash 완료 시점에 이미 로그인돼 있으면 보류 초대 토큰 소비(cold-start-logged-in, EC-5.5).
       consumePendingConnectIfNeeded()
+      consumePendingLoginLetterIfNeeded()
     }
     .onReceive(sessionManager.isLoggedInStream) { loggedIn in
       guard isSplashDone else { return }
@@ -64,7 +67,10 @@ struct MainView: View {
       if !loggedIn { coordinator.popToRoot() }
       isUserLoggedIn = loggedIn
       // 로그인 완료 시 보류 초대 딥링크 소비(EC-5.2 — 우연 동작을 설계 보장으로).
-      if loggedIn { consumePendingConnectIfNeeded() }
+      if loggedIn {
+        consumePendingConnectIfNeeded()
+        consumePendingLoginLetterIfNeeded()
+      }
     }
     .onOpenURL { url in
       // 소셜 OAuth 콜백이면 SDK가 소진, 아니면 앱 딥링크(수신 라우트)로 폴백.
@@ -143,8 +149,15 @@ struct MainView: View {
       receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
       letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
       inboxUsecase: nil,
+      letterAccessUsecase: LetterAccessUsecase(repository: LetterAccessRepository()),
+      ticketUsecase: nil,
       audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
-      onBack: { pendingLetter = nil }
+      onBack: { pendingLetter = nil },
+      // 로그인해야 열리는 편지 — 커버를 닫아 로그인 화면을 드러내고, 로그인 뒤 같은 편지로 돌아온다.
+      onLoginRequest: {
+        pendingLoginLetterToken = token
+        pendingLetter = nil
+      }
     ).makeView(.token(token, password: nil))
   }
 
@@ -160,6 +173,13 @@ struct MainView: View {
     if await usecase.isUpdateRequired(currentVersion: current) {
       forceUpdateRequired = true
     }
+  }
+
+  /// 봉투 화면에서 로그인하러 간 편지를 로그인 완료 뒤 다시 연다.
+  private func consumePendingLoginLetterIfNeeded() {
+    guard isUserLoggedIn, let token = pendingLoginLetterToken else { return }
+    pendingLoginLetterToken = nil
+    coordinator.push(.viewer(.token(token, password: nil)))
   }
 
   /// 보류 초대 토큰을 소비해 connect 화면으로 push. 로그인 완료 + 토큰 있을 때만 동작.

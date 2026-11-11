@@ -55,6 +55,8 @@ struct RootViewFactory {
         receiptUsecase: ReceiptUsecase(repository: ReceiptRepository()),
         letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
         inboxUsecase: InboxUsecase(repository: InboxRepository()),
+        letterAccessUsecase: LetterAccessUsecase(repository: LetterAccessRepository()),
+        ticketUsecase: TicketUsecase(repository: TicketRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
         onBack: { coordinator.pop() }
       ).makeView(viewerRoute)

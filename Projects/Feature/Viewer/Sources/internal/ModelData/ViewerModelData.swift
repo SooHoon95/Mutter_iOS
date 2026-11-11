@@ -15,6 +15,8 @@ final class ViewerModelData {
     case loading
     case passwordRequired        // 암호 필요(틀렸거나 미입력)
     case revealPending(Date)     // 예약공개 전 — 이 시각에 열림
+    case loginRequired(LetterCover)          // 로그인해야 열리는 편지 — 봉투 화면
+    case letterLocked(LetterCover, Date)     // 무료 기간 종료 — 잠김 화면(시각 = 삭제 예정)
     case ready(LetterPayload, LetterTheme)
     case failed(String)
   }
@@ -34,6 +36,12 @@ final class ViewerModelData {
   var savedToInbox = false
   /// 사진 서명 URL(Storage 경로 → URL). 본문을 받은 직후 한 번 채운다. 비어 있으면 사진 자리는 플레이스홀더.
   private(set) var photoURLs: [String: URL] = [:]
+  /// 잠김 화면에서만 받는 권한·잔액. nil이면(비로그인·조회 실패) 편지권 UI를 숨긴다.
+  private(set) var entitlements: Entitlements?
+  /// 편지권 사용 중(중복 탭 방지).
+  var isKeeping = false
+  /// 잠김 화면 액션 실패 문구.
+  var keepErrorMessage: String?
 
   let player: LetterAudioPlayer
 
@@ -43,6 +51,11 @@ final class ViewerModelData {
   private let letterUsecase: LetterUsecasable
   /// nil이면 미인증(능력 부재 = nil, Mercury DI 패턴).
   private let inboxUsecase: InboxUsecasable?
+  private let letterAccessUsecase: LetterAccessUsecasable
+  /// nil이면 미인증 — 편지권을 쓸 수 없다.
+  private let ticketUsecase: TicketUsecasable?
+  /// 마지막으로 연 암호(잠긴 편지를 간직할 때 같은 암호로 다시 보낸다).
+  @ObservationIgnored private var lastPassword: String?
 
   init(
     source: Source,
@@ -50,6 +63,8 @@ final class ViewerModelData {
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
     inboxUsecase: InboxUsecasable?,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable?,
     audioUsecase: AudioUsecasable
   ) {
     self.source = source
@@ -57,6 +72,8 @@ final class ViewerModelData {
     self.receiptUsecase = receiptUsecase
     self.letterUsecase = letterUsecase
     self.inboxUsecase = inboxUsecase
+    self.letterAccessUsecase = letterAccessUsecase
+    self.ticketUsecase = ticketUsecase
     self.player = LetterAudioPlayer(audioUsecase: audioUsecase)
   }
 
@@ -83,6 +100,38 @@ final class ViewerModelData {
     await loadByToken(token, password: password)
   }
 
+  /// 잠김 화면의 "편지권으로 간직하기"를 보일지 — 로그인 + 편지권 UI가 켜진 계정만.
+  var canKeep: Bool {
+    ticketUsecase != nil && (entitlements?.showsTicketUI ?? false)
+  }
+
+  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 토큰 수신에서만.
+  func closingSoonDays(_ payload: LetterPayload) -> Int? {
+    guard case .token = source else { return nil }
+    return payload.closingSoonDays()
+  }
+
+  /// 잠긴 편지를 편지권으로 간직한다. 성공하면 같은 편지를 다시 연다.
+  /// 잔액이 없으면 구매 UI가 있는 계정은 `onNoTicket`(편지권 화면)으로, 아니면 문구로 알린다.
+  func keep(onNoTicket: () -> Void) async {
+    guard case .token(let token) = source, let ticketUsecase, !isKeeping else { return }
+    isKeeping = true
+    keepErrorMessage = nil
+    defer { isKeeping = false }
+    do {
+      try await ticketUsecase.keepReceived(token: token, password: lastPassword)
+      await loadByToken(token, password: lastPassword)
+    } catch let error as MutterError where error.define == .noTicket {
+      if entitlements?.showsPurchaseUI == true {
+        onNoTicket()
+      } else {
+        keepErrorMessage = error.userMessage
+      }
+    } catch {
+      keepErrorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
+    }
+  }
+
   /// "편지 열기 ▶" — 사용자 제스처에서 재생 시작 + 읽음 기록(수신 경험 비방해, 실패 무시).
   func open() async {
     isOpened = true
@@ -96,6 +145,7 @@ final class ViewerModelData {
 
   private func loadByToken(_ token: String, password: String?) async {
     state = .loading
+    lastPassword = password
     do {
       let payload = try await deliveryUsecase.open(token: token, password: password)
       // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자라면 이미 저장됨.
@@ -107,12 +157,30 @@ final class ViewerModelData {
         state = .passwordRequired
       case .linkNotYetRevealed(let date):
         state = .revealPending(date)
+      case .loginRequired:
+        state = .loginRequired(await cover(token))
+      case .letterLocked(let deleteAt):
+        async let entitlementsTask = loadEntitlements()
+        let cover = await cover(token)
+        entitlements = await entitlementsTask
+        state = .letterLocked(cover, deleteAt)
       default:
         state = .failed(error.userMessage)
       }
     } catch {
       state = .failed(L10n.viewerErrorLoad)
     }
+  }
+
+  /// 봉투(제목·보낸 사람). 실패하면 빈 봉투 — 화면은 기본 문구로 그린다.
+  private func cover(_ token: String) async -> LetterCover {
+    (try? await letterAccessUsecase.cover(token: token)) ?? .sealed
+  }
+
+  /// 편지권 UI 노출 판단용. 실패(배포 전 RPC 없음 포함)하면 nil — 편지권 UI를 숨긴다.
+  private func loadEntitlements() async -> Entitlements? {
+    guard let ticketUsecase else { return nil }
+    return try? await ticketUsecase.entitlements()
   }
 
   private func loadMyLetter(_ id: String) async {

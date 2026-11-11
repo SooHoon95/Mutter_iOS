@@ -7,8 +7,11 @@ import AudioSync
 /// 수신/열람 화면 — 무마찰 원칙: 링크→웹뷰 없이 네이티브로 "열기 ▶" 한 탭.
 public struct ViewerView: View {
   @State private var model: ViewerModelData
+  @State private var showKeepConfirm = false
   /// 뒤로가기 — 라우팅 레이어 modifier 대신 뷰어 내부 내비바가 직접 호출(MU-7).
   private let onBack: () -> Void
+  private let onLoginRequest: (() -> Void)?
+  private let onOpenTickets: () -> Void
 
   init(
     source: ViewerModelData.Source,
@@ -16,16 +19,24 @@ public struct ViewerView: View {
     receiptUsecase: ReceiptUsecasable,
     letterUsecase: LetterUsecasable,
     inboxUsecase: InboxUsecasable?,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable?,
     audioUsecase: AudioUsecasable,
-    onBack: @escaping () -> Void
+    onBack: @escaping () -> Void,
+    onLoginRequest: (() -> Void)?,
+    onOpenTickets: @escaping () -> Void
   ) {
     self.onBack = onBack
+    self.onLoginRequest = onLoginRequest
+    self.onOpenTickets = onOpenTickets
     _model = State(initialValue: ViewerModelData(
       source: source,
       deliveryUsecase: deliveryUsecase,
       receiptUsecase: receiptUsecase,
       letterUsecase: letterUsecase,
       inboxUsecase: inboxUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase,
       audioUsecase: audioUsecase
     ))
   }
@@ -52,6 +63,12 @@ public struct ViewerView: View {
       )
     }
     .task { await model.load() }
+    .confirmationDialog(L10n.accessKeep, isPresented: $showKeepConfirm, titleVisibility: .visible) {
+      Button(L10n.accessKeep) { Task { await model.keep(onNoTicket: onOpenTickets) } }
+      Button(L10n.commonCancel, role: .cancel) {}
+    } message: {
+      Text(L10n.accessKeepNotice)
+    }
   }
 
   /// 현재 상태의 배경/전경 — 내비바를 편지 테마(또는 스테이지 배경)와 정합시킨다.
@@ -80,6 +97,17 @@ public struct ViewerView: View {
       passwordGate
     case .revealPending(let date):
       revealPending(date)
+    case .loginRequired(let cover):
+      ViewerCoverView(cover: cover, onOpen: onLoginRequest)
+    case .letterLocked(let cover, let deleteAt):
+      ViewerLockedView(
+        cover: cover,
+        deleteAt: deleteAt,
+        canKeep: model.canKeep,
+        isKeeping: model.isKeeping,
+        errorMessage: model.keepErrorMessage,
+        onKeep: { showKeepConfirm = true }
+      )
     case .failed(let message):
       stage(Asset.Colors.ivory.color) {
         VStack(spacing: 8) {
@@ -175,6 +203,14 @@ public struct ViewerView: View {
 
           LetterPaperView(theme: theme, title: payload.title, blocks: model.paperBlocks(payload), revealOnScroll: true)
             .frame(maxWidth: .infinity)
+
+          // 닫힘 예고 — 남은 기간이 짧을 때만 조용히 한 줄.
+          if let days = model.closingSoonDays(payload) {
+            Text(days == 0 ? L10n.accessClosingToday : L10n.accessClosingIn(days))
+              .fonts(.caption)
+              .foregroundStyle(theme.foreground.opacity(0.6))
+              .padding(.top, 8)
+          }
 
           // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
           if model.canSaveToInbox && model.savedToInbox {

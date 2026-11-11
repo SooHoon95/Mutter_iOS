@@ -263,3 +263,34 @@
 "theme.vintageTypewriter.summary" = "Sincerity struck in typeface. Analog warmth.";
 "theme.pureSpace.name" = "Pure Space";
 "theme.pureSpace.summary" = "Extreme minimalism. A letter where one line says it all.";
+
+/* ===== Permanent letter tickets ===== */
+"access.permanent" = "Permanent";
+"access.daysLeft" = "%d days left";
+"access.locked" = "Closed";
+"access.closingIn" = "This letter closes in %d days";
+"access.closingToday" = "This letter closes today";
+"access.lockedTitle" = "This letter's keeping period has ended";
+"access.lockedUntil" = "You can reopen it until %d/%d.";
+"access.keep" = "Keep with a ticket";
+"access.keepNotice" = "If the sender deletes the letter, it disappears too and your ticket is refunded.";
+"access.gone" = "This letter can no longer be opened";
+"access.loginHint" = "Log in to open the letter";
+"access.makePermanent" = "Make permanent · 1 ticket";
+"access.freeDaysNotice" = "Opens for %d days from the day the recipient first opens it.";
+"access.duplicate" = "Send another with the same content";
+"access.readers" = "Opened by";
+"access.reader" = "%@ · opened %d/%d";
+"access.readerUnnamed" = "Unnamed user";
+"ticket.title" = "Letter tickets";
+"ticket.balance" = "%d";
+"ticket.description" = "One ticket keeps one letter with no time limit.";
+"ticket.none" = "You have no tickets";
+"ticket.product" = "%d tickets";
+"ticket.history" = "History";
+"ticket.historyEmpty" = "No history yet";
+"ticket.reason.purchase" = "Purchase";
+"ticket.reason.use" = "Used";
+"ticket.reason.grant" = "Granted";
+"ticket.reason.refund" = "Refund";
+"ticket.deleteAccountWarning" = "Your remaining %d tickets will be lost.";
