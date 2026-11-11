@@ -14,6 +14,16 @@ public enum MutterErrorDefine: Equatable {
   case notConnected
   /// 이미 사용된 초대 링크 수락 시도 (EC-2.2)
   case inviteAlreadyUsed
+  /// 로그인해야 열리는 편지를 익명으로 열려 할 때(LOGIN_REQUIRED) — 봉투 화면으로.
+  case loginRequired
+  /// 무료 기간이 끝난 편지(LETTER_LOCKED:<ISO>). 시각 = 삭제 예정 시각.
+  case letterLocked(Date)
+  /// 유예까지 끝나 되살릴 수 없는 편지(LETTER_GONE).
+  case letterGone
+  /// 편지권 잔액 부족(NO_TICKET).
+  case noTicket
+  /// 편지권 구매를 아직 쓸 수 없음(StoreKit 연동 전).
+  case purchaseUnavailable
   case server(String)
   case unknown
 }

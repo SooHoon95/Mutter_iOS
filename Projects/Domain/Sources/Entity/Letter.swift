@@ -85,6 +85,10 @@ public struct LetterPayload: Equatable {
   public let cue: MusicCue?
   /// 발신자가 오디오를 끈 편지(takedown 등). true면 무음 재생.
   public let audioDisabled: Bool
+  /// 기간 제한 없는 편지인지. 서버가 키를 안 주면(배포 전) true — 지금과 같은 동작.
+  public let isPermanent: Bool
+  /// 무료 기간이 끝나 잠기는 시각(영구면 nil).
+  public let accessUntil: Date?
 
   public var body: String { blocks.joinedText }
 
@@ -94,7 +98,9 @@ public struct LetterPayload: Equatable {
     blocks: [LetterBlock],
     templateId: String,
     cue: MusicCue?,
-    audioDisabled: Bool
+    audioDisabled: Bool,
+    isPermanent: Bool = true,
+    accessUntil: Date? = nil
   ) {
     self.id = id
     self.title = title
@@ -102,6 +108,15 @@ public struct LetterPayload: Equatable {
     self.templateId = templateId
     self.cue = cue
     self.audioDisabled = audioDisabled
+    self.isPermanent = isPermanent
+    self.accessUntil = accessUntil
+  }
+
+  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 영구이거나 아직 여유가 있으면 nil.
+  public func closingSoonDays(now: Date = Date(), calendar: Calendar = .current) -> Int? {
+    guard !isPermanent, let accessUntil, accessUntil > now else { return nil }
+    let days = LetterAccessCountdown.days(until: accessUntil, from: now, calendar: calendar)
+    return days <= LetterAccessCountdown.closingSoonDays ? days : nil
   }
 
   public init(

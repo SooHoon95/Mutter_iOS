@@ -22,6 +22,11 @@ public final class MutterError: Error, Equatable {
     case .linkNotYetRevealed: return "아직 열 수 없는 편지예요."
     case .notConnected:       return "연결된 사람이 아니에요. 먼저 연결해 주세요."
     case .inviteAlreadyUsed:  return "이미 사용된 초대 링크예요. 새 초대를 요청해 주세요."
+    case .loginRequired:      return "로그인하면 편지가 열려요"
+    case .letterLocked:       return "보관 기간이 지난 편지예요"
+    case .letterGone:         return "더 이상 열 수 없는 편지예요"
+    case .noTicket:           return "편지권이 없어요"
+    case .purchaseUnavailable: return "지금은 편지권을 살 수 없어요."
     case .server(let message): return message
     case .unknown:            return "문제가 생겼어요. 다시 시도해 주세요."
     }

@@ -29,7 +29,7 @@ struct IssueLinkParams: Encodable {
   }
 }
 
-/// get_letter_by_token RPC 파라미터(p_token + p_password null 명시).
+/// get_letter_by_token·keep_received_letter RPC 파라미터(p_token + p_password null 명시).
 struct OpenLinkParams: Encodable {
   let token: String
   let password: String?
@@ -117,11 +117,16 @@ struct LetterPayloadDTO: Decodable {
   let paragraphs: [ParagraphDTO]
   let templateId: String
   let audioDisabled: Bool
+  /// 영구 편지권 계약에서 더해진 키. 배포 전 서버는 안 주므로 optional(없으면 영구 = 지금 동작).
+  let isPermanent: Bool?
+  let accessUntil: Date?
 
   enum CodingKeys: String, CodingKey {
     case id, title, paragraphs
     case templateId = "template_id"
     case audioDisabled = "audio_disabled"
+    case isPermanent = "is_permanent"
+    case accessUntil = "access_until"
   }
 
   func toDomain() -> LetterPayload {
@@ -131,7 +136,9 @@ struct LetterPayloadDTO: Decodable {
       blocks: LetterContentCodec.blocks(from: paragraphs),
       templateId: templateId,
       cue: LetterContentCodec.cue(from: paragraphs),
-      audioDisabled: audioDisabled
+      audioDisabled: audioDisabled,
+      isPermanent: isPermanent ?? true,
+      accessUntil: accessUntil
     )
   }
 }

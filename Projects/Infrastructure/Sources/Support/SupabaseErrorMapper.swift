@@ -6,7 +6,8 @@ import AppFoundation
 
 /// Supabase/네트워크 에러를 도메인 `MutterError`로 정규화한다.
 /// 서버 RPC가 raise하는 코드 문자열(웹 data 레이어와 동일 계약)을 의미 케이스로 매핑한다:
-///   WRONG_PASSWORD·LINK_REVOKED·LINK_EXPIRED·*_NOT_FOUND·AUTH_REQUIRED·FORBIDDEN·NOT_YET_REVEALED:<ISO>.
+///   WRONG_PASSWORD·LINK_REVOKED·LINK_EXPIRED·*_NOT_FOUND·AUTH_REQUIRED·FORBIDDEN·NOT_YET_REVEALED:<ISO>,
+///   영구 편지권 계약의 LOGIN_REQUIRED·LETTER_LOCKED:<ISO>·LETTER_GONE·NO_TICKET.
 enum SupabaseErrorMapper {
   static func map(_ error: Error) -> MutterError {
     if let mutter = error as? MutterError { return mutter }
@@ -22,9 +23,16 @@ enum SupabaseErrorMapper {
     }
 
     // 예약공개: "NOT_YET_REVEALED:<ISO8601>" → 공개 시각을 담아 변환.
-    if let revealAt = parseNotYetRevealed(message) {
+    if let revealAt = parseTimestamp(message, prefix: "NOT_YET_REVEALED:") {
       return MutterError(.linkNotYetRevealed(revealAt))
     }
+    // 영구 편지권: "LETTER_LOCKED:<ISO8601>" → 삭제 예정 시각을 담아 변환.
+    if let deleteAt = parseTimestamp(message, prefix: "LETTER_LOCKED:") {
+      return MutterError(.letterLocked(deleteAt))
+    }
+    if message.contains("LOGIN_REQUIRED") { return MutterError(.loginRequired) }
+    if message.contains("LETTER_GONE") { return MutterError(.letterGone) }
+    if message.contains("NO_TICKET") { return MutterError(.noTicket) }
     if message.contains("WRONG_PASSWORD") { return MutterError(.wrongPassword) }
     if message.contains("LINK_REVOKED") { return MutterError(.linkRevoked) }
     if message.contains("LINK_EXPIRED") { return MutterError(.linkExpired) }
@@ -70,9 +78,9 @@ enum SupabaseErrorMapper {
     return error.localizedDescription
   }
 
-  /// "NOT_YET_REVEALED:2026-07-01T00:00:00Z" 형식에서 공개 시각을 파싱.
-  private static func parseNotYetRevealed(_ message: String) -> Date? {
-    guard let range = message.range(of: "NOT_YET_REVEALED:") else { return nil }
+  /// "NOT_YET_REVEALED:2026-07-01T00:00:00Z"·"LETTER_LOCKED:…" 형식에서 접두어 뒤 시각을 파싱.
+  private static func parseTimestamp(_ message: String, prefix: String) -> Date? {
+    guard let range = message.range(of: prefix) else { return nil }
     let iso = String(message[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
     return ISO8601.date(from: iso)
   }
