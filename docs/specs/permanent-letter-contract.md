@@ -1,6 +1,6 @@
 # 영구 편지권 · 관리자 — 서버 계약 (iOS · Android · 웹 공용)
 
-서버 마이그레이션 `letter-app/supabase/migrations/0036~0039`와 Edge Function 4개의 계약.
+서버 마이그레이션 `letter-app/supabase/migrations/0036~0040`과 Edge Function 4개의 계약.
 설계: `docs/superpowers/specs/2026-11-11-permanent-letter-ticket-design.md` (9절 우선).
 
 모든 RPC는 PostgREST `rpc/<이름>`. 표에 없는 기존 RPC는 시그니처·반환 형태가 그대로다.
@@ -39,12 +39,14 @@
 |---|---|---|---|
 | `get_letter_by_token` (기존) | anon·로그인 | `p_token text, p_password text` | 기존 키 + `is_permanent boolean`, `access_until timestamptz\|null` |
 | `get_letter_cover` | anon·로그인 | `p_token text` | 아래 "봉투" |
-| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 받은 사람이 자기 편지권으로 영구로 만든 편지일 때 **보낸 사람에게만** true(삭제 확인 경고에 쓴다) |
+| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient, keep_request_count}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 받은 사람이 자기 편지권으로 영구로 만든 편지일 때 **보낸 사람에게만** true(삭제 확인 경고에 쓴다). `keep_request_count`는 간직 요청 수로, **보낸 사람에게만**, 아직 영구가 아닌 편지(`open`·`locked`)에만 0보다 크다 |
 | `get_letter_readers` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, first_opened_at, last_opened_at, open_count}]` 처음 연 순. 소유자 아니면 `FORBIDDEN` |
 | `get_my_entitlements` | 로그인 | 없음 | `{is_admin, tickets, paid_enabled, free_days, grace_days}` |
 | `get_my_ticket_history` | 로그인 | 없음 | `[{created_at, delta, reason, letter_title}]` 최근 순. `reason` ∈ `purchase`·`use`·`grant`·`refund` |
 | `make_letter_permanent` | 소유자 | `p_letter_id uuid` | void. `FORBIDDEN`·`NO_TICKET`·`LETTER_GONE` |
 | `keep_received_letter` | 로그인 | `p_token text, p_password text` | void. 링크 오류들 + `NO_TICKET`·`LETTER_GONE`. 성공하면 받은 편지함에 들어간다 |
+| `request_keep_letter` | 로그인 | `p_token text, p_password text` | boolean — 이번에 새로 알렸으면 true, 이미 알렸거나 알릴 일이 없으면(영구·내 편지) false. **둘 다 성공으로 다룬다.** 링크 오류들 + `AUTH_REQUIRED`·`LETTER_GONE` |
+| `get_letter_keep_requests` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, requested_at}]` 요청한 순. 소유자 아니면 `FORBIDDEN` |
 | `is_admin` | 로그인 | 없음 | boolean |
 
 - `make_letter_permanent`·`keep_received_letter`는 이미 영구인 편지에 부르면 차감 없이 성공한다.
@@ -70,17 +72,36 @@
   "state": "open",
   "access_until": null,
   "delete_at": null,
-  "login_required": true
+  "login_required": true,
+  "keep_requested": false
 }
 ```
 `login_required`는 "이 편지는 로그인이 필요한가"이며 호출자의 로그인 여부와 무관하다.
 `sender_nickname`·`access_until`·`delete_at`은 null일 수 있다.
+`keep_requested`는 **호출한 로그인 사용자**가 이 편지에 간직 요청을 이미 보냈는지다(익명이면 false).
 
 ### 화면 노출 규칙
 
 - `paid_enabled == false`이고 `is_admin == false` → 편지권 관련 UI(프로필 항목·구매·"영구 편지로 만들기")를 전부 숨긴다.
   상태 표시(○일 남음·자물쇠)는 `state`가 `permanent`가 아닌 편지에만 나오므로 따로 숨길 필요가 없다.
 - `is_admin == true` → 구매 UI를 숨기고 편지에는 "영구"만 표시한다.
+
+### 잠김 화면(받은 사람) — 세 플랫폼 같은 규칙
+
+잠긴 편지를 연 로그인 사용자(소유자 아님)에게 두 가지를 보인다.
+
+1. **편지권으로 간직하기** (`keep_received_letter`)
+   - 앱: `tickets > 0 || paid_enabled || is_admin`이면 보인다. 잔액이 0이면 누를 때 편지권 화면으로 간다.
+   - 웹: `tickets > 0 || is_admin`이면 보인다. 아니고 `paid_enabled`면 버튼 대신 "편지권은 뮤터 앱에서 살 수 있어요" 안내.
+2. **보낸 분께 알리기** (`request_keep_letter`) — 편지권 UI 노출 여부와 무관하게 **항상** 보인다.
+   - 봉투의 `keep_requested`가 true거나 방금 성공했으면 비활성 "보낸 분께 알렸어요"로 바뀐다.
+   - 아래에 "보낸 분이 영구 편지로 만들면 다시 열려요." 안내를 둔다.
+
+### 간직 요청(보낸 사람)
+
+- 보낸 편지 목록: `keep_request_count > 0`이면 상태 옆에 `간직 요청 {n}`.
+- 보낸 편지 상세: `keep_request_count > 0`이면 `get_letter_keep_requests`로 요청자를 받아
+  "영구 편지로 만들기" 버튼 바로 위에 한 줄씩 보인다. 편지가 영구가 되면 건수가 0이 되어 사라진다.
 
 ## Edge Function
 
@@ -117,14 +138,16 @@
 
 ## 푸시
 
-보낸 사람에게만 간다. data에 `type`과 `letter_id`가 있다.
+data에 `type`과 `letter_id`가 있다.
 
-| type | 제목 | 언제 |
-|---|---|---|
-| `letter_lock_soon` | 편지가 곧 닫혀요 | 잠기기 3일 전(편지당 1회) |
-| `letter_locked` | 편지가 닫혔어요 | 잠긴 뒤(편지당 1회) |
+| type | 받는 쪽 | 제목 | 언제 |
+|---|---|---|---|
+| `letter_lock_soon` | 보낸 사람 | 편지가 곧 닫혀요 | 잠기기 3일 전(편지당 1회) |
+| `letter_locked` | 보낸 사람 | 편지가 닫혔어요 | 잠긴 뒤(편지당 1회) |
+| `letter_keep_request` | 보낸 사람 | 편지를 간직하고 싶어 해요 | 받은 사람이 간직 요청을 보냈을 때(편지×사람당 1회) |
+| `letter_kept` | 간직 요청을 보냈던 사람 | 편지를 계속 볼 수 있어요 | 그 편지가 영구가 됐을 때 |
 
-탭하면 그 보낸 편지의 상세로 간다. Android 알림 태그는 `letter_id`를 써서 서로 덮어쓰지 않게 한다.
+보낸 사람에게 가는 셋은 탭하면 그 보낸 편지의 상세로 간다. `letter_kept`는 받은 편지 목록으로 간다. Android 알림 태그는 `letter_id`를 써서 서로 덮어쓰지 않게 한다.
 
 ## 문구 (세 플랫폼 동일)
 
@@ -135,6 +158,11 @@
 | 잠김 화면 본문 | `{M}월 {D}일까지 다시 열 수 있어요.` |
 | 잠김 화면 버튼(앱, 로그인) | `편지권으로 간직하기` |
 | 잠김 화면 안내(웹, 잔액 없음) | `편지권은 뮤터 앱에서 살 수 있어요` |
+| 잠김 화면 요청 버튼 | `보낸 분께 알리기` |
+| 잠김 화면 요청 완료 | `보낸 분께 알렸어요` |
+| 잠김 화면 요청 안내 | `보낸 분이 영구 편지로 만들면 다시 열려요.` |
+| 목록 간직 요청 표시(보낸 사람) | `간직 요청 {n}` |
+| 상세 요청자 행(보낸 사람) | `{닉네임}님이 간직하고 싶어 해요` (닉네임 없으면 `이름 없는 사용자가 간직하고 싶어 해요`) |
 | 삭제 대상 | `더 이상 열 수 없는 편지예요` |
 | 봉투 버튼 | `편지 열기` |
 | 봉투 안내 | `로그인하면 편지가 열려요` |
