@@ -297,3 +297,9 @@
 "access.keptDeleteWarning" = "받은 분이 편지권으로 간직한 편지예요. 지우면 영구가 풀려요.";
 "ticket.productPrice" = "편지권 %d장 · %@";
 "ticket.pending" = "결제 승인을 기다리고 있어요. 승인되면 편지권이 들어와요.";
+"access.requestKeep" = "보낸 분께 알리기";
+"access.requestKeepDone" = "보낸 분께 알렸어요";
+"access.requestKeepNotice" = "보낸 분이 영구 편지로 만들면 다시 열려요.";
+"access.keepRequestCount" = "간직 요청 %d";
+"access.keepRequester" = "%@님이 간직하고 싶어 해요";
+"access.keepRequesterUnnamed" = "이름 없는 사용자가 간직하고 싶어 해요";

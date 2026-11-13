@@ -6,7 +6,7 @@ import AppFoundation
 import Domain
 import Networking
 
-/// `LetterAccessRepositorable` 구현 — 봉투·접근 상태·열람자(RPC), 사본 보내기(Edge Function).
+/// `LetterAccessRepositorable` 구현 — 봉투·접근 상태·열람자·간직 요청(RPC), 사본 보내기(Edge Function).
 public final class LetterAccessRepository: LetterAccessRepositorable {
   private let provider: SupabaseProvider
   private let duplicateFunction = "duplicate-letter"
@@ -43,6 +43,31 @@ public final class LetterAccessRepository: LetterAccessRepositorable {
     do {
       let rows: [LetterReaderRow] = try await provider.client
         .rpc("get_letter_readers", params: LetterIdParams(letterId: letterId))
+        .execute()
+        .value
+      return rows.map { $0.toDomain() }
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  public func requestKeep(token: String, password: String?) async throws -> Bool {
+    do {
+      // p_password는 암호가 없어도 null로 명시해 보낸다(생략하면 PostgREST가 함수를 못 찾는다).
+      let notified: Bool = try await provider.client
+        .rpc("request_keep_letter", params: OpenLinkParams(token: token, password: password))
+        .execute()
+        .value
+      return notified
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
+  public func keepRequests(letterId: String) async throws -> [LetterKeepRequest] {
+    do {
+      let rows: [LetterKeepRequestRow] = try await provider.client
+        .rpc("get_letter_keep_requests", params: LetterIdParams(letterId: letterId))
         .execute()
         .value
       return rows.map { $0.toDomain() }

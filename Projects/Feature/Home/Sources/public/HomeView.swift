@@ -179,6 +179,9 @@ public struct HomeView: View {
         Spacer()
         // 접근 상태(영구·n일 남음·닫힘) — 상태가 없으면 아무것도 붙이지 않는다.
         if let badge = model.accessBadge(for: row) { badge.badge }
+        // 받은 분의 간직 요청 — 상태 옆에 `간직 요청 {n}`.
+        let keepRequestCount = model.keepRequestCount(for: row)
+        if keepRequestCount > 0 { LetterAccessBadge(L10n.accessKeepRequestCount(keepRequestCount)) }
         if row.isSent { readBadge(row.isOpened) } else { draftBadge }
       }
     }

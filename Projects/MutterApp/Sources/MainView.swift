@@ -63,7 +63,7 @@ struct MainView: View {
       consumePendingPushLetterIfNeeded()
     }
     .onReceive(PushRouteCenter.shared.sentLetterId.receive(on: DispatchQueue.main)) { letterId in
-      // 편지 만료 알림 탭 → 그 보낸 편지 상세. 로그인 전·splash 중이면 로그인 완료 때 연다.
+      // 편지 만료·간직 요청 알림 탭 → 그 보낸 편지 상세. 로그인 전·splash 중이면 로그인 완료 때 연다.
       guard letterId != nil else { return }
       consumePendingPushLetterIfNeeded()
     }
@@ -182,7 +182,7 @@ struct MainView: View {
     }
   }
 
-  /// 탭된 편지 만료 알림의 보낸 편지 상세를 연다. 로그인 완료 + splash 끝난 뒤에만 소비한다.
+  /// 탭된 편지 만료·간직 요청 알림의 보낸 편지 상세를 연다. 로그인 완료 + splash 끝난 뒤에만 소비한다.
   private func consumePendingPushLetterIfNeeded() {
     guard isSplashDone, isUserLoggedIn, let letterId = PushRouteCenter.shared.sentLetterId.value else { return }
     PushRouteCenter.shared.consume()

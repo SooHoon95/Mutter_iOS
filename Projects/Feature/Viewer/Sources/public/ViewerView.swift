@@ -105,8 +105,12 @@ public struct ViewerView: View {
         deleteAt: deleteAt,
         canKeep: model.canKeep,
         isKeeping: model.isKeeping,
+        canRequestKeep: model.canRequestKeep,
+        isRequestingKeep: model.isRequestingKeep,
+        keepRequested: model.keepRequested,
         errorMessage: model.keepErrorMessage,
-        onKeep: { showKeepConfirm = true }
+        onKeep: { showKeepConfirm = true },
+        onRequestKeep: { Task { await model.requestKeep() } }
       )
     case .failed(let message):
       stage(Asset.Colors.ivory.color) {

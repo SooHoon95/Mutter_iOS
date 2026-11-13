@@ -69,6 +69,9 @@ public struct DeliveryView: View {
 
             MutterButton(L10n.deliveryPreview, style: .ghost) { onPreview() }
 
+            // 간직 요청자 — "영구 편지로 만들기" 바로 위.
+            if !model.keepRequests.isEmpty { DeliveryKeepRequestsSection(requests: model.keepRequests) }
+
             if model.canMakePermanent {
               MutterButton(L10n.accessMakePermanent, style: .secondary, isLoading: model.isMakingPermanent) {
                 showPermanentConfirm = true

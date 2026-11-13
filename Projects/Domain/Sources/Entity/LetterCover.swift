@@ -12,6 +12,8 @@ public struct LetterCover: Equatable {
   public let deleteAt: Date?
   /// "이 편지는 로그인이 필요한가" — 호출자의 로그인 여부와 무관하다.
   public let loginRequired: Bool
+  /// 호출한 로그인 사용자가 이 편지에 간직 요청을 이미 보냈는지(익명이면 false).
+  public let keepRequested: Bool
 
   public init(
     isSealed: Bool,
@@ -21,7 +23,8 @@ public struct LetterCover: Equatable {
     accessType: LetterAccessType? = nil,
     accessUntil: Date? = nil,
     deleteAt: Date? = nil,
-    loginRequired: Bool = false
+    loginRequired: Bool = false,
+    keepRequested: Bool = false
   ) {
     self.isSealed = isSealed
     self.templateId = templateId
@@ -31,6 +34,7 @@ public struct LetterCover: Equatable {
     self.accessUntil = accessUntil
     self.deleteAt = deleteAt
     self.loginRequired = loginRequired
+    self.keepRequested = keepRequested
   }
 
   /// 봉투 정보가 없는 경우(조회 실패·sealed)의 빈 봉투.

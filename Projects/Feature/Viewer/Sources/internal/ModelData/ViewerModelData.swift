@@ -40,6 +40,10 @@ final class ViewerModelData {
   private(set) var entitlements: Entitlements?
   /// 편지권 사용 중(중복 탭 방지).
   var isKeeping = false
+  /// 보낸 분께 간직 요청을 보내는 중(중복 탭 방지).
+  var isRequestingKeep = false
+  /// 이 편지에 간직 요청을 이미 보냈는지(봉투의 keep_requested 또는 방금 성공).
+  private(set) var keepRequested = false
   /// 잠김 화면 액션 실패 문구.
   var keepErrorMessage: String?
 
@@ -100,9 +104,16 @@ final class ViewerModelData {
     await loadByToken(token, password: password)
   }
 
-  /// 잠김 화면의 "편지권으로 간직하기"를 보일지 — 로그인 + 편지권 UI가 켜진 계정만.
+  /// 잠김 화면의 "편지권으로 간직하기"를 보일지 — 로그인 + (잔액 있음 || 유료 스위치 || 관리자).
+  /// 계약 "잠김 화면(받은 사람)" 앱 규칙. 잔액이 0이면 누를 때 편지권 화면으로 간다.
   var canKeep: Bool {
-    ticketUsecase != nil && (entitlements?.showsTicketUI ?? false)
+    guard ticketUsecase != nil, let entitlements else { return false }
+    return entitlements.tickets > 0 || entitlements.showsTicketUI
+  }
+
+  /// 잠김 화면의 "보낸 분께 알리기"를 보일지 — 편지권 UI와 무관하게 로그인 사용자에게 항상.
+  var canRequestKeep: Bool {
+    ticketUsecase != nil
   }
 
   /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 토큰 수신에서만.
@@ -127,6 +138,20 @@ final class ViewerModelData {
       } else {
         keepErrorMessage = error.userMessage
       }
+    } catch {
+      keepErrorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
+    }
+  }
+
+  /// 보낸 분께 간직하고 싶다고 알린다. 새로 알렸든(true) 이미 알렸든(false) 성공이다.
+  func requestKeep() async {
+    guard case .token(let token) = source, canRequestKeep, !isRequestingKeep, !keepRequested else { return }
+    isRequestingKeep = true
+    keepErrorMessage = nil
+    defer { isRequestingKeep = false }
+    do {
+      _ = try await letterAccessUsecase.requestKeep(token: token, password: lastPassword)
+      keepRequested = true
     } catch {
       keepErrorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }
@@ -163,6 +188,7 @@ final class ViewerModelData {
         async let entitlementsTask = loadEntitlements()
         let cover = await cover(token)
         entitlements = await entitlementsTask
+        keepRequested = cover.keepRequested
         state = .letterLocked(cover, deleteAt)
       default:
         state = .failed(error.userMessage)

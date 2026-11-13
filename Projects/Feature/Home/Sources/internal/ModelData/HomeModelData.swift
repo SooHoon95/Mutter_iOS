@@ -59,6 +59,12 @@ final class HomeModelData {
     return accessStates[row.id]?.badge(showsPermanent: entitlements?.showsTicketUI ?? false)
   }
 
+  /// 보낸 편지 행의 간직 요청 수(0이면 표시하지 않는다).
+  func keepRequestCount(for row: LetterRow) -> Int {
+    guard row.isSent else { return 0 }
+    return accessStates[row.id]?.keepRequestCount ?? 0
+  }
+
   /// 보낸 편지(전달됨) — 통계·"보낸 편지" 탭.
   var sentRows: [LetterRow] { rows.filter(\.isSent) }
   /// 임시저장(미전달) — "임시저장" 탭. 탭하면 이어쓰기.
