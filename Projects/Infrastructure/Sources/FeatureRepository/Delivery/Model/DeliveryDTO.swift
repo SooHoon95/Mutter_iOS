@@ -120,6 +120,8 @@ struct LetterPayloadDTO: Decodable {
   /// 영구 편지권 계약에서 더해진 키. 배포 전 서버는 안 주므로 optional(없으면 영구 = 지금 동작).
   let isPermanent: Bool?
   let accessUntil: Date?
+  /// 0041에서 더해진 키 — 없으면 false.
+  let isMine: Bool?
 
   enum CodingKeys: String, CodingKey {
     case id, title, paragraphs
@@ -127,6 +129,7 @@ struct LetterPayloadDTO: Decodable {
     case audioDisabled = "audio_disabled"
     case isPermanent = "is_permanent"
     case accessUntil = "access_until"
+    case isMine = "is_mine"
   }
 
   func toDomain() -> LetterPayload {
@@ -138,7 +141,8 @@ struct LetterPayloadDTO: Decodable {
       cue: LetterContentCodec.cue(from: paragraphs),
       audioDisabled: audioDisabled,
       isPermanent: isPermanent ?? true,
-      accessUntil: accessUntil
+      accessUntil: accessUntil,
+      isMine: isMine ?? false
     )
   }
 }

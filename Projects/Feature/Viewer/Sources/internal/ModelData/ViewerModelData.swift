@@ -109,17 +109,18 @@ final class ViewerModelData {
     return entitlements.tickets > 0 || entitlements.showsTicketUI
   }
 
-  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 토큰 수신에서만, 간직한 뒤엔 없다.
+  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 토큰 수신에서만, 간직한 뒤·보낸 사람 본인에겐 없다.
   /// 며칠 전부터 보일지는 서버의 `warn_days`(권한을 못 받으면 기본 2).
   func closingSoonDays(_ payload: LetterPayload) -> Int? {
-    guard case .token = source, !isKept else { return nil }
+    guard case .token = source, !isKept, !payload.isMine else { return nil }
     return payload.closingSoonDays(warnDays: entitlements?.warnDays ?? LetterAccessCountdown.defaultWarnDays)
   }
 
   /// 편지 끝 안내의 날짜 — 로그인 토큰 수신 + 아직 영구가 아니고 열려 있는(access_until 있음) 편지만.
+  /// 보낸 사람 본인에겐 없다(자기 편지는 보낸 편지 상세에서 영구로 만든다).
   /// 간직한 뒤에는 nil이 아니어도 화면은 "간직한 편지예요"를 보인다(`isKept`).
   func openUntil(_ payload: LetterPayload) -> Date? {
-    guard case .token = source, ticketUsecase != nil, !payload.isPermanent else { return nil }
+    guard case .token = source, ticketUsecase != nil, !payload.isPermanent, !payload.isMine else { return nil }
     return payload.accessUntil
   }
 

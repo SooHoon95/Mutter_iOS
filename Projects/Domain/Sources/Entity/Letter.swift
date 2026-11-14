@@ -89,6 +89,8 @@ public struct LetterPayload: Equatable {
   public let isPermanent: Bool
   /// 무료 기간이 끝나 잠기는 시각(영구면 nil).
   public let accessUntil: Date?
+  /// 호출자가 이 편지를 보낸 사람 본인인지(서버가 키를 안 주면 false).
+  public let isMine: Bool
 
   public var body: String { blocks.joinedText }
 
@@ -100,7 +102,8 @@ public struct LetterPayload: Equatable {
     cue: MusicCue?,
     audioDisabled: Bool,
     isPermanent: Bool = true,
-    accessUntil: Date? = nil
+    accessUntil: Date? = nil,
+    isMine: Bool = false
   ) {
     self.id = id
     self.title = title
@@ -110,6 +113,7 @@ public struct LetterPayload: Equatable {
     self.audioDisabled = audioDisabled
     self.isPermanent = isPermanent
     self.accessUntil = accessUntil
+    self.isMine = isMine
   }
 
   /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 영구이거나 남은 날이 `warnDays`보다 많으면 nil.
