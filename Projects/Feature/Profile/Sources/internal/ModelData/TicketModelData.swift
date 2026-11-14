@@ -19,6 +19,8 @@ final class TicketModelData {
   /// 구매 중인 상품(중복 탭 방지 + 버튼 로딩 표시).
   var purchasingProduct: TicketProductType?
   var errorMessage: String?
+  /// 이 화면에서 구매가 끝난 횟수 — 보내기 흐름에서 들어온 화면이 구매 뒤 닫히는 신호로 쓴다.
+  private(set) var purchaseCount = 0
 
   private let ticketUsecase: TicketUsecasable
   private let purchaser: TicketPurchasing
@@ -43,6 +45,10 @@ final class TicketModelData {
     async let pricesTask = purchaser.displayPrices()
     await load()
     prices = (try? await pricesTask) ?? [:]
+    // 스토어 상품을 못 받으면 버튼이 꺼진 채 이유가 안 보인다 — 살 수 없는 상태임을 알린다.
+    if prices.isEmpty && showsPurchaseUI && errorMessage == nil {
+      errorMessage = MutterError(.purchaseUnavailable).userMessage
+    }
   }
 
   func load() async {
@@ -63,6 +69,7 @@ final class TicketModelData {
       switch try await purchaser.purchase(product) {
       case .completed:
         await load()
+        purchaseCount += 1
       case .pending:
         errorMessage = L10n.ticketPending
       case .cancelled:

@@ -48,7 +48,7 @@ struct RootViewFactory {
         linkBaseURL: AppLink.baseURL,
         onDone: { coordinator.pop() },
         onBack: { coordinator.pop() },
-        onOpenTickets: { coordinator.push(.tickets) }
+        onOpenTickets: { coordinator.push(.ticketPurchase) }
       ).makeView(composeRoute)
 
     case .viewer(let viewerRoute):
@@ -76,7 +76,7 @@ struct RootViewFactory {
         navTitle: L10n.deliveryNav,
         onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) },
         onBack: { coordinator.pop() },
-        onOpenTickets: { coordinator.push(.tickets) },
+        onOpenTickets: { coordinator.push(.ticketPurchase) },
         // 사본은 링크가 없는 새 편지 — 그 편지의 발송(링크 발급) 화면으로 잇는다.
         onDuplicated: { coordinator.push(.delivery(letterId: $0)) }
       )
@@ -115,6 +115,14 @@ struct RootViewFactory {
       TicketView(
         ticketUsecase: TicketUsecase(repository: TicketRepository()),
         purchaser: StoreKitTicketPurchaser.shared,
+        onBack: { coordinator.pop() }
+      )
+
+    case .ticketPurchase:
+      TicketView(
+        ticketUsecase: TicketUsecase(repository: TicketRepository()),
+        purchaser: StoreKitTicketPurchaser.shared,
+        closesAfterPurchase: true,
         onBack: { coordinator.pop() }
       )
     }

@@ -60,6 +60,8 @@ final class ComposeModelData {
   @ObservationIgnored private var pendingTicketsNavigation = false
   /// 편지권 화면에서 돌아오면 같은 편지로 시트를 다시 연다(선택 카드 그대로).
   @ObservationIgnored private var reopenSendAfterTickets = false
+  /// 영구 편지를 보내려고 편지권 구매 화면에 갔다 — 돌아와 편지권이 있으면 이어서 영구로 만든다.
+  @ObservationIgnored private var wantsPermanentAfterPurchase = false
 
   let player: LetterAudioPlayer
 
@@ -420,12 +422,24 @@ final class ComposeModelData {
     return true
   }
 
+  /// 영구 편지를 골랐는데 편지권이 없다 — 구매 화면으로 보내고, 사 오면 이어서 영구로 만든다.
+  func buyTicketForPermanent() {
+    wantsPermanentAfterPurchase = true
+    openTicketsFromSend()
+  }
+
   /// 편지권 화면에서 돌아왔으면 잔액을 다시 받고 같은 편지로 시트를 다시 연다.
+  /// 영구 편지를 보내려고 사러 갔다 왔고 편지권이 생겼으면, 다시 고르게 하지 않고 바로 영구로 만든다.
   func reopenSendIfNeeded() async {
     guard reopenSendAfterTickets, let id = sentLetterId else { return }
     reopenSendAfterTickets = false
     await loadSendChoice(letterId: id)
-    showSendSheet = true
+    if wantsPermanentAfterPurchase {
+      wantsPermanentAfterPurchase = false
+      if showsSendChoice && hasTicketForPermanent { await makePermanent() }
+    }
+    // makePermanent가 다시 구매 화면으로 보냈으면(잔액 경합) 시트를 열지 않는다.
+    if !pendingTicketsNavigation { showSendSheet = true }
   }
 
   /// 선택 카드 판단용 상태·권한·기존 링크. 표시용 부가 정보라 실패하면 조용히 비운다.

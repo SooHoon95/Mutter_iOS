@@ -22,8 +22,6 @@ struct SendSheet: View {
   @State private var method: Method = .link
   /// 링크 복사 완료 표시(잠시 체크 아이콘으로 전환). 시트는 닫지 않는다 — 닫기는 "완료"가 담당.
   @State private var linkCopied = false
-  /// 보내기 전 선택에서 영구를 골랐을 때의 확인.
-  @State private var showPermanentConfirm = false
 
   var body: some View {
     ZStack(alignment: .bottom) {
@@ -55,12 +53,13 @@ struct SendSheet: View {
               SendChoiceCard(
                 ticketCount: model.sendEntitlements?.tickets ?? 0,
                 freeDays: model.sendEntitlements?.freeDays ?? 0,
+                hasTicket: model.hasTicketForPermanent,
                 isLoading: model.isMakingPermanent,
                 onPermanent: {
                   if model.hasTicketForPermanent {
-                    showPermanentConfirm = true
+                    Task { await model.makePermanent() }
                   } else {
-                    model.openTicketsFromSend()
+                    model.buyTicketForPermanent()
                   }
                 },
                 onFreeDays: { model.choseFreeDays = true }
@@ -98,10 +97,6 @@ struct SendSheet: View {
       )
     }
     .ignoresSafeArea()
-    .confirmationDialog(L10n.accessSendPermanentConfirm, isPresented: $showPermanentConfirm, titleVisibility: .visible) {
-      Button(L10n.accessSendPermanent) { Task { await model.makePermanent() } }
-      Button(L10n.commonCancel, role: .cancel) {}
-    }
     // 닫힐 때 에러 메시지 정리
     .onDisappear { model.errorMessage = nil }
   }

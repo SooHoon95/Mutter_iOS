@@ -309,3 +309,8 @@
 "access.keepContinue" = "계속 간직하기";
 "access.openUntil" = "이 편지는 %d월 %d일까지 열려요";
 "access.kept" = "간직한 편지예요";
+"access.choicePermanent" = "영구 편지";
+"access.choiceFreeDays" = "%d일 편지";
+"access.sendNeedsTicket" = "편지권이 없어요. 구매하면 이어서 영구 편지로 보낼 수 있어요.";
+"access.sendBuyTicket" = "편지권 구매하고 보내기";
+"ticket.neededForPermanent" = "영구 편지로 보내려면 편지권이 필요해요.";

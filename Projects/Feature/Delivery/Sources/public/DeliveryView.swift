@@ -9,8 +9,6 @@ import UIComponent
 public struct DeliveryView: View {
   @State private var model: DeliveryModelData
   @State private var showPermanentConfirm = false
-  /// 보내기 전 선택 카드에서 영구를 골랐을 때의 확인.
-  @State private var showSendPermanentConfirm = false
   private let linkBaseURL: String
   private let navTitle: String
   /// 이 편지를 뷰어로 미리보기(라우팅 레이어가 주입).
@@ -76,12 +74,14 @@ public struct DeliveryView: View {
               SendChoiceCard(
                 ticketCount: model.entitlements?.tickets ?? 0,
                 freeDays: model.entitlements?.freeDays ?? 0,
+                hasTicket: model.hasTicketForPermanent,
                 isLoading: model.isMakingPermanent,
                 onPermanent: {
                   if model.hasTicketForPermanent {
-                    showSendPermanentConfirm = true
+                    Task { await model.makePermanent(onNoTicket: onOpenTickets) }
                   } else {
-                    // 돌아오면 .task가 다시 불러와 잔액이 갱신되고, 링크가 없으니 카드는 그대로 있다.
+                    // 돌아오면 .task가 다시 불러오고, 편지권이 생겼으면 이어서 영구로 만든다.
+                    model.wantsPermanentAfterPurchase = true
                     onOpenTickets()
                   }
                 },
@@ -121,10 +121,6 @@ public struct DeliveryView: View {
     // 편지권 1장이 차감되는 동작이라 한 번 더 묻는다.
     .confirmationDialog(L10n.accessMakePermanent, isPresented: $showPermanentConfirm, titleVisibility: .visible) {
       Button(L10n.commonConfirm) { Task { await model.makePermanent(onNoTicket: onOpenTickets) } }
-      Button(L10n.commonCancel, role: .cancel) {}
-    }
-    .confirmationDialog(L10n.accessSendPermanentConfirm, isPresented: $showSendPermanentConfirm, titleVisibility: .visible) {
-      Button(L10n.accessSendPermanent) { Task { await model.makePermanent(onNoTicket: onOpenTickets) } }
       Button(L10n.commonCancel, role: .cancel) {}
     }
   }

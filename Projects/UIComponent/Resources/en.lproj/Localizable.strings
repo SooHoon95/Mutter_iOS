@@ -309,3 +309,8 @@
 "access.keepContinue" = "Keep it";
 "access.openUntil" = "This letter is open until %d/%d";
 "access.kept" = "You kept this letter";
+"access.choicePermanent" = "Permanent letter";
+"access.choiceFreeDays" = "%d-day letter";
+"access.sendNeedsTicket" = "You have no letter tickets. Buy one to continue sending as a permanent letter.";
+"access.sendBuyTicket" = "Buy a ticket and send";
+"ticket.neededForPermanent" = "You need a letter ticket to send a permanent letter.";

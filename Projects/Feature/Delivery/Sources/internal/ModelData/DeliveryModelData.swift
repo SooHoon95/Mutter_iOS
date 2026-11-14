@@ -29,6 +29,8 @@ final class DeliveryModelData {
   var isDuplicating = false
   /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
   var choseFreeDays = false
+  /// 영구 편지를 보내려고 편지권 구매 화면에 갔다 — 돌아와 편지권이 있으면 이어서 영구로 만든다.
+  @ObservationIgnored var wantsPermanentAfterPurchase = false
   /// 첫 조회가 끝났는지. 끝나기 전엔 발급 폼을 그리지 않는다(선택 카드로 바뀌며 깜빡이지 않게).
   private(set) var hasLoaded = false
 
@@ -102,6 +104,11 @@ final class DeliveryModelData {
     entitlements = try? await entitlementsTask
     readers = (try? await readersTask) ?? []
     hasLoaded = true
+
+    if wantsPermanentAfterPurchase {
+      wantsPermanentAfterPurchase = false
+      if showsSendChoice && hasTicketForPermanent { await makePermanent(onNoTicket: {}) }
+    }
   }
 
   /// 편지권 1장으로 영구 편지로. 잔액이 없으면 구매 UI가 있는 계정은 편지권 화면으로 보낸다.
