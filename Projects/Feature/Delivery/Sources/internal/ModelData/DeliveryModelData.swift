@@ -29,6 +29,10 @@ final class DeliveryModelData {
   private(set) var keepRequests: [LetterKeepRequest] = []
   var isMakingPermanent = false
   var isDuplicating = false
+  /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
+  var choseFreeDays = false
+  /// 첫 조회가 끝났는지. 끝나기 전엔 발급 폼을 그리지 않는다(선택 카드로 바뀌며 깜빡이지 않게).
+  private(set) var hasLoaded = false
 
   private let letterId: String
   private let deliveryUsecase: DeliveryUsecasable
@@ -58,6 +62,22 @@ final class DeliveryModelData {
     return type == .open || type == .locked
   }
 
+  /// 보내기 전 선택 카드 — 아직 영구가 아닌 open 편지 + 유료 스위치 + 링크 없음 + 14일을 고르지 않음.
+  /// 계약 "보내기 전 선택(보낸 사람)". 카드가 떠 있는 동안 발급 폼과 "영구 편지로 만들기" 버튼을 숨긴다.
+  var showsSendChoice: Bool {
+    accessState?.type == .open
+      && entitlements?.paidEnabled == true
+      && links.isEmpty
+      && lastIssuedLink == nil
+      && !choseFreeDays
+  }
+
+  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 편지권 화면으로 보낸다.
+  var hasTicketForPermanent: Bool {
+    guard let entitlements else { return false }
+    return entitlements.tickets > 0 || entitlements.isAdmin
+  }
+
   /// 무료 기간이 적용되는 편지면 링크 발급 안내의 일수(서버 설정값). 영구면 nil.
   var freeDaysNotice: Int? {
     guard accessState?.type == .open else { return nil }
@@ -83,6 +103,7 @@ final class DeliveryModelData {
     accessState = (try? await statesTask)?[letterId]
     entitlements = try? await entitlementsTask
     readers = (try? await readersTask) ?? []
+    hasLoaded = true
     // 간직 요청은 건수가 있을 때만 받는다 — 영구가 되면 건수가 0이 되어 사라진다.
     if let count = accessState?.keepRequestCount, count > 0 {
       keepRequests = (try? await letterAccessUsecase.keepRequests(letterId: letterId)) ?? []

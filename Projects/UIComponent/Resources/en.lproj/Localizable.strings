@@ -303,3 +303,12 @@
 "access.keepRequestCount" = "Keep requests %d";
 "access.keepRequester" = "%@ wants to keep this letter";
 "access.keepRequesterUnnamed" = "An unnamed user wants to keep this letter";
+"access.sendChoiceTitle" = "How would you like to send it?";
+"access.sendPermanent" = "Send as a permanent letter";
+"access.sendPermanentDetail" = "The recipient can keep it with no time limit";
+"access.sendPermanentPrice" = "1 ticket";
+"access.sendFreeDays" = "Send as a %d-day letter";
+"access.sendFreeDaysDetail" = "Opens for %d days from the day the recipient first opens it";
+"access.sendFree" = "Free";
+"access.sendTicketBalance" = "You have %d tickets";
+"access.sendPermanentConfirm" = "This uses 1 ticket";

@@ -303,3 +303,12 @@
 "access.keepRequestCount" = "간직 요청 %d";
 "access.keepRequester" = "%@님이 간직하고 싶어 해요";
 "access.keepRequesterUnnamed" = "이름 없는 사용자가 간직하고 싶어 해요";
+"access.sendChoiceTitle" = "어떻게 보낼까요?";
+"access.sendPermanent" = "영구 편지로 보내기";
+"access.sendPermanentDetail" = "받는 분이 기간 제한 없이 간직해요";
+"access.sendPermanentPrice" = "편지권 1장";
+"access.sendFreeDays" = "%d일 편지로 보내기";
+"access.sendFreeDaysDetail" = "받는 분이 처음 연 날부터 %d일 동안 열려요";
+"access.sendFree" = "무료";
+"access.sendTicketBalance" = "보유 편지권 %d장";
+"access.sendPermanentConfirm" = "편지권 1장을 사용해요";

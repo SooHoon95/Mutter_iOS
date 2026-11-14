@@ -22,6 +22,8 @@ struct SendSheet: View {
   @State private var method: Method = .link
   /// 링크 복사 완료 표시(잠시 체크 아이콘으로 전환). 시트는 닫지 않는다 — 닫기는 "완료"가 담당.
   @State private var linkCopied = false
+  /// 보내기 전 선택에서 영구를 골랐을 때의 확인.
+  @State private var showPermanentConfirm = false
 
   var body: some View {
     ZStack(alignment: .bottom) {
@@ -39,16 +41,38 @@ struct SendSheet: View {
           .padding(.top, 12)
           .padding(.bottom, 20)
 
-        // 커스텀 세그먼트 컨트롤
-        segmentedControl
-          .padding(.horizontal, 20)
-          .padding(.bottom, 20)
+        // 보내기 전 선택이 끝나야 발송 방법(링크·연결 상대)을 고른다.
+        if !model.showsSendChoice {
+          // 커스텀 세그먼트 컨트롤
+          segmentedControl
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
 
         ScrollView {
           VStack(alignment: .leading, spacing: 16) {
-            switch method {
-            case .link: linkSection
-            case .connection: connectionSection
+            if model.showsSendChoice {
+              SendChoiceCard(
+                ticketCount: model.sendEntitlements?.tickets ?? 0,
+                freeDays: model.sendEntitlements?.freeDays ?? 0,
+                isLoading: model.isMakingPermanent,
+                onPermanent: {
+                  if model.hasTicketForPermanent {
+                    showPermanentConfirm = true
+                  } else {
+                    model.openTicketsFromSend()
+                  }
+                },
+                onFreeDays: { model.choseFreeDays = true }
+              )
+            } else {
+              if model.showsPermanentBadge {
+                LetterAccessBadge(L10n.accessPermanent)
+              }
+              switch method {
+              case .link: linkSection
+              case .connection: connectionSection
+              }
             }
 
             if let message = model.errorMessage {
@@ -74,6 +98,10 @@ struct SendSheet: View {
       )
     }
     .ignoresSafeArea()
+    .confirmationDialog(L10n.accessSendPermanentConfirm, isPresented: $showPermanentConfirm, titleVisibility: .visible) {
+      Button(L10n.accessSendPermanent) { Task { await model.makePermanent() } }
+      Button(L10n.commonCancel, role: .cancel) {}
+    }
     // 닫힐 때 에러 메시지 정리
     .onDisappear { model.errorMessage = nil }
   }

@@ -9,27 +9,36 @@ public struct ComposeViewFactory: ViewFactory {
   private let letterUsecase: LetterUsecasable
   private let connectionUsecase: ConnectionUsecasable
   private let deliveryUsecase: DeliveryUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
   private let audioUsecase: AudioUsecasable
   private let linkBaseURL: String
   private let onDone: () -> Void
   private let onBack: () -> Void
+  private let onOpenTickets: () -> Void
 
   public init(
     letterUsecase: LetterUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable,
     audioUsecase: AudioUsecasable,
     linkBaseURL: String,
     onDone: @escaping () -> Void,
-    onBack: @escaping () -> Void
+    onBack: @escaping () -> Void,
+    onOpenTickets: @escaping () -> Void
   ) {
     self.letterUsecase = letterUsecase
     self.connectionUsecase = connectionUsecase
     self.deliveryUsecase = deliveryUsecase
+    self.letterAccessUsecase = letterAccessUsecase
+    self.ticketUsecase = ticketUsecase
     self.audioUsecase = audioUsecase
     self.linkBaseURL = linkBaseURL
     self.onDone = onDone
     self.onBack = onBack
+    self.onOpenTickets = onOpenTickets
   }
 
   public func makeView(_ route: ComposeRoute) -> some View {
@@ -50,10 +59,13 @@ public struct ComposeViewFactory: ViewFactory {
       letterUsecase: letterUsecase,
       connectionUsecase: connectionUsecase,
       deliveryUsecase: deliveryUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase,
       audioUsecase: audioUsecase,
       linkBaseURL: linkBaseURL,
       onDone: onDone,
-      onBack: onBack
+      onBack: onBack,
+      onOpenTickets: onOpenTickets
     )
   }
 }

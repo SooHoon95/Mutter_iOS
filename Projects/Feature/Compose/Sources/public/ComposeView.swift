@@ -12,6 +12,8 @@ public struct ComposeView: View {
   @FocusState private var focusedBlockId: String?
   private let navTitle: String
   private let onBack: () -> Void
+  /// 보내기 전 선택에서 편지권이 없을 때 편지권 화면으로.
+  private let onOpenTickets: () -> Void
 
   init(
     mode: ComposeModelData.Mode,
@@ -19,18 +21,24 @@ public struct ComposeView: View {
     letterUsecase: LetterUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable,
     audioUsecase: AudioUsecasable,
     linkBaseURL: String,
     onDone: @escaping () -> Void,
-    onBack: @escaping () -> Void
+    onBack: @escaping () -> Void,
+    onOpenTickets: @escaping () -> Void
   ) {
     self.navTitle = navTitle
     self.onBack = onBack
+    self.onOpenTickets = onOpenTickets
     _model = State(initialValue: ComposeModelData(
       mode: mode,
       letterUsecase: letterUsecase,
       connectionUsecase: connectionUsecase,
       deliveryUsecase: deliveryUsecase,
+      letterAccessUsecase: letterAccessUsecase,
+      ticketUsecase: ticketUsecase,
       audioUsecase: audioUsecase,
       linkBaseURL: linkBaseURL,
       onDone: onDone
@@ -85,7 +93,12 @@ public struct ComposeView: View {
       }
     }
     .task { await model.load() }
-    .sheet(isPresented: $model.showSendSheet) {
+    // 보내기 시트에서 편지권 화면으로 갔다 돌아오면 같은 시트(선택 카드)를 다시 연다.
+    .onAppear { Task { await model.reopenSendIfNeeded() } }
+    .sheet(isPresented: $model.showSendSheet, onDismiss: {
+      // 시트가 다 닫힌 뒤에 push해야 편지권 화면이 시트 아래에 깔리지 않는다.
+      if model.consumeTicketsNavigation() { onOpenTickets() }
+    }) {
       SendSheet(model: model)
     }
     .sheet(isPresented: $model.showSoundCloudPicker) {

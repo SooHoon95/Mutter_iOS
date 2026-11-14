@@ -42,10 +42,13 @@ struct RootViewFactory {
         letterUsecase: LetterUsecase(repository: LetterRepository(), photoRepository: LetterPhotoRepository()),
         connectionUsecase: ConnectionUsecase(repository: ConnectionRepository()),
         deliveryUsecase: DeliveryUsecase(repository: DeliveryRepository()),
+        letterAccessUsecase: LetterAccessUsecase(repository: LetterAccessRepository()),
+        ticketUsecase: TicketUsecase(repository: TicketRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
         linkBaseURL: AppLink.baseURL,
         onDone: { coordinator.pop() },
-        onBack: { coordinator.pop() }
+        onBack: { coordinator.pop() },
+        onOpenTickets: { coordinator.push(.tickets) }
       ).makeView(composeRoute)
 
     case .viewer(let viewerRoute):

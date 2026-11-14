@@ -49,6 +49,18 @@ final class ComposeModelData {
   var connections: [Connection] = []        // 연결된 사람(독점 1:1 — 0 또는 1).
   var isSending = false                     // 연결 상대 직접 발송 중.
 
+  // 보내기 전 선택(계약 "보내기 전 선택(보낸 사람)") — 조회 실패면 nil/false라 선택 카드 없이 지금처럼 보인다.
+  private(set) var sendAccessState: LetterAccessState?
+  private(set) var sendEntitlements: Entitlements?
+  private(set) var sendHasLinks = false
+  /// 이 시트에서 "{n}일 편지로 보내기"를 골랐는지 — 시트를 새로 열면 다시 묻는다.
+  var choseFreeDays = false
+  var isMakingPermanent = false
+  /// 편지권 화면으로 가려고 시트를 닫는 중 — 다 닫힌 뒤 화면이 편지권으로 보낸다(시트 위로는 push가 안 보인다).
+  @ObservationIgnored private var pendingTicketsNavigation = false
+  /// 편지권 화면에서 돌아오면 같은 편지로 시트를 다시 연다(선택 카드 그대로).
+  @ObservationIgnored private var reopenSendAfterTickets = false
+
   let player: LetterAudioPlayer
 
   private var mode: Mode                     // 첫 저장 후 .edit로 승격(중복 생성 방지).
@@ -56,6 +68,8 @@ final class ComposeModelData {
   private let letterUsecase: LetterUsecasable
   private let connectionUsecase: ConnectionUsecasable
   private let deliveryUsecase: DeliveryUsecasable
+  private let letterAccessUsecase: LetterAccessUsecasable
+  private let ticketUsecase: TicketUsecasable
   private let audioUsecase: AudioUsecasable
   private let linkBaseURL: String
   private let onDone: () -> Void
@@ -65,6 +79,8 @@ final class ComposeModelData {
     letterUsecase: LetterUsecasable,
     connectionUsecase: ConnectionUsecasable,
     deliveryUsecase: DeliveryUsecasable,
+    letterAccessUsecase: LetterAccessUsecasable,
+    ticketUsecase: TicketUsecasable,
     audioUsecase: AudioUsecasable,
     linkBaseURL: String,
     onDone: @escaping () -> Void
@@ -74,6 +90,8 @@ final class ComposeModelData {
     self.letterUsecase = letterUsecase
     self.connectionUsecase = connectionUsecase
     self.deliveryUsecase = deliveryUsecase
+    self.letterAccessUsecase = letterAccessUsecase
+    self.ticketUsecase = ticketUsecase
     self.audioUsecase = audioUsecase
     self.linkBaseURL = linkBaseURL
     self.player = LetterAudioPlayer(audioUsecase: audioUsecase)
@@ -313,7 +331,9 @@ final class ComposeModelData {
       issuedLink = nil
       password = ""
       usePassword = true
+      choseFreeDays = false
       connections = connected
+      await loadSendChoice(letterId: letterId)
       showSendSheet = true
       return
     }
@@ -335,8 +355,87 @@ final class ComposeModelData {
     password = ""
     usePassword = true
     errorMessage = nil
-    connections = (try? await connectionUsecase.myConnections()) ?? []
+    choseFreeDays = false
+    async let connectionsTask = connectionUsecase.myConnections()
+    async let choiceTask: Void = loadSendChoice(letterId: id)
+    connections = (try? await connectionsTask) ?? []
+    await choiceTask
     showSendSheet = true
+  }
+
+  // MARK: - 보내기 전 선택
+
+  /// 선택 카드 — 아직 영구가 아닌 open 편지 + 유료 스위치 + 링크 없음 + 14일을 고르지 않음.
+  /// 카드가 떠 있는 동안 시트는 링크 발급·연결 상대 발송을 보이지 않는다.
+  var showsSendChoice: Bool {
+    sendAccessState?.type == .open
+      && sendEntitlements?.paidEnabled == true
+      && !sendHasLinks
+      && issuedLink == nil
+      && !choseFreeDays
+  }
+
+  /// 영구로 만든 뒤(또는 처음부터 영구인) 편지의 "영구" 표시 — 편지권 UI가 켜진 계정에서만.
+  var showsPermanentBadge: Bool {
+    sendAccessState?.type == .permanent && sendEntitlements?.showsTicketUI == true
+  }
+
+  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 편지권 화면으로 보낸다.
+  var hasTicketForPermanent: Bool {
+    guard let sendEntitlements else { return false }
+    return sendEntitlements.tickets > 0 || sendEntitlements.isAdmin
+  }
+
+  /// 편지권 1장으로 영구 편지로 만든 뒤 상태를 다시 받는다(카드가 사라지고 "영구"와 발송 방법이 열린다).
+  func makePermanent() async {
+    guard let id = sentLetterId, !isMakingPermanent else { return }
+    isMakingPermanent = true
+    errorMessage = nil
+    defer { isMakingPermanent = false }
+    do {
+      try await ticketUsecase.makePermanent(letterId: id)
+      await loadSendChoice(letterId: id)
+    } catch let error as MutterError where error.define == .noTicket {
+      if sendEntitlements?.showsPurchaseUI == true {
+        openTicketsFromSend()
+      } else {
+        errorMessage = error.userMessage
+      }
+    } catch {
+      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
+    }
+  }
+
+  /// 편지권 화면으로 — 시트를 먼저 닫는다. 실제 이동은 시트가 다 닫힌 뒤(`consumeTicketsNavigation`).
+  func openTicketsFromSend() {
+    pendingTicketsNavigation = true
+    showSendSheet = false
+  }
+
+  /// 시트가 닫힌 뒤 호출 — 편지권 화면 이동이 예약돼 있으면 true를 돌려주고, 돌아오면 시트를 다시 열게 표시한다.
+  func consumeTicketsNavigation() -> Bool {
+    guard pendingTicketsNavigation else { return false }
+    pendingTicketsNavigation = false
+    reopenSendAfterTickets = true
+    return true
+  }
+
+  /// 편지권 화면에서 돌아왔으면 잔액을 다시 받고 같은 편지로 시트를 다시 연다.
+  func reopenSendIfNeeded() async {
+    guard reopenSendAfterTickets, let id = sentLetterId else { return }
+    reopenSendAfterTickets = false
+    await loadSendChoice(letterId: id)
+    showSendSheet = true
+  }
+
+  /// 선택 카드 판단용 상태·권한·기존 링크. 표시용 부가 정보라 실패하면 조용히 비운다.
+  private func loadSendChoice(letterId: String) async {
+    async let statesTask = letterAccessUsecase.accessStates(letterIds: [letterId])
+    async let entitlementsTask = ticketUsecase.entitlements()
+    async let linksTask = deliveryUsecase.links(letterId: letterId)
+    sendAccessState = (try? await statesTask)?[letterId]
+    sendEntitlements = try? await entitlementsTask
+    sendHasLinks = !((try? await linksTask) ?? []).isEmpty
   }
 
   /// 전달 링크 발급(시트). 무마찰 위해 예약공개는 생략 — 풀옵션은 전달 관리 화면.
