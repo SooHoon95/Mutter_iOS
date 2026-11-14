@@ -18,8 +18,8 @@ public struct ViewerViewFactory: ViewFactory {
   private let onBack: () -> Void
   /// 봉투 화면의 "편지 열기" — 로그인 후 같은 편지로 돌아오게 하는 건 라우팅 레이어 몫. nil이면 버튼을 숨긴다.
   private let onLoginRequest: (() -> Void)?
-  /// 편지권이 없을 때 편지권 화면으로.
-  private let onOpenTickets: () -> Void
+  /// 간직하려는데 편지권이 없을 때 띄우는 결제 안내 시트. nil이면(미인증 뷰어) 띄우지 않는다.
+  private let ticketCheckout: TicketCheckoutBuilder?
 
   public init(
     deliveryUsecase: DeliveryUsecasable,
@@ -31,7 +31,7 @@ public struct ViewerViewFactory: ViewFactory {
     audioUsecase: AudioUsecasable,
     onBack: @escaping () -> Void,
     onLoginRequest: (() -> Void)? = nil,
-    onOpenTickets: @escaping () -> Void = {}
+    ticketCheckout: TicketCheckoutBuilder? = nil
   ) {
     self.deliveryUsecase = deliveryUsecase
     self.receiptUsecase = receiptUsecase
@@ -42,7 +42,7 @@ public struct ViewerViewFactory: ViewFactory {
     self.audioUsecase = audioUsecase
     self.onBack = onBack
     self.onLoginRequest = onLoginRequest
-    self.onOpenTickets = onOpenTickets
+    self.ticketCheckout = ticketCheckout
   }
 
   public func makeView(_ route: ViewerRoute) -> some View {
@@ -66,7 +66,7 @@ public struct ViewerViewFactory: ViewFactory {
       audioUsecase: audioUsecase,
       onBack: onBack,
       onLoginRequest: onLoginRequest,
-      onOpenTickets: onOpenTickets
+      ticketCheckout: ticketCheckout
     )
   }
 }

@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import Router
 import UIComponent
 
 /// 전달 링크 발급/관리(= 보낸 편지 상세) — 암호 기본 ON, 예약공개, revoke,
@@ -29,8 +30,8 @@ final class DeliveryModelData {
   var isDuplicating = false
   /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
   var choseFreeDays = false
-  /// 영구 편지를 보내려고 편지권 구매 화면에 갔다 — 돌아와 편지권이 있으면 이어서 영구로 만든다.
-  @ObservationIgnored var wantsPermanentAfterPurchase = false
+  /// 결제 안내 시트 — 영구 편지로 만들려는데 편지권이 없을 때 띄운다(nil이면 닫힘).
+  var checkoutRoute: TicketCheckoutRoute?
   /// 첫 조회가 끝났는지. 끝나기 전엔 발급 폼을 그리지 않는다(선택 카드로 바뀌며 깜빡이지 않게).
   private(set) var hasLoaded = false
 
@@ -104,15 +105,25 @@ final class DeliveryModelData {
     entitlements = try? await entitlementsTask
     readers = (try? await readersTask) ?? []
     hasLoaded = true
+  }
 
-    if wantsPermanentAfterPurchase {
-      wantsPermanentAfterPurchase = false
-      if showsSendChoice && hasTicketForPermanent { await makePermanent(onNoTicket: {}) }
+  /// 영구 편지로(선택 카드의 버튼·"영구 편지로 만들기") — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트를 띄운다.
+  func choosePermanent() async {
+    if hasTicketForPermanent {
+      await makePermanent()
+    } else {
+      checkoutRoute = .sendPermanent(letterId: letterId)
     }
   }
 
-  /// 편지권 1장으로 영구 편지로. 잔액이 없으면 구매 UI가 있는 계정은 편지권 화면으로 보낸다.
-  func makePermanent(onNoTicket: () -> Void) async {
+  /// 결제 안내 시트가 끝났다. 편지권 사용까지 마쳤으면 다시 불러와 "영구"와 발급 폼을 보인다.
+  func checkoutFinished(completed: Bool) async {
+    checkoutRoute = nil
+    if completed { await load() }
+  }
+
+  /// 편지권 1장으로 영구 편지로. 잔액이 없으면(경합) 구매 UI가 있는 계정은 결제 안내 시트로 보낸다.
+  private func makePermanent() async {
     guard !isMakingPermanent else { return }
     isMakingPermanent = true
     errorMessage = nil
@@ -122,7 +133,7 @@ final class DeliveryModelData {
       await load()
     } catch let error as MutterError where error.define == .noTicket {
       if entitlements?.showsPurchaseUI == true {
-        onNoTicket()
+        checkoutRoute = .sendPermanent(letterId: letterId)
       } else {
         errorMessage = error.userMessage
       }

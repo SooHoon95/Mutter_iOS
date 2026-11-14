@@ -311,6 +311,14 @@
 "access.kept" = "You kept this letter";
 "access.choicePermanent" = "Permanent letter";
 "access.choiceFreeDays" = "%d-day letter";
-"access.sendNeedsTicket" = "You have no letter tickets. Buy one to continue sending as a permanent letter.";
-"access.sendBuyTicket" = "Buy a ticket and send";
-"ticket.neededForPermanent" = "You need a letter ticket to send a permanent letter.";
+/* ===== Checkout sheet (shown when there is no ticket) ===== */
+"checkout.send.point1" = "It never closes, however much time passes";
+"checkout.send.point2" = "It stays in the recipient's inbox even if you delete it";
+"checkout.send.buy" = "Buy and send as a permanent letter";
+"checkout.send.use" = "Send with 1 ticket";
+"checkout.keep.title" = "Keep this letter";
+"checkout.keep.subtitle" = "Open it any time, with no time limit";
+"checkout.keep.point1" = "A closed letter opens again";
+"checkout.keep.point2" = "It stays in your inbox even if the sender deletes it";
+"checkout.keep.buy" = "Buy and keep";
+"checkout.keep.use" = "Keep with 1 ticket";

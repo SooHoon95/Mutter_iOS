@@ -1,12 +1,15 @@
 import SwiftUI
 
 import Domain
+import Router
 import UIComponent
 
 /// 저장 직후 뜨는 "보내기" 시트 — 두 방식: 전달 링크 발급 / 연결된 사람 직접 발송.
 /// (Feature→Feature 의존 금지라 DeliveryView를 끌어오지 않고 Domain usecase를 직접 쓴다.)
 struct SendSheet: View {
   @Bindable var model: ComposeModelData
+  /// 결제 안내 시트를 만드는 클로저(앱이 주입).
+  let ticketCheckout: TicketCheckoutBuilder
 
   enum Method: String, CaseIterable, Identifiable {
     case link = "link"
@@ -55,13 +58,7 @@ struct SendSheet: View {
                 freeDays: model.sendEntitlements?.freeDays ?? 0,
                 hasTicket: model.hasTicketForPermanent,
                 isLoading: model.isMakingPermanent,
-                onPermanent: {
-                  if model.hasTicketForPermanent {
-                    Task { await model.makePermanent() }
-                  } else {
-                    model.buyTicketForPermanent()
-                  }
-                },
+                onPermanent: { Task { await model.choosePermanent() } },
                 onFreeDays: { model.choseFreeDays = true }
               )
             } else {
@@ -97,6 +94,12 @@ struct SendSheet: View {
       )
     }
     .ignoresSafeArea()
+    // 편지권이 없으면 이 시트 위로 결제 안내가 올라온다. 구매·사용이 끝나면 내려가고 "영구"와 발송 방법이 열린다.
+    .sheet(item: $model.checkoutRoute) { route in
+      ticketCheckout(route) { completed in
+        Task { await model.checkoutFinished(completed: completed) }
+      }
+    }
     // 닫힐 때 에러 메시지 정리
     .onDisappear { model.errorMessage = nil }
   }

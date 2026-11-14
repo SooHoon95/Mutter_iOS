@@ -2,20 +2,20 @@ import SwiftUI
 import UIKit
 
 import Domain
+import Router
 import UIComponent
 
 /// 전달 링크 발급/관리 화면(= 보낸 편지 상세) — 암호 기본 ON, 예약공개, revoke,
 /// 영구 편지로 만들기·열람자·같은 내용으로 한 통 더 보내기.
 public struct DeliveryView: View {
   @State private var model: DeliveryModelData
-  @State private var showPermanentConfirm = false
   private let linkBaseURL: String
   private let navTitle: String
   /// 이 편지를 뷰어로 미리보기(라우팅 레이어가 주입).
   private let onPreview: () -> Void
   private let onBack: () -> Void
-  /// 편지권이 없을 때 편지권 화면으로.
-  private let onOpenTickets: () -> Void
+  /// 편지권이 없을 때 띄우는 결제 안내 시트(앱이 주입).
+  private let ticketCheckout: TicketCheckoutBuilder
   /// 사본이 만들어지면 새 편지 id로 발송 흐름을 잇는다.
   private let onDuplicated: (String) -> Void
 
@@ -28,7 +28,7 @@ public struct DeliveryView: View {
     navTitle: String,
     onPreview: @escaping () -> Void,
     onBack: @escaping () -> Void,
-    onOpenTickets: @escaping () -> Void,
+    ticketCheckout: @escaping TicketCheckoutBuilder,
     onDuplicated: @escaping (String) -> Void
   ) {
     _model = State(initialValue: DeliveryModelData(
@@ -41,7 +41,7 @@ public struct DeliveryView: View {
     self.navTitle = navTitle
     self.onPreview = onPreview
     self.onBack = onBack
-    self.onOpenTickets = onOpenTickets
+    self.ticketCheckout = ticketCheckout
     self.onDuplicated = onDuplicated
   }
 
@@ -76,21 +76,14 @@ public struct DeliveryView: View {
                 freeDays: model.entitlements?.freeDays ?? 0,
                 hasTicket: model.hasTicketForPermanent,
                 isLoading: model.isMakingPermanent,
-                onPermanent: {
-                  if model.hasTicketForPermanent {
-                    Task { await model.makePermanent(onNoTicket: onOpenTickets) }
-                  } else {
-                    // 돌아오면 .task가 다시 불러오고, 편지권이 생겼으면 이어서 영구로 만든다.
-                    model.wantsPermanentAfterPurchase = true
-                    onOpenTickets()
-                  }
-                },
+                onPermanent: { Task { await model.choosePermanent() } },
                 onFreeDays: { model.choseFreeDays = true }
               )
             } else {
               if model.canMakePermanent {
+                // 문구가 편지권 1장을 말하므로 확인 팝업 없이 진행한다. 편지권이 없으면 결제 안내 시트.
                 MutterButton(L10n.accessMakePermanent, style: .secondary, isLoading: model.isMakingPermanent) {
-                  showPermanentConfirm = true
+                  Task { await model.choosePermanent() }
                 }
               }
 
@@ -118,10 +111,10 @@ public struct DeliveryView: View {
     }
     .toolbar(.hidden, for: .navigationBar)
     .task { await model.load() }
-    // 편지권 1장이 차감되는 동작이라 한 번 더 묻는다.
-    .confirmationDialog(L10n.accessMakePermanent, isPresented: $showPermanentConfirm, titleVisibility: .visible) {
-      Button(L10n.commonConfirm) { Task { await model.makePermanent(onNoTicket: onOpenTickets) } }
-      Button(L10n.commonCancel, role: .cancel) {}
+    .sheet(item: $model.checkoutRoute) { route in
+      ticketCheckout(route) { completed in
+        Task { await model.checkoutFinished(completed: completed) }
+      }
     }
   }
 

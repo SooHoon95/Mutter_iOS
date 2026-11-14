@@ -1,17 +1,18 @@
 import SwiftUI
 
 import Domain
+import Router
 import UIComponent
 import AudioSync
 
 /// 수신/열람 화면 — 무마찰 원칙: 링크→웹뷰 없이 네이티브로 "열기 ▶" 한 탭.
 public struct ViewerView: View {
   @State private var model: ViewerModelData
-  @State private var showKeepConfirm = false
   /// 뒤로가기 — 라우팅 레이어 modifier 대신 뷰어 내부 내비바가 직접 호출(MU-7).
   private let onBack: () -> Void
   private let onLoginRequest: (() -> Void)?
-  private let onOpenTickets: () -> Void
+  /// 간직하려는데 편지권이 없을 때 띄우는 결제 안내 시트(앱이 주입, 미인증 뷰어는 nil).
+  private let ticketCheckout: TicketCheckoutBuilder?
 
   init(
     source: ViewerModelData.Source,
@@ -24,11 +25,11 @@ public struct ViewerView: View {
     audioUsecase: AudioUsecasable,
     onBack: @escaping () -> Void,
     onLoginRequest: (() -> Void)?,
-    onOpenTickets: @escaping () -> Void
+    ticketCheckout: TicketCheckoutBuilder?
   ) {
     self.onBack = onBack
     self.onLoginRequest = onLoginRequest
-    self.onOpenTickets = onOpenTickets
+    self.ticketCheckout = ticketCheckout
     _model = State(initialValue: ViewerModelData(
       source: source,
       deliveryUsecase: deliveryUsecase,
@@ -63,12 +64,13 @@ public struct ViewerView: View {
       )
     }
     .task { await model.load() }
-    // 간직하기 확인(편지 끝·닫힘 예고·잠김 화면 공통) — 편지권 1장은 여기서 처음 보인다.
-    .confirmationDialog(L10n.accessKeepShort, isPresented: $showKeepConfirm, titleVisibility: .visible) {
-      Button(L10n.accessKeepShort) { Task { await model.keep(onNoTicket: onOpenTickets) } }
-      Button(L10n.commonCancel, role: .cancel) {}
-    } message: {
-      Text(L10n.accessKeepNotice)
+    // 간직하려는데 편지권이 없으면 편지 위로 결제 안내가 올라온다(편지와 음악은 뒤에 그대로).
+    .sheet(item: $model.checkoutRoute) { route in
+      if let ticketCheckout {
+        ticketCheckout(route) { completed in
+          Task { await model.checkoutFinished(completed: completed) }
+        }
+      }
     }
   }
 
@@ -105,9 +107,10 @@ public struct ViewerView: View {
         cover: cover,
         deleteAt: deleteAt,
         canKeep: model.canKeep,
+        hasTicket: model.hasTicketForKeep,
         isKeeping: model.isKeeping,
         errorMessage: model.keepErrorMessage,
-        onKeep: { showKeepConfirm = true }
+        onKeep: { Task { await model.requestKeep() } }
       )
     case .failed(let message):
       stage(Asset.Colors.ivory.color) {
@@ -211,10 +214,11 @@ public struct ViewerView: View {
             closingSoonDays: model.closingSoonDays(payload),
             isKept: model.isKept,
             canKeep: model.canKeep,
+            hasTicket: model.hasTicketForKeep,
             isKeeping: model.isKeeping,
             errorMessage: model.keepErrorMessage,
             foreground: theme.foreground,
-            onKeep: { showKeepConfirm = true }
+            onKeep: { Task { await model.requestKeep() } }
           )
 
           // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.

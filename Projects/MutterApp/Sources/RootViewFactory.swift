@@ -14,6 +14,7 @@ import Home
 import Inbox
 import Legal
 import Profile
+import Ticket
 import Viewer
 
 /// 마스터 화면 팩토리 — push되는 FeatureRoute를 각 Feature의 ViewFactory로 위임한다.
@@ -48,7 +49,7 @@ struct RootViewFactory {
         linkBaseURL: AppLink.baseURL,
         onDone: { coordinator.pop() },
         onBack: { coordinator.pop() },
-        onOpenTickets: { coordinator.push(.ticketPurchase) }
+        ticketCheckout: ticketCheckout
       ).makeView(composeRoute)
 
     case .viewer(let viewerRoute):
@@ -63,7 +64,7 @@ struct RootViewFactory {
         ticketUsecase: TicketUsecase(repository: TicketRepository()),
         audioUsecase: AudioUsecase(soundCloud: SoundCloudRepository()),
         onBack: { coordinator.pop() },
-        onOpenTickets: { coordinator.push(.tickets) }
+        ticketCheckout: ticketCheckout
       ).makeView(viewerRoute)
 
     case .delivery(let letterId):
@@ -76,7 +77,7 @@ struct RootViewFactory {
         navTitle: L10n.deliveryNav,
         onPreview: { coordinator.push(.viewer(.myLetter(letterId: letterId))) },
         onBack: { coordinator.pop() },
-        onOpenTickets: { coordinator.push(.ticketPurchase) },
+        ticketCheckout: ticketCheckout,
         // 사본은 링크가 없는 새 편지 — 그 편지의 발송(링크 발급) 화면으로 잇는다.
         onDuplicated: { coordinator.push(.delivery(letterId: $0)) }
       )
@@ -117,13 +118,20 @@ struct RootViewFactory {
         purchaser: StoreKitTicketPurchaser.shared,
         onBack: { coordinator.pop() }
       )
+    }
+  }
 
-    case .ticketPurchase:
-      TicketView(
-        ticketUsecase: TicketUsecase(repository: TicketRepository()),
-        purchaser: StoreKitTicketPurchaser.shared,
-        closesAfterPurchase: true,
-        onBack: { coordinator.pop() }
+  /// 결제 안내 시트(Ticket 모듈) — 작성·링크 관리·뷰어가 편지권이 없을 때 같은 화면을 띄우도록 주입한다.
+  /// 구매자는 거래 갱신 리스너를 쥔 앱 공유 인스턴스.
+  private var ticketCheckout: TicketCheckoutBuilder {
+    { route, onFinish in
+      AnyView(
+        TicketCheckoutView(
+          route: route,
+          ticketUsecase: TicketUsecase(repository: TicketRepository()),
+          purchaser: StoreKitTicketPurchaser.shared,
+          onFinish: onFinish
+        )
       )
     }
   }

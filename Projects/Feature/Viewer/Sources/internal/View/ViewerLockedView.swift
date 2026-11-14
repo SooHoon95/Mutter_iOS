@@ -10,6 +10,8 @@ struct ViewerLockedView: View {
   /// 삭제 예정 시각 — 이날까지 편지권을 붙이면 다시 열린다.
   let deleteAt: Date
   let canKeep: Bool
+  /// 지금 쓸 편지권이 있는지 — 있으면 버튼이 바로 1장을 쓰므로 버튼 아래에 미리 알린다. 없으면 결제 안내가 뜬다.
+  let hasTicket: Bool
   let isKeeping: Bool
   let errorMessage: String?
   let onKeep: () -> Void
@@ -54,6 +56,12 @@ struct ViewerLockedView: View {
         if canKeep {
           MutterButton(L10n.accessKeep, isLoading: isKeeping, action: onKeep)
             .frame(minWidth: 200, maxWidth: 280)
+          if hasTicket {
+            Text(L10n.accessKeepNotice)
+              .fonts(.caption)
+              .foregroundStyle(Asset.Colors.inkSoft.color)
+              .multilineTextAlignment(.center)
+          }
         }
 
         if let errorMessage {

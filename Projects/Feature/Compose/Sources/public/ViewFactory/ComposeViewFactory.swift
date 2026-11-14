@@ -15,7 +15,7 @@ public struct ComposeViewFactory: ViewFactory {
   private let linkBaseURL: String
   private let onDone: () -> Void
   private let onBack: () -> Void
-  private let onOpenTickets: () -> Void
+  private let ticketCheckout: TicketCheckoutBuilder
 
   public init(
     letterUsecase: LetterUsecasable,
@@ -27,7 +27,7 @@ public struct ComposeViewFactory: ViewFactory {
     linkBaseURL: String,
     onDone: @escaping () -> Void,
     onBack: @escaping () -> Void,
-    onOpenTickets: @escaping () -> Void
+    ticketCheckout: @escaping TicketCheckoutBuilder
   ) {
     self.letterUsecase = letterUsecase
     self.connectionUsecase = connectionUsecase
@@ -38,7 +38,7 @@ public struct ComposeViewFactory: ViewFactory {
     self.linkBaseURL = linkBaseURL
     self.onDone = onDone
     self.onBack = onBack
-    self.onOpenTickets = onOpenTickets
+    self.ticketCheckout = ticketCheckout
   }
 
   public func makeView(_ route: ComposeRoute) -> some View {
@@ -65,7 +65,7 @@ public struct ComposeViewFactory: ViewFactory {
       linkBaseURL: linkBaseURL,
       onDone: onDone,
       onBack: onBack,
-      onOpenTickets: onOpenTickets
+      ticketCheckout: ticketCheckout
     )
   }
 }

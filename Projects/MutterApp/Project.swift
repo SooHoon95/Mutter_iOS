@@ -19,6 +19,7 @@ let project = Project.app(
     .feature(target: "Home"),
     .feature(target: "MainTab"),
     .feature(target: "Legal"),
+    .feature(target: "Ticket"),
     .domain,
     .infrastructure,
     .appFoundation,

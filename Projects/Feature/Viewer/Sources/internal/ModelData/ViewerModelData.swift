@@ -2,6 +2,7 @@ import Foundation
 
 import AppFoundation
 import Domain
+import Router
 import UIComponent
 import AudioSync
 
@@ -44,6 +45,8 @@ final class ViewerModelData {
   private(set) var isKept = false
   /// 간직하기 실패 문구(잠김 화면·편지 끝 공통).
   var keepErrorMessage: String?
+  /// 결제 안내 시트 — 간직하려는데 편지권이 없을 때 띄운다(nil이면 닫힘).
+  var checkoutRoute: TicketCheckoutRoute?
 
   let player: LetterAudioPlayer
 
@@ -103,10 +106,16 @@ final class ViewerModelData {
   }
 
   /// 간직 버튼(편지 끝·닫힘 예고·잠김 화면 공통)을 보일지 — 로그인 + (잔액 있음 || 유료 스위치 || 관리자).
-  /// 계약 "받은 사람의 간직하기" 앱 규칙. 잔액이 0이면 누를 때 편지권 화면으로 간다.
+  /// 계약 "받은 사람의 간직하기" 앱 규칙. 잔액이 0이면 누를 때 결제 안내 시트가 뜬다.
   var canKeep: Bool {
     guard ticketUsecase != nil, let entitlements else { return false }
     return entitlements.tickets > 0 || entitlements.showsTicketUI
+  }
+
+  /// 간직하는 데 쓸 편지권이 지금 있는지(관리자는 차감 없음) — 있으면 그 자리에서 쓰고, 없으면 결제 안내.
+  var hasTicketForKeep: Bool {
+    guard let entitlements else { return false }
+    return entitlements.tickets > 0 || entitlements.isAdmin
   }
 
   /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 토큰 수신에서만, 간직한 뒤·보낸 사람 본인에겐 없다.
@@ -124,9 +133,29 @@ final class ViewerModelData {
     return payload.accessUntil
   }
 
+  /// 간직하기를 눌렀다(편지 끝·닫힘 예고·잠김 화면 공통) — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트를 띄운다.
+  func requestKeep() async {
+    guard case .token(let token) = source else { return }
+    if hasTicketForKeep {
+      await keep()
+    } else {
+      checkoutRoute = .keepReceived(token: token, password: lastPassword)
+    }
+  }
+
+  /// 결제 안내 시트가 끝났다. 간직까지 마쳤으면 "간직한 편지예요"로 바꾸고, 잠김 화면이었다면 같은 편지를 다시 연다.
+  func checkoutFinished(completed: Bool) async {
+    checkoutRoute = nil
+    guard completed, case .token(let token) = source else { return }
+    isKept = true
+    if case .letterLocked = state {
+      await loadByToken(token, password: lastPassword)
+    }
+  }
+
   /// 받은 편지를 편지권으로 간직한다(열린 편지·잠긴 편지 모두). 잠김 화면이었다면 같은 편지를 다시 열고,
-  /// 읽던 중이면 본문을 그대로 둔다. 잔액이 없으면 구매 UI가 있는 계정은 `onNoTicket`(편지권 화면)으로, 아니면 문구로 알린다.
-  func keep(onNoTicket: () -> Void) async {
+  /// 읽던 중이면 본문을 그대로 둔다. 잔액이 없으면(경합) 구매 UI가 있는 계정은 결제 안내 시트로, 아니면 문구로 알린다.
+  private func keep() async {
     guard case .token(let token) = source, let ticketUsecase, !isKeeping else { return }
     isKeeping = true
     keepErrorMessage = nil
@@ -139,7 +168,7 @@ final class ViewerModelData {
       }
     } catch let error as MutterError where error.define == .noTicket {
       if entitlements?.showsPurchaseUI == true {
-        onNoTicket()
+        checkoutRoute = .keepReceived(token: token, password: lastPassword)
       } else {
         keepErrorMessage = error.userMessage
       }

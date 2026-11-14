@@ -311,6 +311,14 @@
 "access.kept" = "간직한 편지예요";
 "access.choicePermanent" = "영구 편지";
 "access.choiceFreeDays" = "%d일 편지";
-"access.sendNeedsTicket" = "편지권이 없어요. 구매하면 이어서 영구 편지로 보낼 수 있어요.";
-"access.sendBuyTicket" = "편지권 구매하고 보내기";
-"ticket.neededForPermanent" = "영구 편지로 보내려면 편지권이 필요해요.";
+/* ===== 결제 안내 시트(편지권이 없을 때) ===== */
+"checkout.send.point1" = "시간이 지나도 닫히지 않아요";
+"checkout.send.point2" = "내가 편지를 지워도 받은 분의 편지함에는 남아요";
+"checkout.send.buy" = "구매하고 영구 편지로 보내기";
+"checkout.send.use" = "편지권 1장으로 보내기";
+"checkout.keep.title" = "이 편지 간직하기";
+"checkout.keep.subtitle" = "기간 제한 없이 계속 열 수 있어요";
+"checkout.keep.point1" = "닫힌 편지도 다시 열려요";
+"checkout.keep.point2" = "보낸 분이 편지를 지워도 내 편지함에는 남아요";
+"checkout.keep.buy" = "구매하고 간직하기";
+"checkout.keep.use" = "편지권 1장으로 간직하기";

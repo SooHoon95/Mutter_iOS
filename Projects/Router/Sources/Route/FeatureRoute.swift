@@ -12,7 +12,6 @@ public enum FeatureRoute: Hashable {
   case trash                          // 보낸 편지 삭제함(내 편지 30일 보관 — 복구·완전 삭제)
   case inboxTrash                     // 받은 편지 삭제함(받은 편지함에서 지운 편지 30일 보관)
   case tickets                        // 편지권(잔액·내역·구매)
-  case ticketPurchase                 // 영구 편지를 보내려다 편지권이 없어 들어온 구매 화면 — 구매하면 닫히고 보내기로 돌아간다
 }
 
 /// 인증 플로우.

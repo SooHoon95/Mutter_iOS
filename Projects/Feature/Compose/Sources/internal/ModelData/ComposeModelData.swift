@@ -4,6 +4,7 @@ import SwiftUI
 
 import AppFoundation
 import Domain
+import Router
 import UIComponent
 import AudioSync
 
@@ -56,12 +57,8 @@ final class ComposeModelData {
   /// 이 시트에서 "{n}일 편지로 보내기"를 골랐는지 — 시트를 새로 열면 다시 묻는다.
   var choseFreeDays = false
   var isMakingPermanent = false
-  /// 편지권 화면으로 가려고 시트를 닫는 중 — 다 닫힌 뒤 화면이 편지권으로 보낸다(시트 위로는 push가 안 보인다).
-  @ObservationIgnored private var pendingTicketsNavigation = false
-  /// 편지권 화면에서 돌아오면 같은 편지로 시트를 다시 연다(선택 카드 그대로).
-  @ObservationIgnored private var reopenSendAfterTickets = false
-  /// 영구 편지를 보내려고 편지권 구매 화면에 갔다 — 돌아와 편지권이 있으면 이어서 영구로 만든다.
-  @ObservationIgnored private var wantsPermanentAfterPurchase = false
+  /// 결제 안내 시트 — 영구 편지를 골랐는데 편지권이 없을 때 보내기 시트 위로 띄운다(nil이면 닫힘).
+  var checkoutRoute: TicketCheckoutRoute?
 
   let player: LetterAudioPlayer
 
@@ -399,7 +396,7 @@ final class ComposeModelData {
       await loadSendChoice(letterId: id)
     } catch let error as MutterError where error.define == .noTicket {
       if sendEntitlements?.showsPurchaseUI == true {
-        openTicketsFromSend()
+        checkoutRoute = .sendPermanent(letterId: id)
       } else {
         errorMessage = error.userMessage
       }
@@ -408,38 +405,21 @@ final class ComposeModelData {
     }
   }
 
-  /// 편지권 화면으로 — 시트를 먼저 닫는다. 실제 이동은 시트가 다 닫힌 뒤(`consumeTicketsNavigation`).
-  func openTicketsFromSend() {
-    pendingTicketsNavigation = true
-    showSendSheet = false
-  }
-
-  /// 시트가 닫힌 뒤 호출 — 편지권 화면 이동이 예약돼 있으면 true를 돌려주고, 돌아오면 시트를 다시 열게 표시한다.
-  func consumeTicketsNavigation() -> Bool {
-    guard pendingTicketsNavigation else { return false }
-    pendingTicketsNavigation = false
-    reopenSendAfterTickets = true
-    return true
-  }
-
-  /// 영구 편지를 골랐는데 편지권이 없다 — 구매 화면으로 보내고, 사 오면 이어서 영구로 만든다.
-  func buyTicketForPermanent() {
-    wantsPermanentAfterPurchase = true
-    openTicketsFromSend()
-  }
-
-  /// 편지권 화면에서 돌아왔으면 잔액을 다시 받고 같은 편지로 시트를 다시 연다.
-  /// 영구 편지를 보내려고 사러 갔다 왔고 편지권이 생겼으면, 다시 고르게 하지 않고 바로 영구로 만든다.
-  func reopenSendIfNeeded() async {
-    guard reopenSendAfterTickets, let id = sentLetterId else { return }
-    reopenSendAfterTickets = false
-    await loadSendChoice(letterId: id)
-    if wantsPermanentAfterPurchase {
-      wantsPermanentAfterPurchase = false
-      if showsSendChoice && hasTicketForPermanent { await makePermanent() }
+  /// 선택 카드에서 영구 편지를 고르고 버튼을 눌렀다 — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트를 띄운다.
+  func choosePermanent() async {
+    guard let id = sentLetterId else { return }
+    if hasTicketForPermanent {
+      await makePermanent()
+    } else {
+      checkoutRoute = .sendPermanent(letterId: id)
     }
-    // makePermanent가 다시 구매 화면으로 보냈으면(잔액 경합) 시트를 열지 않는다.
-    if !pendingTicketsNavigation { showSendSheet = true }
+  }
+
+  /// 결제 안내 시트가 끝났다. 편지권 사용까지 마쳤으면 상태를 다시 받아 "영구"와 발송 방법을 연다.
+  func checkoutFinished(completed: Bool) async {
+    checkoutRoute = nil
+    guard completed, let id = sentLetterId else { return }
+    await loadSendChoice(letterId: id)
   }
 
   /// 선택 카드 판단용 상태·권한·기존 링크. 표시용 부가 정보라 실패하면 조용히 비운다.

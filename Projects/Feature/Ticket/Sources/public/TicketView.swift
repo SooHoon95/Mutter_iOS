@@ -4,22 +4,14 @@ import Domain
 import UIComponent
 
 /// 편지권 화면(프로필 → 편지권) — 잔액·설명·상품(1장·5장)·내역.
+/// 편지를 보내거나 간직하다 편지권이 없어서 뜨는 것은 이 화면이 아니라 `TicketCheckoutView`(시트)다.
 /// 구매 UI는 유료 스위치가 켜진 일반 계정에만 보인다(관리자는 차감 없이 영구가 되므로 숨김).
 public struct TicketView: View {
   @State private var model: TicketModelData
-  private let closesAfterPurchase: Bool
   private let onBack: () -> Void
 
-  /// - Parameter closesAfterPurchase: 영구 편지를 보내려다 들어온 구매 화면이면 true —
-  ///   왜 왔는지 한 줄로 알리고, 내역은 숨기고, 구매가 끝나면 스스로 닫혀 보내기로 돌아간다.
-  public init(
-    ticketUsecase: TicketUsecasable,
-    purchaser: TicketPurchasing,
-    closesAfterPurchase: Bool = false,
-    onBack: @escaping () -> Void
-  ) {
+  public init(ticketUsecase: TicketUsecasable, purchaser: TicketPurchasing, onBack: @escaping () -> Void) {
     _model = State(initialValue: TicketModelData(ticketUsecase: ticketUsecase, purchaser: purchaser))
-    self.closesAfterPurchase = closesAfterPurchase
     self.onBack = onBack
   }
 
@@ -39,12 +31,6 @@ public struct TicketView: View {
         ScrollView {
           VStack(alignment: .leading, spacing: 24) {
             balanceCard
-
-            if closesAfterPurchase {
-              Text(L10n.ticketNeededForPermanent)
-                .fonts(.bodyMediumBold)
-                .foregroundStyle(Asset.Colors.ink.color)
-            }
 
             if model.showsPurchaseUI {
               VStack(spacing: 8) {
@@ -66,7 +52,7 @@ public struct TicketView: View {
               Text(message).fonts(.caption).foregroundStyle(Asset.Colors.danger.color)
             }
 
-            if !closesAfterPurchase { historySection }
+            historySection
           }
           .padding(24)
           .frame(maxWidth: 560)
@@ -76,9 +62,6 @@ public struct TicketView: View {
     }
     .toolbar(.hidden, for: .navigationBar)
     .task { await model.appear() }
-    .onChange(of: model.purchaseCount) {
-      if closesAfterPurchase { onBack() }
-    }
   }
 
   // MARK: - 잔액 카드
