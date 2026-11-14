@@ -2,3 +2,7 @@ SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
 #include "Mutter.xcconfig"
 
 APS_ENVIRONMENT = development
+
+// 개발 서버 — XCConfigs/DevServer.xcconfig(gitignore)가 있으면 Debug 빌드만 그 서버를 본다.
+// 없으면 Sensitive.xcconfig의 운영 서버를 그대로 쓴다. 만드는 법: DevServer.xcconfig.example 참고.
+#include? "DevServer.xcconfig"

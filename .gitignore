@@ -126,3 +126,6 @@ marketing/video/**/metadata.json
 marketing/video/**/preview-payload.json
 marketing/video/**/preview-browser.mp4
 marketing/video/**/*.validation.json
+
+# 로컬 개발 서버 설정(개인 환경)
+XCConfigs/DevServer.xcconfig
