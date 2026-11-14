@@ -50,15 +50,26 @@ struct ConnectionRow: Decodable {
 }
 
 /// send_to_connection RPC 파라미터(토큰은 구현부 생성).
+/// p_permanent는 true일 때만 보낸다(서버 기본값 false) — 0041 이전 서버에는 이 인자가 없다.
 struct SendToConnectionParams: Encodable {
   let letterId: String
   let recipient: String
   let token: String
+  let permanent: Bool
 
   enum CodingKeys: String, CodingKey {
     case letterId = "p_letter_id"
     case recipient = "p_recipient"
     case token = "p_token"
+    case permanent = "p_permanent"
+  }
+
+  func encode(to encoder: Encoder) throws {
+    var c = encoder.container(keyedBy: CodingKeys.self)
+    try c.encode(letterId, forKey: .letterId)
+    try c.encode(recipient, forKey: .recipient)
+    try c.encode(token, forKey: .token)
+    if permanent { try c.encode(true, forKey: .permanent) }
   }
 }
 

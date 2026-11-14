@@ -57,13 +57,16 @@ struct SendSheet: View {
                 ticketCount: model.sendEntitlements?.tickets ?? 0,
                 freeDays: model.sendEntitlements?.freeDays ?? 0,
                 hasTicket: model.hasTicketForPermanent,
-                isLoading: model.isMakingPermanent,
-                onPermanent: { Task { await model.choosePermanent() } },
+                onPermanent: { model.choosePermanent() },
                 onFreeDays: { model.choseFreeDays = true }
               )
             } else {
               if model.showsPermanentBadge {
                 LetterAccessBadge(L10n.accessPermanent)
+              }
+              // 영구를 골랐지만 아직 보내지 않았다 — 편지권은 아래에서 링크를 만들거나 보낼 때 쓰인다.
+              if model.showsPermanentPending {
+                PermanentSendNotice(onChooseAgain: { model.chooseAgain() })
               }
               switch method {
               case .link: linkSection
@@ -94,7 +97,7 @@ struct SendSheet: View {
       )
     }
     .ignoresSafeArea()
-    // 편지권이 없으면 이 시트 위로 결제 안내가 올라온다. 구매·사용이 끝나면 내려가고 "영구"와 발송 방법이 열린다.
+    // 편지권이 없으면 이 시트 위로 결제 안내(구매)가 올라온다. 사고 나면 내려가고 발송 방법이 열린다.
     .sheet(item: $model.checkoutRoute) { route in
       ticketCheckout(route) { completed in
         Task { await model.checkoutFinished(completed: completed) }

@@ -9,5 +9,6 @@ public protocol ConnectionRepositorable {
   func accept(token: String) async throws
   func myConnections() async throws -> [Connection]
   func disconnect(otherUserId: String) async throws
-  func send(letterId: String, recipientId: String) async throws
+  /// `permanent`가 true면 서버가 발송과 같은 트랜잭션에서 편지권 1장을 써 영구 편지로 만든다.
+  func send(letterId: String, recipientId: String, permanent: Bool) async throws
 }

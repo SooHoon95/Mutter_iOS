@@ -75,16 +75,19 @@ public struct DeliveryView: View {
                 ticketCount: model.entitlements?.tickets ?? 0,
                 freeDays: model.entitlements?.freeDays ?? 0,
                 hasTicket: model.hasTicketForPermanent,
-                isLoading: model.isMakingPermanent,
-                onPermanent: { Task { await model.choosePermanent() } },
+                onPermanent: { model.choosePermanent() },
                 onFreeDays: { model.choseFreeDays = true }
               )
             } else {
               if model.canMakePermanent {
-                // 문구가 편지권 1장을 말하므로 확인 팝업 없이 진행한다. 편지권이 없으면 결제 안내 시트.
+                // 이미 보낸 편지에만 보인다. 문구가 편지권 1장을 말하므로 확인 팝업 없이 진행하고, 편지권이 없으면 결제 안내 시트.
                 MutterButton(L10n.accessMakePermanent, style: .secondary, isLoading: model.isMakingPermanent) {
-                  Task { await model.choosePermanent() }
+                  Task { await model.makeSentLetterPermanent() }
                 }
+              }
+              // 영구를 골랐지만 아직 링크를 만들지 않았다 — 편지권은 아래에서 링크를 만들 때 쓰인다.
+              if model.showsPermanentPending {
+                PermanentSendNotice(onChooseAgain: { model.chooseAgain() })
               }
 
               if model.hasLoaded { issueCard }

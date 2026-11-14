@@ -84,12 +84,13 @@ public final class ConnectionRepository: ConnectionRepositorable {
     }
   }
 
-  public func send(letterId: String, recipientId: String) async throws {
+  public func send(letterId: String, recipientId: String, permanent: Bool) async throws {
     do {
       let params = SendToConnectionParams(
         letterId: letterId,
         recipient: recipientId,
-        token: TokenGenerator.make()
+        token: TokenGenerator.make(),
+        permanent: permanent
       )
       try await provider.client
         .rpc("send_to_connection", params: params)

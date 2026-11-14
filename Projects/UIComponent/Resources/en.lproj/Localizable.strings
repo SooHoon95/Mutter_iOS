@@ -314,11 +314,17 @@
 /* ===== Checkout sheet (shown when there is no ticket) ===== */
 "checkout.send.point1" = "It never closes, however much time passes";
 "checkout.send.point2" = "It stays in the recipient's inbox even if you delete it";
-"checkout.send.buy" = "Buy and send as a permanent letter";
-"checkout.send.use" = "Send with 1 ticket";
+"checkout.send.buy" = "Buy a ticket and continue";
+"checkout.send.use" = "Continue";
+"checkout.make.title" = "Make it a permanent letter";
+"checkout.make.buy" = "Buy and make it permanent";
+"checkout.make.use" = "Make permanent with 1 ticket";
 "checkout.keep.title" = "Keep this letter";
 "checkout.keep.subtitle" = "Open it any time, with no time limit";
 "checkout.keep.point1" = "A closed letter opens again";
 "checkout.keep.point2" = "It stays in your inbox even if the sender deletes it";
 "checkout.keep.buy" = "Buy and keep";
 "checkout.keep.use" = "Keep with 1 ticket";
+"access.sendPermanentChosen" = "Sending as a permanent letter";
+"access.sendPermanentHint" = "1 ticket is used when you create the link or send";
+"access.chooseAgain" = "Choose again";

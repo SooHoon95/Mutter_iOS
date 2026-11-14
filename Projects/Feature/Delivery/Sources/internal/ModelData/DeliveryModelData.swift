@@ -30,6 +30,8 @@ final class DeliveryModelData {
   var isDuplicating = false
   /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
   var choseFreeDays = false
+  /// 이 화면에서 "영구 편지"를 골랐는지 — **고른 것만 기억한다.** 편지권은 링크를 만들 때 서버가 쓴다.
+  var chosePermanent = false
   /// 결제 안내 시트 — 영구 편지로 만들려는데 편지권이 없을 때 띄운다(nil이면 닫힘).
   var checkoutRoute: TicketCheckoutRoute?
   /// 첫 조회가 끝났는지. 끝나기 전엔 발급 폼을 그리지 않는다(선택 카드로 바뀌며 깜빡이지 않게).
@@ -57,9 +59,10 @@ final class DeliveryModelData {
     accessState?.type == .permanent && (entitlements?.showsTicketUI ?? false)
   }
 
-  /// "영구 편지로 만들기" — 편지권 UI가 켜져 있고 아직 되살릴 수 있는(열림·잠김) 편지만.
+  /// "영구 편지로 만들기" — 편지권 UI가 켜져 있고 아직 되살릴 수 있는(열림·잠김) 편지 중 **이미 보낸(링크가 있는) 편지만.**
+  /// 아직 안 보낸 편지는 보내기 전 선택으로 고른다(누르는 즉시 편지권이 쓰이면 보내기 전에 차감된다).
   var canMakePermanent: Bool {
-    guard entitlements?.showsTicketUI == true, let type = accessState?.type else { return false }
+    guard entitlements?.showsTicketUI == true, let type = accessState?.type, !links.isEmpty else { return false }
     return type == .open || type == .locked
   }
 
@@ -71,9 +74,15 @@ final class DeliveryModelData {
       && links.isEmpty
       && lastIssuedLink == nil
       && !choseFreeDays
+      && !chosePermanent
   }
 
-  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 편지권 화면으로 보낸다.
+  /// 영구 편지를 골랐고 아직 링크를 만들지 않았다 — 발급 폼 위에 "보낼 때 편지권 1장이 사용돼요"와 "다시 고르기"를 보인다.
+  var showsPermanentPending: Bool {
+    chosePermanent && accessState?.type == .open && links.isEmpty
+  }
+
+  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 결제 안내 시트(구매)를 띄운다.
   var hasTicketForPermanent: Bool {
     guard let entitlements else { return false }
     return entitlements.tickets > 0 || entitlements.isAdmin
@@ -81,7 +90,7 @@ final class DeliveryModelData {
 
   /// 무료 기간이 적용되는 편지면 링크 발급 안내의 일수(서버 설정값). 영구면 nil.
   var freeDaysNotice: Int? {
-    guard accessState?.type == .open else { return nil }
+    guard accessState?.type == .open, !chosePermanent else { return nil }
     return entitlements?.freeDays
   }
 
@@ -107,19 +116,38 @@ final class DeliveryModelData {
     hasLoaded = true
   }
 
-  /// 영구 편지로(선택 카드의 버튼·"영구 편지로 만들기") — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트를 띄운다.
-  func choosePermanent() async {
+  /// 선택 카드에서 영구 편지를 고르고 버튼을 눌렀다 — 편지권이 있으면 선택만 기억하고 발급 폼을 연다.
+  /// 없으면 결제 안내 시트(구매)를 띄운다. **여기서는 편지권을 쓰지 않는다.**
+  func choosePermanent() {
     if hasTicketForPermanent {
-      await makePermanent()
+      chosePermanent = true
     } else {
-      checkoutRoute = .sendPermanent(letterId: letterId)
+      checkoutRoute = .sendPermanent
     }
   }
 
-  /// 결제 안내 시트가 끝났다. 편지권 사용까지 마쳤으면 다시 불러와 "영구"와 발급 폼을 보인다.
+  /// "다시 고르기" — 선택 카드로 돌아간다.
+  func chooseAgain() {
+    chosePermanent = false
+    choseFreeDays = false
+  }
+
+  /// 이미 보낸 편지의 "영구 편지로 만들기" — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트(구매 후 사용).
+  func makeSentLetterPermanent() async {
+    if hasTicketForPermanent {
+      await makePermanent()
+    } else {
+      checkoutRoute = .makePermanent(letterId: letterId)
+    }
+  }
+
+  /// 결제 안내 시트가 끝났다. 다시 불러와 잔액·상태를 맞추고, 보내기 전 구매였으면 영구 편지를 고른 것으로 넘어간다.
   func checkoutFinished(completed: Bool) async {
+    let route = checkoutRoute
     checkoutRoute = nil
-    if completed { await load() }
+    guard completed else { return }
+    await load()
+    if route == .sendPermanent { chosePermanent = true }
   }
 
   /// 편지권 1장으로 영구 편지로. 잔액이 없으면(경합) 구매 UI가 있는 계정은 결제 안내 시트로 보낸다.
@@ -133,7 +161,7 @@ final class DeliveryModelData {
       await load()
     } catch let error as MutterError where error.define == .noTicket {
       if entitlements?.showsPurchaseUI == true {
-        checkoutRoute = .sendPermanent(letterId: letterId)
+        checkoutRoute = .makePermanent(letterId: letterId)
       } else {
         errorMessage = error.userMessage
       }
@@ -161,7 +189,8 @@ final class DeliveryModelData {
       let link = try await deliveryUsecase.issue(
         letterId: letterId,
         password: usePassword ? password : nil,
-        revealAt: useReveal ? revealAt : nil
+        revealAt: useReveal ? revealAt : nil,
+        permanent: showsPermanentPending
       )
       lastIssuedLink = link
       password = ""
@@ -182,6 +211,13 @@ final class DeliveryModelData {
     defer { isLoading = false }
     do {
       try await operation()
+    } catch let error as MutterError where error.define == .noTicket {
+      // 영구 편지로 링크를 만들려는데 편지권이 없어졌다 — 구매 UI가 있는 계정은 결제 안내 시트로.
+      if entitlements?.showsPurchaseUI == true {
+        checkoutRoute = .sendPermanent
+      } else {
+        errorMessage = error.userMessage
+      }
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }

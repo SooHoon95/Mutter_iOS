@@ -56,7 +56,8 @@ final class ComposeModelData {
   private(set) var sendHasLinks = false
   /// 이 시트에서 "{n}일 편지로 보내기"를 골랐는지 — 시트를 새로 열면 다시 묻는다.
   var choseFreeDays = false
-  var isMakingPermanent = false
+  /// 이 시트에서 "영구 편지"를 골랐는지 — **고른 것만 기억한다.** 편지권은 링크를 만들거나 보낼 때 서버가 쓴다.
+  var chosePermanent = false
   /// 결제 안내 시트 — 영구 편지를 골랐는데 편지권이 없을 때 보내기 시트 위로 띄운다(nil이면 닫힘).
   var checkoutRoute: TicketCheckoutRoute?
 
@@ -331,13 +332,15 @@ final class ComposeModelData {
       password = ""
       usePassword = true
       choseFreeDays = false
+      chosePermanent = false
       connections = connected
       await loadSendChoice(letterId: letterId)
       showSendSheet = true
       return
     }
     do {
-      try await connectionUsecase.send(letterId: letterId, recipientId: recipientId)
+      // 답장은 선택 카드를 거치지 않는다 — 무료 기간 편지로 보낸다.
+      try await connectionUsecase.send(letterId: letterId, recipientId: recipientId, permanent: false)
       onDone()
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSend
@@ -355,6 +358,7 @@ final class ComposeModelData {
     usePassword = true
     errorMessage = nil
     choseFreeDays = false
+    chosePermanent = false
     async let connectionsTask = connectionUsecase.myConnections()
     async let choiceTask: Void = loadSendChoice(letterId: id)
     connections = (try? await connectionsTask) ?? []
@@ -364,7 +368,7 @@ final class ComposeModelData {
 
   // MARK: - 보내기 전 선택
 
-  /// 선택 카드 — 아직 영구가 아닌 open 편지 + 유료 스위치 + 링크 없음 + 14일을 고르지 않음.
+  /// 선택 카드 — 아직 영구가 아닌 open 편지 + 유료 스위치 + 링크 없음 + 아직 고르지 않음.
   /// 카드가 떠 있는 동안 시트는 링크 발급·연결 상대 발송을 보이지 않는다.
   var showsSendChoice: Bool {
     sendAccessState?.type == .open
@@ -372,6 +376,7 @@ final class ComposeModelData {
       && !sendHasLinks
       && issuedLink == nil
       && !choseFreeDays
+      && !chosePermanent
   }
 
   /// 영구로 만든 뒤(또는 처음부터 영구인) 편지의 "영구" 표시 — 편지권 UI가 켜진 계정에서만.
@@ -379,47 +384,39 @@ final class ComposeModelData {
     sendAccessState?.type == .permanent && sendEntitlements?.showsTicketUI == true
   }
 
-  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 편지권 화면으로 보낸다.
+  /// 영구 편지를 골랐고 아직 보내지 않았다 — 발급·발송 위에 "보낼 때 편지권 1장이 사용돼요"와 "다시 고르기"를 보인다.
+  var showsPermanentPending: Bool {
+    chosePermanent && sendAccessState?.type == .open && issuedLink == nil
+  }
+
+  /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 결제 안내 시트(구매)를 띄운다.
   var hasTicketForPermanent: Bool {
     guard let sendEntitlements else { return false }
     return sendEntitlements.tickets > 0 || sendEntitlements.isAdmin
   }
 
-  /// 편지권 1장으로 영구 편지로 만든 뒤 상태를 다시 받는다(카드가 사라지고 "영구"와 발송 방법이 열린다).
-  func makePermanent() async {
-    guard let id = sentLetterId, !isMakingPermanent else { return }
-    isMakingPermanent = true
-    errorMessage = nil
-    defer { isMakingPermanent = false }
-    do {
-      try await ticketUsecase.makePermanent(letterId: id)
-      await loadSendChoice(letterId: id)
-    } catch let error as MutterError where error.define == .noTicket {
-      if sendEntitlements?.showsPurchaseUI == true {
-        checkoutRoute = .sendPermanent(letterId: id)
-      } else {
-        errorMessage = error.userMessage
-      }
-    } catch {
-      errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
-    }
-  }
-
-  /// 선택 카드에서 영구 편지를 고르고 버튼을 눌렀다 — 편지권이 있으면 바로 쓰고, 없으면 결제 안내 시트를 띄운다.
-  func choosePermanent() async {
-    guard let id = sentLetterId else { return }
+  /// 선택 카드에서 영구 편지를 고르고 버튼을 눌렀다 — 편지권이 있으면 선택만 기억하고 발급·발송으로 넘어간다.
+  /// 없으면 결제 안내 시트(구매)를 띄운다. **여기서는 편지권을 쓰지 않는다.**
+  func choosePermanent() {
     if hasTicketForPermanent {
-      await makePermanent()
+      chosePermanent = true
     } else {
-      checkoutRoute = .sendPermanent(letterId: id)
+      checkoutRoute = .sendPermanent
     }
   }
 
-  /// 결제 안내 시트가 끝났다. 편지권 사용까지 마쳤으면 상태를 다시 받아 "영구"와 발송 방법을 연다.
+  /// "다시 고르기" — 선택 카드로 돌아간다.
+  func chooseAgain() {
+    chosePermanent = false
+    choseFreeDays = false
+  }
+
+  /// 결제 안내 시트가 끝났다. 편지권을 샀으면 잔액을 다시 받고, 영구 편지를 고른 것으로 넘어간다.
   func checkoutFinished(completed: Bool) async {
     checkoutRoute = nil
     guard completed, let id = sentLetterId else { return }
     await loadSendChoice(letterId: id)
+    chosePermanent = true
   }
 
   /// 선택 카드 판단용 상태·권한·기존 링크. 표시용 부가 정보라 실패하면 조용히 비운다.
@@ -442,10 +439,16 @@ final class ComposeModelData {
       let link = try await deliveryUsecase.issue(
         letterId: id,
         password: usePassword ? password : nil,
-        revealAt: nil
+        revealAt: nil,
+        permanent: showsPermanentPending
       )
       issuedLink = link
       password = ""
+      // 영구로 보냈으면 상태가 바뀌었다 — "영구" 표시를 위해 다시 받는다.
+      await loadSendChoice(letterId: id)
+    } catch let error as MutterError where error.define == .noTicket {
+      // 고른 뒤 편지권이 없어졌다(다른 기기에서 사용 등) — 구매로 잇는다.
+      handleNoTicket(error)
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorLinkCreate
     }
@@ -458,10 +461,21 @@ final class ComposeModelData {
     errorMessage = nil
     defer { isSending = false }
     do {
-      try await connectionUsecase.send(letterId: id, recipientId: recipientId)
+      try await connectionUsecase.send(letterId: id, recipientId: recipientId, permanent: showsPermanentPending)
       finishSend()
+    } catch let error as MutterError where error.define == .noTicket {
+      handleNoTicket(error)
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSend
+    }
+  }
+
+  /// 발급·발송 때 편지권이 없었다 — 구매 UI가 있는 계정은 결제 안내 시트로, 아니면 문구로 알린다.
+  private func handleNoTicket(_ error: MutterError) {
+    if sendEntitlements?.showsPurchaseUI == true {
+      checkoutRoute = .sendPermanent
+    } else {
+      errorMessage = error.userMessage
     }
   }
 

@@ -14,5 +14,6 @@ public protocol ConnectionUsecasable {
   /// 연결 해제(특정 상대 — 편지·받은함은 보존). N:N이라 대상 지정 필수.
   func disconnect(otherUserId: String) async throws
   /// 연결된 상대에게 편지 발송(전달 토큰은 구현부에서 생성).
-  func send(letterId: String, recipientId: String) async throws
+  /// `permanent`가 true면 서버가 발송과 같은 트랜잭션에서 편지권 1장을 써 영구 편지로 만든다.
+  func send(letterId: String, recipientId: String, permanent: Bool) async throws
 }

@@ -8,8 +8,8 @@ public final class DeliveryUsecase: DeliveryUsecasable {
     self.repository = repository
   }
 
-  public func issue(letterId: String, password: String?, revealAt: Date?) async throws -> DeliveryLink {
-    try await repository.issue(letterId: letterId, password: password, revealAt: revealAt)
+  public func issue(letterId: String, password: String?, revealAt: Date?, permanent: Bool) async throws -> DeliveryLink {
+    try await repository.issue(letterId: letterId, password: password, revealAt: revealAt, permanent: permanent)
   }
 
   public func revoke(token: String) async throws {

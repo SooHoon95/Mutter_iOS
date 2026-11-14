@@ -32,7 +32,7 @@ public final class ConnectionUsecase: ConnectionUsecasable {
     try await repository.disconnect(otherUserId: otherUserId)
   }
 
-  public func send(letterId: String, recipientId: String) async throws {
-    try await repository.send(letterId: letterId, recipientId: recipientId)
+  public func send(letterId: String, recipientId: String, permanent: Bool) async throws {
+    try await repository.send(letterId: letterId, recipientId: recipientId, permanent: permanent)
   }
 }

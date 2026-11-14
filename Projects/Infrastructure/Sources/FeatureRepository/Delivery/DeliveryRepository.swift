@@ -14,14 +14,15 @@ public final class DeliveryRepository: DeliveryRepositorable {
     self.provider = provider
   }
 
-  public func issue(letterId: String, password: String?, revealAt: Date?) async throws -> DeliveryLink {
+  public func issue(letterId: String, password: String?, revealAt: Date?, permanent: Bool) async throws -> DeliveryLink {
     do {
       let params = IssueLinkParams(
         letterId: letterId,
         token: TokenGenerator.make(),
         password: password,
         expiresAt: nil,
-        revealAt: revealAt.map(ISO8601.string(from:))
+        revealAt: revealAt.map(ISO8601.string(from:)),
+        permanent: permanent
       )
       // issue_link는 setof 반환 → 첫 행.
       let rows: [RpcDeliveryLinkRow] = try await provider.client

@@ -5,15 +5,16 @@ import Router
 import UIComponent
 
 /// 결제 안내 시트 — 편지권이 필요한 동작을 눌렀는데 편지권이 없을 때 어디서나 같은 화면이 뜬다.
-/// 보내는 사람(영구 편지로 보내기)과 받는 사람(간직하기)은 제목·설명·버튼 문구만 다르다.
+/// 보내는 사람(영구 편지로 보내기·만들기)과 받는 사람(간직하기)은 제목·설명·버튼 문구만 다르다.
 /// 상품을 고르고 맨 아래 버튼을 누르면 구매 → 편지권 사용까지 이어서 하고 닫힌다.
+/// 아직 안 보낸 편지는 구매까지만 한다(편지권은 링크를 만들거나 보낼 때 쓰인다).
 public struct TicketCheckoutView: View {
   @State private var model: TicketCheckoutModelData
   /// 내용 높이 — 시트를 내용만큼만 올린다(편지권이 있을 때와 상품을 고를 때 높이가 다르다).
   @State private var contentHeight: CGFloat = 440
   private let onFinish: (Bool) -> Void
 
-  /// - Parameter onFinish: 시트를 닫아 달라는 요청. `true`면 편지권 사용(영구 전환·간직)까지 마쳤다.
+  /// - Parameter onFinish: 시트를 닫아 달라는 요청. `true`면 하려던 일(편지권 확보 또는 사용)을 마쳤다.
   public init(
     route: TicketCheckoutRoute,
     ticketUsecase: TicketUsecasable,
@@ -86,19 +87,27 @@ public struct TicketCheckoutView: View {
     }
   }
 
-  // MARK: - 문구(보내는 사람 / 받는 사람)
+  // MARK: - 문구(보내기 전 / 이미 보낸 편지 / 받는 사람)
 
-  private var isSender: Bool {
-    if case .sendPermanent = model.route { return true }
+  private var isReceiver: Bool {
+    if case .keepReceived = model.route { return true }
     return false
+  }
+
+  private var title: String {
+    switch model.route {
+    case .sendPermanent: return L10n.accessSendPermanent
+    case .makePermanent: return L10n.checkoutMakeTitle
+    case .keepReceived: return L10n.checkoutKeepTitle
+    }
   }
 
   private var header: some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text(isSender ? L10n.accessSendPermanent : L10n.checkoutKeepTitle)
+      Text(title)
         .fonts(.title)
         .foregroundStyle(Asset.Colors.ink.color)
-      Text(isSender ? L10n.accessSendPermanentDetail : L10n.checkoutKeepSubtitle)
+      Text(isReceiver ? L10n.checkoutKeepSubtitle : L10n.accessSendPermanentDetail)
         .fonts(.bodyMedium)
         .foregroundStyle(Asset.Colors.inkSoft.color)
     }
@@ -106,8 +115,8 @@ public struct TicketCheckoutView: View {
 
   private var points: some View {
     VStack(alignment: .leading, spacing: 8) {
-      point(isSender ? L10n.checkoutSendPoint1 : L10n.checkoutKeepPoint1)
-      point(isSender ? L10n.checkoutSendPoint2 : L10n.checkoutKeepPoint2)
+      point(isReceiver ? L10n.checkoutKeepPoint1 : L10n.checkoutSendPoint1)
+      point(isReceiver ? L10n.checkoutKeepPoint2 : L10n.checkoutSendPoint2)
     }
   }
 
@@ -122,9 +131,10 @@ public struct TicketCheckoutView: View {
   }
 
   private var buttonTitle: String {
-    if model.canUseNow {
-      return isSender ? L10n.checkoutSendUse : L10n.checkoutKeepUse
+    switch model.route {
+    case .sendPermanent: return model.canUseNow ? L10n.checkoutSendUse : L10n.checkoutSendBuy
+    case .makePermanent: return model.canUseNow ? L10n.checkoutMakeUse : L10n.checkoutMakeBuy
+    case .keepReceived: return model.canUseNow ? L10n.checkoutKeepUse : L10n.checkoutKeepBuy
     }
-    return isSender ? L10n.checkoutSendBuy : L10n.checkoutKeepBuy
   }
 }

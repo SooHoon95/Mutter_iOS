@@ -3,6 +3,7 @@ import Foundation
 import Domain
 
 /// issue_link RPC 파라미터. p_password/p_expires_at은 항상 전송(null 명시), p_reveal_at은 설정 시만.
+/// p_permanent는 true일 때만 보낸다(서버 기본값 false) — 0041 이전 서버에는 이 인자가 없어, 늘 보내면 발급 자체가 실패한다.
 /// PostgREST는 제공된 인자명 집합으로 함수를 매칭하므로 nil을 생략하면 함수를 못 찾는다 → 명시 인코딩.
 struct IssueLinkParams: Encodable {
   let letterId: String
@@ -10,6 +11,7 @@ struct IssueLinkParams: Encodable {
   let password: String?
   let expiresAt: String?
   let revealAt: String?
+  let permanent: Bool
 
   enum CodingKeys: String, CodingKey {
     case letterId = "p_letter_id"
@@ -17,6 +19,7 @@ struct IssueLinkParams: Encodable {
     case password = "p_password"
     case expiresAt = "p_expires_at"
     case revealAt = "p_reveal_at"
+    case permanent = "p_permanent"
   }
 
   func encode(to encoder: Encoder) throws {
@@ -26,6 +29,7 @@ struct IssueLinkParams: Encodable {
     try c.encode(password, forKey: .password)     // null 명시
     try c.encode(expiresAt, forKey: .expiresAt)   // null 명시
     try c.encodeIfPresent(revealAt, forKey: .revealAt) // 설정 시만(서버 default)
+    if permanent { try c.encode(true, forKey: .permanent) } // 영구일 때만(서버 default false)
   }
 }
 

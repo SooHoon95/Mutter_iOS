@@ -7,6 +7,7 @@ import UIComponent
 
 /// 결제 안내 시트 — 편지권이 없는 계정이 영구 편지로 보내거나 받은 편지를 간직하려 할 때.
 /// 상품을 골라 사고, 산 편지권으로 하려던 일(영구 전환·간직)까지 이어서 마친다.
+/// 단, 아직 안 보낸 편지(`sendPermanent`)는 구매까지만 한다 — 편지권은 실제로 보낼 때 쓰인다.
 @MainActor
 @Observable
 final class TicketCheckoutModelData {
@@ -21,7 +22,7 @@ final class TicketCheckoutModelData {
   private(set) var isLoading = true
   /// 구매하거나 편지권을 쓰는 중 — 버튼 로딩, 시트 닫기 막기.
   private(set) var isWorking = false
-  /// 편지권 사용까지 끝났다 → 화면이 닫히며 호출한 쪽에 알린다.
+  /// 하려던 일이 끝났다(편지권 확보 또는 사용) → 화면이 닫히며 호출한 쪽에 알린다.
   private(set) var isDone = false
   var errorMessage: String?
 
@@ -89,7 +90,10 @@ final class TicketCheckoutModelData {
 
   private func useTicket() async throws {
     switch route {
-    case .sendPermanent(let letterId):
+    case .sendPermanent:
+      // 아직 안 보낸 편지 — 여기서 쓰지 않는다. 링크 발급·발송 때 서버가 쓴다.
+      break
+    case .makePermanent(let letterId):
       try await ticketUsecase.makePermanent(letterId: letterId)
     case .keepReceived(let token, let password):
       try await ticketUsecase.keepReceived(token: token, password: password)
