@@ -55,12 +55,15 @@ public struct Counterpart: Identifiable, Equatable {
   public let userId: String
   public let nickname: String?
   public let exchangeCount: Int
+  /// 상대가 탈퇴했다 — 받은 편지는 남지만 편지를 보낼 수는 없다.
+  public let isGone: Bool
 
   public var id: String { userId }
 
-  public init(userId: String, nickname: String?, exchangeCount: Int) {
+  public init(userId: String, nickname: String?, exchangeCount: Int, isGone: Bool = false) {
     self.userId = userId
     self.nickname = nickname
     self.exchangeCount = exchangeCount
+    self.isGone = isGone
   }
 }

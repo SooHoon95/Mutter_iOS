@@ -101,8 +101,10 @@ public struct ThreadsView: View {
           // 편지 버블 목록 — 로딩/실패/빈 상태를 드러내 "빈 시트"를 방지한다.
           threadContent(counterpart)
 
-          // 하단 편지 쓰기 바
-          bottomBar(counterpart)
+          // 하단 편지 쓰기 바 — 탈퇴한 상대에게는 보낼 수 없어 숨긴다.
+          if !counterpart.isGone {
+            bottomBar(counterpart)
+          }
         }
       }
       .navigationTitle(counterpart.nickname ?? L10n.threadsLetterFallback)

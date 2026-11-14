@@ -7,15 +7,17 @@ struct CounterpartRow: Decodable {
   let counterpartId: String
   let nickname: String?
   let letterCount: Int
+  /// 0041 — 상대가 탈퇴했다. 서버 반영 전에는 없다(false로 본다).
+  let gone: Bool?
 
   enum CodingKeys: String, CodingKey {
-    case nickname
+    case nickname, gone
     case counterpartId = "counterpart_id"
     case letterCount = "letter_count"
   }
 
   func toDomain() -> Counterpart {
-    Counterpart(userId: counterpartId, nickname: nickname, exchangeCount: letterCount)
+    Counterpart(userId: counterpartId, nickname: nickname, exchangeCount: letterCount, isGone: gone ?? false)
   }
 }
 
