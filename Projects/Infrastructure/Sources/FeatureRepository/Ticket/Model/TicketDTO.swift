@@ -2,13 +2,15 @@ import Foundation
 
 import Domain
 
-/// get_my_entitlements RPC 반환 `{is_admin, tickets, paid_enabled, free_days, grace_days}`.
+/// get_my_entitlements RPC 반환 `{is_admin, tickets, paid_enabled, free_days, grace_days, warn_days}`.
 struct EntitlementsDTO: Decodable {
   let isAdmin: Bool
   let tickets: Int
   let paidEnabled: Bool
   let freeDays: Int
   let graceDays: Int
+  /// 나중에 더해진 키 — 없으면 2(서버 마이그레이션 배포 전).
+  let warnDays: Int?
 
   enum CodingKeys: String, CodingKey {
     case tickets
@@ -16,6 +18,7 @@ struct EntitlementsDTO: Decodable {
     case paidEnabled = "paid_enabled"
     case freeDays = "free_days"
     case graceDays = "grace_days"
+    case warnDays = "warn_days"
   }
 
   func toDomain() -> Entitlements {
@@ -24,7 +27,8 @@ struct EntitlementsDTO: Decodable {
       tickets: tickets,
       paidEnabled: paidEnabled,
       freeDays: freeDays,
-      graceDays: graceDays
+      graceDays: graceDays,
+      warnDays: warnDays ?? LetterAccessCountdown.defaultWarnDays
     )
   }
 }

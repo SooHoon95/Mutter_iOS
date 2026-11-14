@@ -31,8 +31,6 @@ private struct FakeLetterAccessUsecase: LetterAccessUsecasable {
   func accessStates(letterIds: [String]) async throws -> [String: LetterAccessState] { throw URLError(.badServerResponse) }
   func readers(letterId: String) async throws -> [LetterReader] { throw URLError(.badServerResponse) }
   func duplicate(letterId: String) async throws -> String { throw URLError(.badServerResponse) }
-  func requestKeep(token: String, password: String?) async throws -> Bool { throw URLError(.badServerResponse) }
-  func keepRequests(letterId: String) async throws -> [LetterKeepRequest] { throw URLError(.badServerResponse) }
 }
 
 private struct FakeTicketUsecase: TicketUsecasable {

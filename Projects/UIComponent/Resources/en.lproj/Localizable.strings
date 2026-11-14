@@ -158,7 +158,7 @@
 "trash.restore" = "Restore";
 "trash.purge" = "Delete Permanently";
 "trash.purgeConfirm" = "Delete permanently?";
-"trash.purgeConfirmDetail" = "This can't be undone.";
+"trash.purgeConfirmDetail" = "This can't be undone. It stays in the Inbox of anyone who already received it.";
 "trash.restored" = "Letter restored";
 "trash.empty" = "Trash is empty";
 "trash.error.load" = "Couldn't load Trash.";
@@ -203,7 +203,7 @@
 "profile.savedToast" = "Saved";
 "profile.mailFallback" = "No mail app — copied the email address instead";
 "profile.delete.confirm" = "Delete account?";
-"profile.delete.detail" = "All your letters and connections are permanently deleted. Letters others saved are removed too.";
+"profile.delete.detail" = "All your letters and connections are permanently deleted. Letters you sent stay in their recipients' Inboxes.";
 "profile.defaultPaper" = "Default Stationery";
 "profile.passwordDefault" = "Password Default";
 "profile.on" = "On";
@@ -273,7 +273,7 @@
 "access.lockedTitle" = "This letter's keeping period has ended";
 "access.lockedUntil" = "You can reopen it until %d/%d.";
 "access.keep" = "Keep with a ticket";
-"access.keepNotice" = "If the sender deletes the letter, it disappears too and your ticket is refunded.";
+"access.keepNotice" = "This uses 1 ticket. Even if the sender deletes the letter, it stays in your Inbox.";
 "access.gone" = "This letter can no longer be opened";
 "access.loginHint" = "Log in to open the letter";
 "access.makePermanent" = "Make permanent · 1 ticket";
@@ -294,15 +294,8 @@
 "ticket.reason.grant" = "Granted";
 "ticket.reason.refund" = "Refund";
 "ticket.deleteAccountWarning" = "Your remaining %d tickets will be lost.";
-"access.keptDeleteWarning" = "The recipient kept this letter with a ticket. Deleting it removes its permanent status.";
 "ticket.productPrice" = "%d tickets · %@";
 "ticket.pending" = "Waiting for payment approval. Tickets arrive once approved.";
-"access.requestKeep" = "Let the sender know";
-"access.requestKeepDone" = "The sender has been notified";
-"access.requestKeepNotice" = "It opens again if the sender makes it permanent.";
-"access.keepRequestCount" = "Keep requests %d";
-"access.keepRequester" = "%@ wants to keep this letter";
-"access.keepRequesterUnnamed" = "An unnamed user wants to keep this letter";
 "access.sendChoiceTitle" = "How would you like to send it?";
 "access.sendPermanent" = "Send as a permanent letter";
 "access.sendPermanentDetail" = "The recipient can keep it with no time limit";
@@ -312,3 +305,7 @@
 "access.sendFree" = "Free";
 "access.sendTicketBalance" = "You have %d tickets";
 "access.sendPermanentConfirm" = "This uses 1 ticket";
+"access.keepShort" = "Keep";
+"access.keepContinue" = "Keep it";
+"access.openUntil" = "This letter is open until %d/%d";
+"access.kept" = "You kept this letter";

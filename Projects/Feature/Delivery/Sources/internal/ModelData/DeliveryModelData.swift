@@ -25,8 +25,6 @@ final class DeliveryModelData {
   private(set) var entitlements: Entitlements?
   /// 열람자(처음 연 순). 조회 실패면 비어 있어 섹션을 숨긴다.
   private(set) var readers: [LetterReader] = []
-  /// 간직 요청자(요청한 순). 요청이 없거나 조회 실패면 비어 있어 섹션을 숨긴다.
-  private(set) var keepRequests: [LetterKeepRequest] = []
   var isMakingPermanent = false
   var isDuplicating = false
   /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
@@ -104,12 +102,6 @@ final class DeliveryModelData {
     entitlements = try? await entitlementsTask
     readers = (try? await readersTask) ?? []
     hasLoaded = true
-    // 간직 요청은 건수가 있을 때만 받는다 — 영구가 되면 건수가 0이 되어 사라진다.
-    if let count = accessState?.keepRequestCount, count > 0 {
-      keepRequests = (try? await letterAccessUsecase.keepRequests(letterId: letterId)) ?? []
-    } else {
-      keepRequests = []
-    }
   }
 
   /// 편지권 1장으로 영구 편지로. 잔액이 없으면 구매 UI가 있는 계정은 편지권 화면으로 보낸다.

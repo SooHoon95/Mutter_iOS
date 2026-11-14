@@ -48,21 +48,10 @@ final class HomeModelData {
     self.ticketUsecase = ticketUsecase
   }
 
-  /// 받은 사람이 편지권으로 간직한 편지 — 지우기 전에 영구가 풀린다고 한 번 묻는다.
-  func isKeptByRecipient(_ letterId: String) -> Bool {
-    accessStates[letterId]?.keptByRecipient ?? false
-  }
-
   /// 보낸 편지 행의 접근 상태 배지(임시저장은 없음).
   func accessBadge(for row: LetterRow) -> LetterAccessBadgeType? {
     guard row.isSent else { return nil }
     return accessStates[row.id]?.badge(showsPermanent: entitlements?.showsTicketUI ?? false)
-  }
-
-  /// 보낸 편지 행의 간직 요청 수(0이면 표시하지 않는다).
-  func keepRequestCount(for row: LetterRow) -> Int {
-    guard row.isSent else { return 0 }
-    return accessStates[row.id]?.keepRequestCount ?? 0
   }
 
   /// 보낸 편지(전달됨) — 통계·"보낸 편지" 탭.

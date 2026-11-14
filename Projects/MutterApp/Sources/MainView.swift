@@ -61,9 +61,15 @@ struct MainView: View {
       consumePendingConnectIfNeeded()
       consumePendingLoginLetterIfNeeded()
       consumePendingPushLetterIfNeeded()
+      consumePendingReceivedPushIfNeeded()
+    }
+    .onReceive(PushRouteCenter.shared.receivedLetterToken.receive(on: DispatchQueue.main)) { token in
+      // 받은 편지 닫힘 예고 알림 탭 → 그 편지를 뷰어로. 로그인 전·splash 중이면 로그인 완료 때 연다.
+      guard token != nil else { return }
+      consumePendingReceivedPushIfNeeded()
     }
     .onReceive(PushRouteCenter.shared.sentLetterId.receive(on: DispatchQueue.main)) { letterId in
-      // 편지 만료·간직 요청 알림 탭 → 그 보낸 편지 상세. 로그인 전·splash 중이면 로그인 완료 때 연다.
+      // 편지 만료 알림 탭 → 그 보낸 편지 상세. 로그인 전·splash 중이면 로그인 완료 때 연다.
       guard letterId != nil else { return }
       consumePendingPushLetterIfNeeded()
     }
@@ -77,6 +83,7 @@ struct MainView: View {
         consumePendingConnectIfNeeded()
         consumePendingLoginLetterIfNeeded()
         consumePendingPushLetterIfNeeded()
+        consumePendingReceivedPushIfNeeded()
       }
     }
     .onOpenURL { url in
@@ -182,11 +189,18 @@ struct MainView: View {
     }
   }
 
-  /// 탭된 편지 만료·간직 요청 알림의 보낸 편지 상세를 연다. 로그인 완료 + splash 끝난 뒤에만 소비한다.
+  /// 탭된 편지 만료 알림의 보낸 편지 상세를 연다. 로그인 완료 + splash 끝난 뒤에만 소비한다.
   private func consumePendingPushLetterIfNeeded() {
     guard isSplashDone, isUserLoggedIn, let letterId = PushRouteCenter.shared.sentLetterId.value else { return }
     PushRouteCenter.shared.consume()
     coordinator.push(.delivery(letterId: letterId))
+  }
+
+  /// 탭된 받은 편지 닫힘 예고 알림의 편지를 연다(로그인 상태 딥링크와 같은 경로). 로그인 완료 + splash 끝난 뒤에만 소비한다.
+  private func consumePendingReceivedPushIfNeeded() {
+    guard isSplashDone, isUserLoggedIn, let token = PushRouteCenter.shared.receivedLetterToken.value else { return }
+    PushRouteCenter.shared.consumeReceived()
+    coordinator.push(.viewer(.token(token, password: nil)))
   }
 
   /// 봉투 화면에서 로그인하러 간 편지를 로그인 완료 뒤 다시 연다.

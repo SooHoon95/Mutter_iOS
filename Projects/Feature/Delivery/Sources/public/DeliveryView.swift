@@ -71,9 +71,6 @@ public struct DeliveryView: View {
 
             MutterButton(L10n.deliveryPreview, style: .ghost) { onPreview() }
 
-            // 간직 요청자 — "영구 편지로 만들기" 바로 위.
-            if !model.keepRequests.isEmpty { DeliveryKeepRequestsSection(requests: model.keepRequests) }
-
             if model.showsSendChoice {
               // 보내기 전 선택 — 고르기 전에는 발급 폼을 보이지 않는다(카드가 "영구 편지로 만들기"를 대신한다).
               SendChoiceCard(

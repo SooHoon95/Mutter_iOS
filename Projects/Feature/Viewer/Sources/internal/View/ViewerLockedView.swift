@@ -4,20 +4,15 @@ import Domain
 import UIComponent
 
 /// 잠김 화면 — 무료 기간이 끝난 편지. 본문 대신 제목·보낸 사람·다시 열 수 있는 기한을 보이고,
-/// 로그인 사용자에게 "편지권으로 간직하기"(조건부)와 "보낸 분께 알리기"(항상)를 준다.
+/// 간직할 수 있는 로그인 사용자에게만 "편지권으로 간직하기"를 준다.
 struct ViewerLockedView: View {
   let cover: LetterCover
   /// 삭제 예정 시각 — 이날까지 편지권을 붙이면 다시 열린다.
   let deleteAt: Date
   let canKeep: Bool
   let isKeeping: Bool
-  let canRequestKeep: Bool
-  let isRequestingKeep: Bool
-  /// 이미 알렸으면 비활성 "보낸 분께 알렸어요".
-  let keepRequested: Bool
   let errorMessage: String?
   let onKeep: () -> Void
-  let onRequestKeep: () -> Void
 
   var body: some View {
     ZStack {
@@ -59,24 +54,6 @@ struct ViewerLockedView: View {
         if canKeep {
           MutterButton(L10n.accessKeep, isLoading: isKeeping, action: onKeep)
             .frame(minWidth: 200, maxWidth: 280)
-        }
-
-        if canRequestKeep {
-          VStack(spacing: 8) {
-            MutterButton(
-              keepRequested ? L10n.accessRequestKeepDone : L10n.accessRequestKeep,
-              style: .secondary,
-              isLoading: isRequestingKeep,
-              isEnabled: !keepRequested,
-              action: onRequestKeep
-            )
-            .frame(minWidth: 200, maxWidth: 280)
-
-            Text(L10n.accessRequestKeepNotice)
-              .fonts(.caption)
-              .foregroundStyle(Asset.Colors.inkSoft.color)
-              .multilineTextAlignment(.center)
-          }
         }
 
         if let errorMessage {

@@ -11,13 +11,23 @@ public struct Entitlements: Equatable {
   public let freeDays: Int
   /// 잠긴 뒤 삭제까지 유예(일).
   public let graceDays: Int
+  /// 닫힘 예고를 며칠 전부터 보일지(일).
+  public let warnDays: Int
 
-  public init(isAdmin: Bool, tickets: Int, paidEnabled: Bool, freeDays: Int, graceDays: Int) {
+  public init(
+    isAdmin: Bool,
+    tickets: Int,
+    paidEnabled: Bool,
+    freeDays: Int,
+    graceDays: Int,
+    warnDays: Int = LetterAccessCountdown.defaultWarnDays
+  ) {
     self.isAdmin = isAdmin
     self.tickets = tickets
     self.paidEnabled = paidEnabled
     self.freeDays = freeDays
     self.graceDays = graceDays
+    self.warnDays = warnDays
   }
 
   /// 편지권 관련 UI(프로필 항목·"영구 편지로 만들기"·"영구" 표시)를 보일지.

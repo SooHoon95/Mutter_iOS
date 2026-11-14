@@ -63,8 +63,9 @@ public struct ViewerView: View {
       )
     }
     .task { await model.load() }
-    .confirmationDialog(L10n.accessKeep, isPresented: $showKeepConfirm, titleVisibility: .visible) {
-      Button(L10n.accessKeep) { Task { await model.keep(onNoTicket: onOpenTickets) } }
+    // 간직하기 확인(편지 끝·닫힘 예고·잠김 화면 공통) — 편지권 1장은 여기서 처음 보인다.
+    .confirmationDialog(L10n.accessKeepShort, isPresented: $showKeepConfirm, titleVisibility: .visible) {
+      Button(L10n.accessKeepShort) { Task { await model.keep(onNoTicket: onOpenTickets) } }
       Button(L10n.commonCancel, role: .cancel) {}
     } message: {
       Text(L10n.accessKeepNotice)
@@ -105,12 +106,8 @@ public struct ViewerView: View {
         deleteAt: deleteAt,
         canKeep: model.canKeep,
         isKeeping: model.isKeeping,
-        canRequestKeep: model.canRequestKeep,
-        isRequestingKeep: model.isRequestingKeep,
-        keepRequested: model.keepRequested,
         errorMessage: model.keepErrorMessage,
-        onKeep: { showKeepConfirm = true },
-        onRequestKeep: { Task { await model.requestKeep() } }
+        onKeep: { showKeepConfirm = true }
       )
     case .failed(let message):
       stage(Asset.Colors.ivory.color) {
@@ -208,13 +205,17 @@ public struct ViewerView: View {
           LetterPaperView(theme: theme, title: payload.title, blocks: model.paperBlocks(payload), revealOnScroll: true)
             .frame(maxWidth: .infinity)
 
-          // 닫힘 예고 — 남은 기간이 짧을 때만 조용히 한 줄.
-          if let days = model.closingSoonDays(payload) {
-            Text(days == 0 ? L10n.accessClosingToday : L10n.accessClosingIn(days))
-              .fonts(.caption)
-              .foregroundStyle(theme.foreground.opacity(0.6))
-              .padding(.top, 8)
-          }
+          // 편지 끝 간직 안내(열린 기한·닫힘 예고·간직한 편지) — 읽기를 끊지 않게 스크롤 마지막에만.
+          ViewerKeepFooter(
+            openUntil: model.openUntil(payload),
+            closingSoonDays: model.closingSoonDays(payload),
+            isKept: model.isKept,
+            canKeep: model.canKeep,
+            isKeeping: model.isKeeping,
+            errorMessage: model.keepErrorMessage,
+            foreground: theme.foreground,
+            onKeep: { showKeepConfirm = true }
+          )
 
           // 서버가 열람 시 자동 저장(마이그레이션 0022) — 인증 사용자 대상 토큰 수신에서만 표시.
           if model.canSaveToInbox && model.savedToInbox {

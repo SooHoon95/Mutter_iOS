@@ -8,18 +8,12 @@ struct LetterAccessStateRow: Decodable {
   let state: String
   let accessUntil: Date?
   let deleteAt: Date?
-  /// 나중에 더해진 키 — 없으면 false.
-  let keptByRecipient: Bool?
-  /// 나중에 더해진 키 — 없으면 0(서버 마이그레이션 배포 전).
-  let keepRequestCount: Int?
 
   enum CodingKeys: String, CodingKey {
     case state
     case letterId = "letter_id"
     case accessUntil = "access_until"
     case deleteAt = "delete_at"
-    case keptByRecipient = "kept_by_recipient"
-    case keepRequestCount = "keep_request_count"
   }
 
   /// 모르는 state는 nil — 목록에 아무것도 붙이지 않는다(지금과 같은 표시).
@@ -29,9 +23,7 @@ struct LetterAccessStateRow: Decodable {
       letterId: letterId,
       type: type,
       accessUntil: accessUntil,
-      deleteAt: deleteAt,
-      keptByRecipient: keptByRecipient ?? false,
-      keepRequestCount: keepRequestCount ?? 0
+      deleteAt: deleteAt
     )
   }
 }
@@ -46,8 +38,6 @@ struct LetterCoverDTO: Decodable {
   let accessUntil: Date?
   let deleteAt: Date?
   let loginRequired: Bool?
-  /// 나중에 더해진 키 — 없으면 false(서버 마이그레이션 배포 전).
-  let keepRequested: Bool?
 
   enum CodingKeys: String, CodingKey {
     case sealed, title, state
@@ -56,7 +46,6 @@ struct LetterCoverDTO: Decodable {
     case accessUntil = "access_until"
     case deleteAt = "delete_at"
     case loginRequired = "login_required"
-    case keepRequested = "keep_requested"
   }
 
   func toDomain() -> LetterCover {
@@ -69,8 +58,7 @@ struct LetterCoverDTO: Decodable {
       accessType: state.flatMap(LetterAccessType.init(rawValue:)),
       accessUntil: accessUntil,
       deleteAt: deleteAt,
-      loginRequired: loginRequired ?? false,
-      keepRequested: keepRequested ?? false
+      loginRequired: loginRequired ?? false
     )
   }
 }
@@ -99,23 +87,6 @@ struct LetterReaderRow: Decodable {
       lastOpenedAt: lastOpenedAt,
       openCount: openCount
     )
-  }
-}
-
-/// get_letter_keep_requests RPC 반환 row.
-struct LetterKeepRequestRow: Decodable {
-  let userId: String
-  let nickname: String?
-  let requestedAt: Date
-
-  enum CodingKeys: String, CodingKey {
-    case nickname
-    case userId = "user_id"
-    case requestedAt = "requested_at"
-  }
-
-  func toDomain() -> LetterKeepRequest {
-    LetterKeepRequest(userId: userId, nickname: nickname, requestedAt: requestedAt)
   }
 }
 

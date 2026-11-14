@@ -25,12 +25,4 @@ public final class LetterAccessUsecase: LetterAccessUsecasable {
   public func duplicate(letterId: String) async throws -> String {
     try await repository.duplicate(letterId: letterId)
   }
-
-  public func requestKeep(token: String, password: String?) async throws -> Bool {
-    try await repository.requestKeep(token: token, password: password)
-  }
-
-  public func keepRequests(letterId: String) async throws -> [LetterKeepRequest] {
-    try await repository.keepRequests(letterId: letterId)
-  }
 }

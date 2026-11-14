@@ -13,8 +13,6 @@ public struct HomeView: View {
   @EnvironmentObject private var coordinator: NavigationCoordinator<FeatureRoute>
   @State private var model: HomeModelData
   @State private var selectedTab: HomeTab = .sent
-  /// 받은 사람이 간직한 편지를 지우려 할 때 확인을 기다리는 편지 id.
-  @State private var keptDeleteLetterId: String?
 
   public init(
     letterUsecase: LetterUsecasable,
@@ -71,12 +69,7 @@ public struct HomeView: View {
                 .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                   Button(role: .destructive) {
-                    // 받은 사람이 편지권으로 간직한 편지만 한 번 묻는다. 나머지는 지금처럼 바로 지우고 되돌리기.
-                    if model.isKeptByRecipient(row.letter.id) {
-                      keptDeleteLetterId = row.letter.id
-                    } else {
-                      Task { await model.delete(row.letter.id) }
-                    }
+                    Task { await model.delete(row.letter.id) }
                   } label: {
                     Label(L10n.commonDelete, systemImage: "trash")
                   }
@@ -103,18 +96,6 @@ public struct HomeView: View {
       }
     }
     .animation(.snappy, value: model.undoableLetterId)
-    .confirmationDialog(
-      L10n.accessKeptDeleteWarning,
-      isPresented: Binding(get: { keptDeleteLetterId != nil }, set: { if !$0 { keptDeleteLetterId = nil } }),
-      titleVisibility: .visible
-    ) {
-      Button(L10n.commonDelete, role: .destructive) {
-        guard let letterId = keptDeleteLetterId else { return }
-        keptDeleteLetterId = nil
-        Task { await model.delete(letterId) }
-      }
-      Button(L10n.commonCancel, role: .cancel) { keptDeleteLetterId = nil }
-    }
     // 삭제함에서 되살리고 돌아오면 다시 보여야 하므로 나타날 때마다 새로 받는다.
     .task { await model.load() }
   }
@@ -179,9 +160,6 @@ public struct HomeView: View {
         Spacer()
         // 접근 상태(영구·n일 남음·닫힘) — 상태가 없으면 아무것도 붙이지 않는다.
         if let badge = model.accessBadge(for: row) { badge.badge }
-        // 받은 분의 간직 요청 — 상태 옆에 `간직 요청 {n}`.
-        let keepRequestCount = model.keepRequestCount(for: row)
-        if keepRequestCount > 0 { LetterAccessBadge(L10n.accessKeepRequestCount(keepRequestCount)) }
         if row.isSent { readBadge(row.isOpened) } else { draftBadge }
       }
     }

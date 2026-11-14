@@ -29,7 +29,7 @@ struct IssueLinkParams: Encodable {
   }
 }
 
-/// get_letter_by_token·keep_received_letter·request_keep_letter RPC 파라미터(p_token + p_password null 명시).
+/// get_letter_by_token·keep_received_letter RPC 파라미터(p_token + p_password null 명시).
 struct OpenLinkParams: Encodable {
   let token: String
   let password: String?

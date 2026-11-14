@@ -112,11 +112,11 @@ public struct LetterPayload: Equatable {
     self.accessUntil = accessUntil
   }
 
-  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 영구이거나 아직 여유가 있으면 nil.
-  public func closingSoonDays(now: Date = Date(), calendar: Calendar = .current) -> Int? {
+  /// 받은 사람에게 보일 "곧 닫혀요" 남은 일수(0 = 오늘). 영구이거나 남은 날이 `warnDays`보다 많으면 nil.
+  public func closingSoonDays(warnDays: Int, now: Date = Date(), calendar: Calendar = .current) -> Int? {
     guard !isPermanent, let accessUntil, accessUntil > now else { return nil }
     let days = LetterAccessCountdown.days(until: accessUntil, from: now, calendar: calendar)
-    return days <= LetterAccessCountdown.closingSoonDays ? days : nil
+    return days <= warnDays ? days : nil
   }
 
   public init(
