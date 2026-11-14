@@ -1,6 +1,6 @@
 # 영구 편지권 · 관리자 — 서버 계약 (iOS · Android · 웹 공용)
 
-서버 마이그레이션 `letter-app/supabase/migrations/0036~0040`과 Edge Function 4개의 계약.
+서버 마이그레이션 `letter-app/supabase/migrations/0036~0041`과 Edge Function 4개의 계약.
 설계: `docs/superpowers/specs/2026-11-11-permanent-letter-ticket-design.md` (9절 우선).
 
 모든 RPC는 PostgREST `rpc/<이름>`. 표에 없는 기존 RPC는 시그니처·반환 형태가 그대로다.
@@ -16,7 +16,7 @@
 | `locked` | 무료 기간이 끝남. 편지권을 붙이면 다시 열린다 | 잠긴 시각 | 삭제 예정 시각 |
 | `gone` | 유예도 끝남. 되살릴 수 없다 | — | — |
 
-- 14일은 **편지 단위**로 하나만 센다. 소유자가 아닌 로그인 사용자가 처음 본문을 받은 순간부터다.
+- 무료 기간(`free_days`, 지금 7일)은 **편지 단위**로 하나만 센다. 소유자가 아닌 로그인 사용자가 처음 본문을 받은 순간부터다.
 - 보낸 사람(소유자)은 편지가 존재하는 한 항상 자기 편지를 연다.
 - 일수(`free_days`, `grace_days`)는 `get_my_entitlements`가 준다. 코드에 14·30을 박지 않는다.
 
@@ -39,14 +39,12 @@
 |---|---|---|---|
 | `get_letter_by_token` (기존) | anon·로그인 | `p_token text, p_password text` | 기존 키 + `is_permanent boolean`, `access_until timestamptz\|null` |
 | `get_letter_cover` | anon·로그인 | `p_token text` | 아래 "봉투" |
-| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient, keep_request_count}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 받은 사람이 자기 편지권으로 영구로 만든 편지일 때 **보낸 사람에게만** true(삭제 확인 경고에 쓴다). `keep_request_count`는 간직 요청 수로, **보낸 사람에게만**, 아직 영구가 아닌 편지(`open`·`locked`)에만 0보다 크다 |
+| `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 0041부터 항상 false다(쓰지 않는다) |
 | `get_letter_readers` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, first_opened_at, last_opened_at, open_count}]` 처음 연 순. 소유자 아니면 `FORBIDDEN` |
-| `get_my_entitlements` | 로그인 | 없음 | `{is_admin, tickets, paid_enabled, free_days, grace_days}` |
+| `get_my_entitlements` | 로그인 | 없음 | `{is_admin, tickets, paid_enabled, free_days, grace_days, warn_days}` — `warn_days`(지금 2)는 닫힘 예고를 며칠 전부터 보일지. 키가 없으면 2로 본다 |
 | `get_my_ticket_history` | 로그인 | 없음 | `[{created_at, delta, reason, letter_title}]` 최근 순. `reason` ∈ `purchase`·`use`·`grant`·`refund` |
 | `make_letter_permanent` | 소유자 | `p_letter_id uuid` | void. `FORBIDDEN`·`NO_TICKET`·`LETTER_GONE` |
-| `keep_received_letter` | 로그인 | `p_token text, p_password text` | void. 링크 오류들 + `NO_TICKET`·`LETTER_GONE`. 성공하면 받은 편지함에 들어간다 |
-| `request_keep_letter` | 로그인 | `p_token text, p_password text` | boolean — 이번에 새로 알렸으면 true, 이미 알렸거나 알릴 일이 없으면(영구·내 편지) false. **둘 다 성공으로 다룬다.** 링크 오류들 + `AUTH_REQUIRED`·`LETTER_GONE` |
-| `get_letter_keep_requests` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, requested_at}]` 요청한 순. 소유자 아니면 `FORBIDDEN` |
+| `keep_received_letter` | 로그인 | `p_token text, p_password text` | void. 링크 오류들 + `NO_TICKET`·`LETTER_GONE`. 성공하면 받은 편지함에 들어간다. **잠기기 전(`open`)에도 쓸 수 있다** |
 | `is_admin` | 로그인 | 없음 | boolean |
 
 - `make_letter_permanent`·`keep_received_letter`는 이미 영구인 편지에 부르면 차감 없이 성공한다.
@@ -72,13 +70,12 @@
   "state": "open",
   "access_until": null,
   "delete_at": null,
-  "login_required": true,
-  "keep_requested": false
+  "login_required": true
 }
 ```
 `login_required`는 "이 편지는 로그인이 필요한가"이며 호출자의 로그인 여부와 무관하다.
 `sender_nickname`·`access_until`·`delete_at`은 null일 수 있다.
-`keep_requested`는 **호출한 로그인 사용자**가 이 편지에 간직 요청을 이미 보냈는지다(익명이면 false).
+`sender_nickname`은 보낸 사람이 탈퇴했으면 `탈퇴한 사용자`다.
 
 ### 화면 노출 규칙
 
@@ -88,10 +85,10 @@
 
 ### 보내기 전 선택(보낸 사람) — 세 플랫폼 같은 규칙
 
-보낸 사람이 결제를 **먼저** 고르게 한다. 간직 요청·잠김 화면은 이걸 지나친 편지를 위한 보완이다.
+보낸 사람이 결제를 **먼저** 고르게 한다. 받은 사람의 간직하기는 이걸 지나친 편지를 위한 보완이다.
 
 - **언제 보이나**: 발송 직전 화면(링크 발급 화면, 연결 상대에게 보내기 화면)에서 아래가 모두 참일 때.
-  1. 그 편지의 `state == open` (14일 규칙 대상이고 아직 영구가 아님)
+  1. 그 편지의 `state == open` (무료 기간 규칙 대상이고 아직 영구가 아님)
   2. `paid_enabled == true` (관리자의 편지는 처음부터 `permanent`라 해당 없음)
   3. 그 편지에 아직 발급된 링크가 없고, 이 화면에서 "14일 편지"를 고르지 않았다
 - **모양**: 제목 "어떻게 보낼까요?" 아래 선택지 둘. 고르기 전에는 링크 발급 폼(암호·예약·발급 버튼)을 보이지 않는다.
@@ -104,22 +101,37 @@
 - 링크가 이미 있는 편지(이미 보낸 편지)는 선택 카드 없이 기존 "영구 편지로 만들기" 버튼만 보인다.
 - `paid_enabled == false`면 아무것도 바뀌지 않는다(선택 카드 없음).
 
-### 잠김 화면(받은 사람) — 세 플랫폼 같은 규칙
+### 받은 사람의 간직하기 — 세 플랫폼 같은 규칙
 
-잠긴 편지를 연 로그인 사용자(소유자 아님)에게 두 가지를 보인다.
+받은 사람(로그인, 소유자 아님)은 무료 기간 안에도, 잠긴 뒤에도 자기 편지권으로 편지를 간직할 수 있다(`keep_received_letter`).
+보낸 사람에게 "편지권을 써 달라"고 알리는 간직 요청(0040)은 없앴다. 읽는 도중에는 끼어들지 않고, 화면에는 "간직하기"만 쓴다
+(편지권 1장은 확인 단계에서 보인다).
 
-1. **편지권으로 간직하기** (`keep_received_letter`)
-   - 앱: `tickets > 0 || paid_enabled || is_admin`이면 보인다. 잔액이 0이면 누를 때 편지권 화면으로 간다.
-   - 웹: `tickets > 0 || is_admin`이면 보인다. 아니고 `paid_enabled`면 버튼 대신 "편지권은 뮤터 앱에서 살 수 있어요" 안내.
-2. **보낸 분께 알리기** (`request_keep_letter`) — 편지권 UI 노출 여부와 무관하게 **항상** 보인다.
-   - 봉투의 `keep_requested`가 true거나 방금 성공했으면 비활성 "보낸 분께 알렸어요"로 바뀐다.
-   - 아래에 "보낸 분이 영구 편지로 만들면 다시 열려요." 안내를 둔다.
+**간직 버튼을 보이는 조건**(아래 ①②③ 공통)
+- 앱: `tickets > 0 || paid_enabled || is_admin`. 잔액이 0이면 누를 때 편지권 화면으로 간다.
+- 웹: `tickets > 0 || is_admin`. 아니고 `paid_enabled`면 버튼 대신 "편지권은 뮤터 앱에서 살 수 있어요".
+- 둘 다 아니면 버튼 없이 날짜 안내만 남는다.
 
-### 간직 요청(보낸 사람)
+**확인 단계**(①②③ 공통): "편지권 1장을 사용해요. 보낸 분이 편지를 지워도 내 편지함에는 남아요." → [간직하기] / [취소].
+성공하면 본문이 그대로 열려 있고(잠김 화면이었다면 열리고) 안내가 "간직한 편지예요"로 바뀐다.
 
-- 보낸 편지 목록: `keep_request_count > 0`이면 상태 옆에 `간직 요청 {n}`.
-- 보낸 편지 상세: `keep_request_count > 0`이면 `get_letter_keep_requests`로 요청자를 받아
-  "영구 편지로 만들기" 버튼 바로 위에 한 줄씩 보인다. 편지가 영구가 되면 건수가 0이 되어 사라진다.
+1. **① 편지 맨 끝** — 본문·사진이 끝난 자리에 작은 한 줄. `state == open`이고 `access_until`이 있을 때.
+   "이 편지는 {M}월 {D}일까지 열려요" + 글자 버튼 "계속 간직하기". 영구 편지(`is_permanent`)에는 아무것도 없다.
+2. **② 닫히기 `warn_days`일 전부터** — 기존 닫힘 예고("이 편지는 {n}일 뒤 닫혀요") 옆에 "간직하기" 버튼.
+   남은 날 ≤ `warn_days`일 때 보인다(예전의 고정 3일 대신).
+3. **③ 잠긴 뒤** — 잠김 화면의 "편지권으로 간직하기". "보낸 분께 알리기"는 없앤다.
+4. **④ 받은 편지 목록** — 상태 표시("{n}일 남음"·"닫힘")만. 버튼은 두지 않는다.
+
+### 삭제는 계정 단위 (0041)
+
+- **보낸 사람이 지우면** 자기 보낸 편지·삭제함에서만 다룬다. 이미 받은 사람(받은 편지함에 가진 사람)은 계속 연다.
+  아직 안 받은 사람과 로그인 없이 읽던 사람에게는 링크가 `LETTER_NOT_FOUND`로 닫힌다. 삭제함에서 되돌리면 다시 열린다.
+- **영구 삭제·삭제함 30일 경과·탈퇴**는 보낸 사람 쪽에서 끊는 것이다. 받은 사람이 가진 편지는 남는다.
+- **보낸 사람이 탈퇴한 편지**는 `sender_nickname`이 `탈퇴한 사용자`로 온다(`sender_id`는 값이 그대로 온다).
+- **받은 사람이 지우면** 지금처럼 자기 받은 편지함에서만 빠진다.
+- 받은 사람이 간직한 편지를 보낸 사람이 지워도 영구가 풀리지 않는다 → 환급도, 삭제 경고도 없다.
+- 클라이언트가 고칠 문구: 보낸 편지 삭제 확인("이미 받은 분의 편지함에는 남아요"), 탈퇴 안내("보낸 편지는 받은 분의 편지함에 남아요").
+- 링크 회수(`revoke_link`)는 그대로다 — 받은 사람의 접근까지 끊는 수단은 회수다.
 
 ## Edge Function
 
@@ -158,20 +170,20 @@
 
 data에 `type`과 `letter_id`가 있다.
 
-| type | 받는 쪽 | 제목 | 언제 |
-|---|---|---|---|
-| `letter_lock_soon` | 보낸 사람 | 편지가 곧 닫혀요 | 잠기기 3일 전(편지당 1회) |
-| `letter_locked` | 보낸 사람 | 편지가 닫혔어요 | 잠긴 뒤(편지당 1회) |
-| `letter_keep_request` | 보낸 사람 | 편지를 간직하고 싶어 해요 | 받은 사람이 간직 요청을 보냈을 때(편지×사람당 1회) |
-| `letter_kept` | 간직 요청을 보냈던 사람 | 편지를 계속 볼 수 있어요 | 그 편지가 영구가 됐을 때 |
+| type | 받는 쪽 | 제목 | 언제 | 탭하면 |
+|---|---|---|---|---|
+| `letter_lock_soon` | 보낸 사람 | 편지가 곧 닫혀요 | 잠기기 `warn_days`일 전(편지당 1회) | 그 보낸 편지의 상세 |
+| `letter_locked` | 보낸 사람 | 편지가 닫혔어요 | 잠긴 뒤(편지당 1회) | 그 보낸 편지의 상세 |
+| `received_lock_soon` | 받은 사람(간직할 수 있는 계정만) | 받은 편지가 곧 닫혀요 | 잠기기 `warn_days`일 전(편지당 1회) | 그 받은 편지를 연다 — data에 `token`이 함께 온다 |
 
-보낸 사람에게 가는 셋은 탭하면 그 보낸 편지의 상세로 간다. `letter_kept`는 받은 편지 목록으로 간다. Android 알림 태그는 `letter_id`를 써서 서로 덮어쓰지 않게 한다.
+보낸 사람이 지운 편지는 보낸 사람에게 알리지 않는다. Android 알림 태그는 `letter_id`를 써서 서로 덮어쓰지 않게 한다.
+`letter_keep_request`·`letter_kept`(0040)는 없어졌다.
 
 ## 문구 (세 플랫폼 동일)
 
 | 키 | 문구 |
 |---|---|
-| 닫힘 예고(받은 사람, 남은 기간 ≤ 3일) | `이 편지는 {n}일 뒤 닫혀요` (당일이면 `이 편지는 오늘 닫혀요`) |
+| 닫힘 예고(받은 사람, 남은 기간 ≤ `warn_days`일) | `이 편지는 {n}일 뒤 닫혀요` (당일이면 `이 편지는 오늘 닫혀요`) |
 | 잠김 화면 제목 | `보관 기간이 지난 편지예요` |
 | 잠김 화면 본문 | `{M}월 {D}일까지 다시 열 수 있어요.` |
 | 잠김 화면 버튼(앱, 로그인) | `편지권으로 간직하기` |
@@ -181,11 +193,6 @@ data에 `type`과 `letter_id`가 있다.
 | 보내기 전 선택 2 | `14일 편지로 보내기`({free_days}일) / `받는 분이 처음 연 날부터 {free_days}일 동안 열려요` / `무료` |
 | 보내기 전 보유 표시 | `보유 편지권 {n}장` |
 | 영구 선택 확인 | `편지권 1장을 사용해요` |
-| 잠김 화면 요청 버튼 | `보낸 분께 알리기` |
-| 잠김 화면 요청 완료 | `보낸 분께 알렸어요` |
-| 잠김 화면 요청 안내 | `보낸 분이 영구 편지로 만들면 다시 열려요.` |
-| 목록 간직 요청 표시(보낸 사람) | `간직 요청 {n}` |
-| 상세 요청자 행(보낸 사람) | `{닉네임}님이 간직하고 싶어 해요` (닉네임 없으면 `이름 없는 사용자가 간직하고 싶어 해요`) |
 | 삭제 대상 | `더 이상 열 수 없는 편지예요` |
 | 봉투 버튼 | `편지 열기` |
 | 봉투 안내 | `로그인하면 편지가 열려요` |
@@ -194,8 +201,13 @@ data에 `type`과 `letter_id`가 있다.
 | 링크 발급 화면 안내 | `받는 분이 처음 연 날부터 {free_days}일 동안 열려요.` |
 | 사본 | `같은 내용으로 한 통 더 보내기` |
 | 열람자 행 | `{닉네임} · {M}월 {D}일에 열어봄` (닉네임 없으면 `이름 없는 사용자`) |
-| 받은 사람이 편지권 쓸 때 확인 | `보낸 사람이 편지를 지우면 함께 사라지고 편지권은 돌려드려요.` |
-| 받은 사람이 간직한 편지를 보낸 사람이 지울 때 | `받은 분이 편지권으로 간직한 편지예요. 지우면 영구가 풀려요.` |
+| 받은 사람이 편지권 쓸 때 확인 | `편지권 1장을 사용해요. 보낸 분이 편지를 지워도 내 편지함에는 남아요.` |
+| 편지 끝 안내(받은 사람) | `이 편지는 {M}월 {D}일까지 열려요` · 버튼 `계속 간직하기` |
+| 닫힘 예고 옆 버튼 | `간직하기` |
+| 간직한 뒤 안내 | `간직한 편지예요` |
+| 보낸 편지 삭제 확인(보탤 문장) | `이미 받은 분의 편지함에는 남아요.` |
+| 탈퇴 안내(보탤 문장) | `보낸 편지는 받은 분의 편지함에 남아요.` |
+| 탈퇴한 보낸 사람 | `탈퇴한 사용자` (서버가 내려준다) |
 | 편지권 남은 계정 탈퇴 | `남은 편지권 {n}장이 사라져요.` |
 | 편지권 화면 제목 | `편지권` |
 | 편지권 잔액 | `{n}장` |
