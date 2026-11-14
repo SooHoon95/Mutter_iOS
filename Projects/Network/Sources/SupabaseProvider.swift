@@ -36,10 +36,14 @@ public final class SupabaseProvider {
     anonKey: String = AppConfig.supabaseAnonKey
   ) {
     // 기본 옵션: 인증 세션 = Keychain, 토큰 자동 갱신 ON.
+    // emitLocalSessionAsInitialSession: SDK가 다음 메이저에서 기본값으로 바꾸는 동작을 미리 켠다 — 저장된 세션을
+    // 갱신을 기다리지 않고 초기 세션으로 바로 내보낸다. 켜지 않으면 실행할 때마다 콘솔에 경고가 찍힌다.
+    // 이 앱은 초기 세션 이벤트(authStateChanges)를 구독하지 않는다 — 로그인 여부는 `auth.currentSession`(로컬 캐시)으로
+    // 판단하고, 실제 요청의 토큰은 SDK가 갱신해 보낸다. 그래서 이 옵션으로 동작이 달라지는 곳은 없다.
     self.client = SupabaseClient(
       supabaseURL: url,
       supabaseKey: anonKey,
-      options: SupabaseClientOptions()
+      options: SupabaseClientOptions(auth: .init(emitLocalSessionAsInitialSession: true))
     )
 
     // Pulse 네트워크 로깅을 켠다(URLSession 자동 후킹 — Supabase 트래픽 포함).
