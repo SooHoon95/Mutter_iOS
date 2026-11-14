@@ -37,7 +37,7 @@
 
 | RPC | 호출자 | 인자 | 반환 |
 |---|---|---|---|
-| `get_letter_by_token` (기존) | anon·로그인 | `p_token text, p_password text` | 기존 키 + `is_permanent boolean`, `access_until timestamptz\|null` |
+| `get_letter_by_token` (기존) | anon·로그인 | `p_token text, p_password text` | 기존 키 + `is_permanent boolean`, `access_until timestamptz\|null`, `is_mine boolean`(호출자가 보낸 사람 본인인가 — 0041, 키가 없으면 false로 본다) |
 | `get_letter_cover` | anon·로그인 | `p_token text` | 아래 "봉투" |
 | `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 0041부터 항상 false다(쓰지 않는다) |
 | `get_letter_readers` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, first_opened_at, last_opened_at, open_count}]` 처음 연 순. 소유자 아니면 `FORBIDDEN` |
@@ -108,6 +108,7 @@
 (편지권 1장은 확인 단계에서 보인다).
 
 **간직 버튼을 보이는 조건**(아래 ①②③ 공통)
+- 보낸 사람 본인(`is_mine == true`)에게는 ①②의 안내·버튼을 모두 보이지 않는다(자기 편지는 보낸 편지 상세에서 영구로 만든다).
 - 앱: `tickets > 0 || paid_enabled || is_admin`. 잔액이 0이면 누를 때 편지권 화면으로 간다.
 - 웹: `tickets > 0 || is_admin`. 아니고 `paid_enabled`면 버튼 대신 "편지권은 뮤터 앱에서 살 수 있어요".
 - 둘 다 아니면 버튼 없이 날짜 안내만 남는다.
