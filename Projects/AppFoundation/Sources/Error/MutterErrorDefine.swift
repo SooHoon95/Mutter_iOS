@@ -24,6 +24,8 @@ public enum MutterErrorDefine: Equatable {
   case noTicket
   /// 편지권 구매를 아직 쓸 수 없음(StoreKit 연동 전).
   case purchaseUnavailable
+  /// 다른 계정으로 산 편지권 거래(verify-purchase 403 `account_mismatch`). 거래는 마무리하지 않고 남겨 둔다.
+  case purchaseAccountMismatch
   /// 비밀번호 로그인 실패 — 이메일·비밀번호 불일치(Supabase `invalid_credentials`).
   /// 코드로 가입한 계정은 직접 정한 비밀번호가 없어 항상 여기로 온다.
   case invalidCredentials

@@ -27,6 +27,8 @@ public final class MutterError: Error, Equatable {
     case .letterGone:         return "더 이상 열 수 없는 편지예요"
     case .noTicket:           return "편지권이 없어요"
     case .purchaseUnavailable: return "지금은 편지권을 살 수 없어요."
+    case .purchaseAccountMismatch:
+      return "다른 계정으로 구매한 편지권이에요. 구매한 계정으로 로그인하면 들어와요."
     case .invalidCredentials:
       return "이메일 또는 비밀번호가 맞지 않아요. 비밀번호를 정한 적이 없다면 코드로 로그인해 주세요."
     case .emailNotConfirmed:  return "이메일 인증이 아직 끝나지 않았어요. 코드로 로그인해 주세요."

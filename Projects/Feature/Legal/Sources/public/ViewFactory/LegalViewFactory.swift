@@ -5,12 +5,16 @@ import Router
 import UIComponent
 
 /// Legal 화면 팩토리. LegalRoute(신고/약관/개인정보)→화면.
+/// 개인정보처리방침은 웹의 정식 문서를 앱 안에서 연다(웹·Android와 같은 문서 하나를 본다).
 public struct LegalViewFactory: ViewFactory {
   private let takedownUsecase: TakedownUsecasable
+  private let privacyURL: URL
   private let onBack: () -> Void
 
-  public init(takedownUsecase: TakedownUsecasable, onBack: @escaping () -> Void) {
+  /// - Parameter privacyURL: 웹 정식 개인정보처리방침 주소(`<링크 베이스>/legal/privacy`).
+  public init(takedownUsecase: TakedownUsecasable, privacyURL: URL, onBack: @escaping () -> Void) {
     self.takedownUsecase = takedownUsecase
+    self.privacyURL = privacyURL
     self.onBack = onBack
   }
 
@@ -21,7 +25,7 @@ public struct LegalViewFactory: ViewFactory {
     case .terms:
       LegalDocView(title: L10n.legalTerms, text: Self.termsText, onBack: onBack)
     case .privacy:
-      LegalDocView(title: L10n.legalPrivacy, text: Self.privacyText, onBack: onBack)
+      LegalWebView(title: L10n.legalPrivacy, url: privacyURL, onBack: onBack)
     }
   }
 
@@ -33,15 +37,5 @@ public struct LegalViewFactory: ViewFactory {
   3. 서비스는 사전 고지 후 변경·중단될 수 있습니다.
 
   (정식 약관 전문은 추후 보강됩니다.)
-  """
-
-  private static let privacyText = """
-  Mutter는 최소한의 정보만 수집합니다.
-
-  1. 계정: 이메일(로그인), 닉네임(표시).
-  2. 편지·연결 데이터는 본인과 수신자만 접근할 수 있도록 보호됩니다.
-  3. 전달 링크는 추측 불가 토큰 + 암호로 보호되며 색인되지 않습니다.
-
-  (정식 처리방침 전문은 추후 보강됩니다.)
   """
 }

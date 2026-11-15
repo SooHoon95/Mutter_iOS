@@ -16,13 +16,16 @@ public struct ProfileView: View {
   @Environment(\.openURL) private var openURL
   /// 편지권 화면으로(라우팅 레이어가 주입).
   private let onOpenTickets: () -> Void
+  /// 개인정보처리방침 화면으로(라우팅 레이어가 주입).
+  private let onOpenPrivacy: () -> Void
 
   public init(
     profileUsecase: ProfileUsecasable,
     authUsecase: AuthUsecasable,
     ticketUsecase: TicketUsecasable,
     onSignedOut: @escaping () -> Void,
-    onOpenTickets: @escaping () -> Void
+    onOpenTickets: @escaping () -> Void,
+    onOpenPrivacy: @escaping () -> Void
   ) {
     _model = State(initialValue: ProfileModelData(
       profileUsecase: profileUsecase,
@@ -31,6 +34,7 @@ public struct ProfileView: View {
       onSignedOut: onSignedOut
     ))
     self.onOpenTickets = onOpenTickets
+    self.onOpenPrivacy = onOpenPrivacy
   }
 
   public var body: some View {
@@ -294,6 +298,9 @@ public struct ProfileView: View {
           }
         }
       }
+
+      // 앱 안에서 처리방침을 언제든 열 수 있어야 한다(App Store 5.1.1).
+      MutterButton(L10n.legalPrivacy, style: .ghost, action: onOpenPrivacy)
 
       MutterButton(L10n.profileLogout, style: .ghost) {
         Task { await model.signOut() }

@@ -81,6 +81,9 @@ final class TicketCheckoutModelData {
       }
       try await useTicket()
       isDone = true
+    } catch let error as MutterError where error.define == .purchaseAccountMismatch {
+      // 다른 계정의 거래라 지급되지 않았다 — 잔액은 그대로. userMessage는 한국어 고정이라 L10n으로 보인다.
+      errorMessage = L10n.ticketAccountMismatch
     } catch {
       // 구매는 됐는데 사용이 실패했으면 편지권은 남아 있다 — 잔액을 다시 받아 버튼을 "편지권 1장으로 …"로 바꾼다.
       entitlements = (try? await ticketUsecase.entitlements()) ?? entitlements

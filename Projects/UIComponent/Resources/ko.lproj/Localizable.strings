@@ -316,10 +316,12 @@
 "ticket.reason.purchase" = "구매";
 "ticket.reason.use" = "사용";
 "ticket.reason.grant" = "지급";
-"ticket.reason.refund" = "환급";
+"ticket.reason.refund" = "환불";
 "ticket.deleteAccountWarning" = "남은 편지권 %d장이 사라져요.";
 "ticket.productPrice" = "편지권 %d장 · %@";
 "ticket.pending" = "결제 승인을 기다리고 있어요. 승인되면 편지권이 들어와요.";
+"ticket.purchaseNotice" = "구매한 편지권은 바로 지급돼요. 환불은 App Store에서 요청할 수 있고, 환불되면 그만큼 편지권이 회수돼요.";
+"ticket.accountMismatch" = "다른 계정으로 구매한 편지권이에요. 구매한 계정으로 로그인하면 들어와요.";
 "access.sendChoiceTitle" = "어떻게 보낼까요?";
 "access.sendPermanent" = "영구 편지로 보내기";
 "access.sendPermanentDetail" = "받는 분이 기간 제한 없이 간직해요";

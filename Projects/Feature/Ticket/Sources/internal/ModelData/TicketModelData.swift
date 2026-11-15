@@ -72,6 +72,9 @@ final class TicketModelData {
       case .cancelled:
         break
       }
+    } catch let error as MutterError where error.define == .purchaseAccountMismatch {
+      // userMessage는 한국어 고정이라 영어 화면을 위해 L10n으로 보인다.
+      errorMessage = L10n.ticketAccountMismatch
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
     }

@@ -15,4 +15,9 @@ public enum AppLink {
     }
     return value
   }()
+
+  /// 웹의 정식 개인정보처리방침. 앱 안 처리방침 화면이 이 문서를 연다.
+  public static var privacyPolicyURL: URL {
+    URL(string: baseURL + "/legal/privacy") ?? URL(string: productionBaseURL + "/legal/privacy")!
+  }
 }

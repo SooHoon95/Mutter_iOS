@@ -46,9 +46,15 @@ public actor StoreKitTicketPurchaser: TicketPurchasing {
     guard let product = try await loadProducts()[productType] else {
       throw MutterError(.purchaseUnavailable)
     }
+    // 구매를 로그인 계정에 묶는다 — 서버가 거래의 appAccountToken과 로그인 사용자를 비교해
+    // 다른 계정이면 지급하지 않는다(account_mismatch). 세션이 없으면 옵션 없이 산다.
+    var options: Set<Product.PurchaseOption> = []
+    if let userId = provider.client.auth.currentUser?.id {
+      options.insert(.appAccountToken(userId))
+    }
     let result: Product.PurchaseResult
     do {
-      result = try await product.purchase()
+      result = try await product.purchase(options: options)
     } catch {
       throw MutterError(.unknown)
     }
@@ -111,6 +117,8 @@ public actor StoreKitTicketPurchaser: TicketPurchasing {
       let errorCode = try? JSONDecoder().decode(VerifyPurchaseErrorBody.self, from: data).error
       // 테스트 모드: 테스터가 아닌 계정은 지급되지 않는다.
       if code == 403, errorCode == "not_tester" { throw MutterError(.purchaseUnavailable) }
+      // 다른 계정으로 산 거래 — finish하지 않고 남겨 두면, 구매한 계정으로 로그인했을 때 재전송으로 지급된다.
+      if code == 403, errorCode == "account_mismatch" { throw MutterError(.purchaseAccountMismatch) }
       throw MutterError(.unknown)
     } catch {
       throw SupabaseErrorMapper.map(error)
