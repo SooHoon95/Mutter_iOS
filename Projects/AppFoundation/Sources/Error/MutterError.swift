@@ -27,6 +27,13 @@ public final class MutterError: Error, Equatable {
     case .letterGone:         return "더 이상 열 수 없는 편지예요"
     case .noTicket:           return "편지권이 없어요"
     case .purchaseUnavailable: return "지금은 편지권을 살 수 없어요."
+    case .invalidCredentials:
+      return "이메일 또는 비밀번호가 맞지 않아요. 비밀번호를 정한 적이 없다면 코드로 로그인해 주세요."
+    case .emailNotConfirmed:  return "이메일 인증이 아직 끝나지 않았어요. 코드로 로그인해 주세요."
+    case .weakPassword:       return "비밀번호는 6자 이상이어야 해요."
+    case .samePassword:       return "지금 쓰는 비밀번호와 다른 비밀번호를 입력해 주세요."
+    case .reauthenticationNeeded: return "보안을 위해 코드로 다시 로그인한 뒤 설정해 주세요."
+    case .emailSendLimited:   return "코드 메일을 너무 자주 요청했어요. 잠시 후 다시 시도해 주세요."
     case .server(let message): return message
     case .unknown:            return "문제가 생겼어요. 다시 시도해 주세요."
     }

@@ -24,6 +24,19 @@ public enum MutterErrorDefine: Equatable {
   case noTicket
   /// 편지권 구매를 아직 쓸 수 없음(StoreKit 연동 전).
   case purchaseUnavailable
+  /// 비밀번호 로그인 실패 — 이메일·비밀번호 불일치(Supabase `invalid_credentials`).
+  /// 코드로 가입한 계정은 직접 정한 비밀번호가 없어 항상 여기로 온다.
+  case invalidCredentials
+  /// 이메일 인증 전 계정의 비밀번호 로그인(`email_not_confirmed`).
+  case emailNotConfirmed
+  /// 비밀번호 설정 — 6자 미만(`weak_password`).
+  case weakPassword
+  /// 비밀번호 설정 — 지금 비밀번호와 같음(`same_password`).
+  case samePassword
+  /// 비밀번호 설정 — 최근 로그인이 필요함(`reauthentication_needed`).
+  case reauthenticationNeeded
+  /// 코드 메일 발송 한도 초과(`over_email_send_rate_limit`) — 기본 메일 서버의 시간당 제한.
+  case emailSendLimited
   case server(String)
   case unknown
 }

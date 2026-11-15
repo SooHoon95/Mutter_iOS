@@ -7,6 +7,7 @@ public protocol AuthRepositorable {
   func signIn(email: String, password: String) async throws -> Session
   func signInApple(idToken: String, nonce: String) async throws -> Session
   func signInSocial(provider: SocialProvider, token: String) async throws -> Session
+  func setPassword(_ password: String) async throws
   func signOut() async throws
   func currentSession() async -> Session?
 }

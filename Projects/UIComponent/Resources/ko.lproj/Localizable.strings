@@ -35,6 +35,18 @@
 "auth.password" = "비밀번호";
 "auth.login" = "로그인";
 "auth.loginWithCode" = "코드로 로그인";
+"auth.signUp.open" = "이메일로 회원가입하기";
+"auth.signUp.title" = "이메일로 회원가입";
+"auth.signUp.requestCode" = "인증 코드 받기";
+"auth.backToLogin" = "로그인으로 돌아가기";
+"auth.setPassword.title" = "비밀번호 설정";
+"auth.setPassword.guide" = "비밀번호를 정해 두면 다음부터 코드 없이 로그인할 수 있어요.";
+"auth.setPassword.new" = "새 비밀번호 (6자 이상)";
+"auth.setPassword.confirm" = "비밀번호 확인";
+"auth.setPassword.save" = "저장하고 시작";
+"auth.setPassword.later" = "나중에 하기";
+"auth.password.mismatch" = "비밀번호가 서로 달라요.";
+"auth.password.tooShort" = "비밀번호는 6자 이상이어야 해요.";
 "auth.error.openLogin" = "로그인 화면을 열 수 없어요.";
 "auth.error.googleToken" = "Google 토큰을 받지 못했어요.";
 "auth.error.kakaoFailed" = "카카오 로그인에 실패했어요.";
@@ -212,6 +224,11 @@
 "profile.contact.body" = "문의 내용을 적어주세요.\n\n———\n(원활한 답변을 위해 앱 버전/기기 정보를 함께 남겨주시면 좋아요.)";
 "profile.logout" = "로그아웃";
 "profile.deleteAccount" = "계정 삭제";
+"profile.loginPassword" = "로그인 비밀번호";
+"profile.loginPassword.set" = "설정됨";
+"profile.loginPassword.unset" = "설정하기";
+"profile.loginPassword.save" = "저장";
+"profile.loginPassword.savedToast" = "비밀번호를 저장했어요";
 
 /* ===== 주고받음(Threads) ===== */
 "threads.unnamed" = "이름 없음";
@@ -311,6 +328,9 @@
 "access.kept" = "간직한 편지예요";
 "access.choicePermanent" = "영구 편지";
 "access.choiceFreeDays" = "%d일 편지";
+"access.sendPermanentChosen" = "영구 편지로 보내요";
+"access.sendPermanentHint" = "링크를 만들거나 보낼 때 편지권 1장이 사용돼요";
+"access.chooseAgain" = "다시 고르기";
 /* ===== 결제 안내 시트(편지권이 없을 때) ===== */
 "checkout.send.point1" = "시간이 지나도 닫히지 않아요";
 "checkout.send.point2" = "내가 편지를 지워도 받은 분의 편지함에는 남아요";
@@ -325,6 +345,3 @@
 "checkout.keep.point2" = "보낸 분이 편지를 지워도 내 편지함에는 남아요";
 "checkout.keep.buy" = "구매하고 간직하기";
 "checkout.keep.use" = "편지권 1장으로 간직하기";
-"access.sendPermanentChosen" = "영구 편지로 보내요";
-"access.sendPermanentHint" = "링크를 만들거나 보낼 때 편지권 1장이 사용돼요";
-"access.chooseAgain" = "다시 고르기";

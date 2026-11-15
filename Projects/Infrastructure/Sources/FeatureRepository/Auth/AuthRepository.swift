@@ -157,6 +157,18 @@ public final class AuthRepository: AuthRepositorable {
     }
   }
 
+  /// 로그인 비밀번호 설정·변경. `password_set` 표시를 함께 남겨 다음 코드 로그인 때 설정 단계를 건너뛴다.
+  /// (서버 계약: docs/specs/2026-11-14-login-password.md — 웹·Android 동일)
+  public func setPassword(_ password: String) async throws {
+    do {
+      _ = try await provider.client.auth.update(
+        user: UserAttributes(password: password, data: ["password_set": .bool(true)])
+      )
+    } catch {
+      throw SupabaseErrorMapper.map(error)
+    }
+  }
+
   public func signOut() async throws {
     do {
       try await provider.client.auth.signOut()
@@ -171,6 +183,12 @@ public final class AuthRepository: AuthRepositorable {
   }
 
   private func domainSession(from session: Auth.Session) -> Domain.Session {
-    Domain.Session(userId: session.user.id.uuidString, email: session.user.email)
+    let user = session.user
+    return Domain.Session(
+      userId: user.id.uuidString,
+      email: user.email,
+      isEmailAccount: user.appMetadata["provider"]?.stringValue == "email",
+      hasSetPassword: user.userMetadata["password_set"]?.boolValue == true
+    )
   }
 }

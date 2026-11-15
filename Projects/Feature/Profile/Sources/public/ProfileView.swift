@@ -10,6 +10,7 @@ public struct ProfileView: View {
   @State private var showDeleteConfirm = false
   @State private var isEditingNickname = false
   @State private var mailFallbackToast = false
+  @State private var showPasswordSheet = false
   @FocusState private var nicknameFocused: Bool
   @Environment(\.openURL) private var openURL
   /// 편지권 화면으로(라우팅 레이어가 주입).
@@ -51,6 +52,10 @@ public struct ProfileView: View {
     .task { await model.load() }
     .toastIfNeeded($model.savedToast, text: L10n.profileSavedToast)
     .toastIfNeeded($mailFallbackToast, text: L10n.profileMailFallback)
+    .toastIfNeeded($model.passwordSavedToast, text: L10n.profileLoginPasswordSavedToast)
+    .sheet(isPresented: $showPasswordSheet) {
+      LoginPasswordSheet(model: model, isPresented: $showPasswordSheet)
+    }
     .confirmationDialog(L10n.profileDeleteConfirm, isPresented: $showDeleteConfirm, titleVisibility: .visible) {
       Button(L10n.commonDelete, role: .destructive) { Task { await model.deleteAccount() } }
       Button(L10n.commonCancel, role: .cancel) {}
@@ -96,6 +101,20 @@ public struct ProfileView: View {
         ) {
           isEditingNickname = true
           nicknameFocused = true
+        }
+      }
+
+      // 로그인 비밀번호 — 코드로 가입한 이메일 계정도 여기서 정하면 다음부터 비밀번호로 로그인한다.
+      if model.showsLoginPassword {
+        hairlineDivider
+
+        settingsRow(
+          icon: Asset.Images.lock,
+          label: L10n.profileLoginPassword,
+          value: model.hasLoginPassword ? L10n.profileLoginPasswordSet : L10n.profileLoginPasswordUnset
+        ) {
+          model.passwordErrorMessage = nil
+          showPasswordSheet = true
         }
       }
 

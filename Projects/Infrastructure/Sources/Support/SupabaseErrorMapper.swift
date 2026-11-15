@@ -12,6 +12,11 @@ enum SupabaseErrorMapper {
   static func map(_ error: Error) -> MutterError {
     if let mutter = error as? MutterError { return mutter }
 
+    // 비밀번호 로그인·설정 실패는 GoTrue의 구조화된 error_code로 구분한다(메시지 문구는 바뀔 수 있다).
+    if let auth = error as? AuthError, let mapped = mapAuthErrorCode(auth.errorCode.rawValue) {
+      return mapped
+    }
+
     let message = extractMessage(error)
 
     // 세션 무효(서버 401 — JWT 만료/무효): 세션 상태 소스에 전역 신호를 쏴 온보딩으로 되돌린다.
@@ -70,6 +75,21 @@ enum SupabaseErrorMapper {
       || lower.contains("refresh_token")
       || lower.contains("session_not_found")
       || lower.contains("session not found")
+  }
+
+  /// 비밀번호·코드 메일 관련 GoTrue error_code → MutterError. 그 외 코드는 nil(아래 일반 규칙으로).
+  /// 웹(Login.tsx)·Android 매퍼와 같은 표(docs/specs/2026-11-14-login-password.md).
+  private static func mapAuthErrorCode(_ code: String) -> MutterError? {
+    switch code {
+    case "invalid_credentials": return MutterError(.invalidCredentials)
+    case "email_not_confirmed": return MutterError(.emailNotConfirmed)
+    case "weak_password": return MutterError(.weakPassword)
+    case "same_password": return MutterError(.samePassword)
+    case "reauthentication_needed", "reauthentication_not_valid": return MutterError(.reauthenticationNeeded)
+    case "over_email_send_rate_limit": return MutterError(.emailSendLimited)
+    case "over_request_rate_limit": return MutterError(.rateLimited)
+    default: return nil
+    }
   }
 
   private static func extractMessage(_ error: Error) -> String {

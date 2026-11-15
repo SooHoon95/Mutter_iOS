@@ -28,6 +28,10 @@ public final class AuthUsecase: AuthUsecasable {
     try await repository.signInSocial(provider: provider, token: token)
   }
 
+  public func setPassword(_ password: String) async throws {
+    try await repository.setPassword(password)
+  }
+
   public func signOut() async throws {
     try await repository.signOut()
   }

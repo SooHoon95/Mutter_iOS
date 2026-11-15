@@ -12,6 +12,13 @@ final class ProfileModelData {
   var isLoading = false
   var errorMessage: String?
   var savedToast = false
+  /// 로그인 비밀번호 항목 — 이메일 계정만 보인다(소셜 계정은 이메일이 내부용).
+  private(set) var showsLoginPassword = false
+  /// 직접 정한 비밀번호가 있는지(`password_set` 표시 기준).
+  private(set) var hasLoginPassword = false
+  var isSavingPassword = false
+  var passwordErrorMessage: String?
+  var passwordSavedToast = false
   /// 권한·편지권 잔액. nil이면(조회 실패·배포 전) 편지권 항목을 숨긴다.
   private(set) var entitlements: Entitlements?
 
@@ -48,6 +55,29 @@ final class ProfileModelData {
     let profile = try? await profileTask
     nickname = profile?.nickname ?? ""
     entitlements = try? await entitlementsTask
+    let session = await authUsecase.currentSession()
+    showsLoginPassword = session?.isEmailAccount ?? false
+    hasLoginPassword = session?.hasSetPassword ?? false
+  }
+
+  /// 로그인 비밀번호 설정·변경. 성공하면 true(시트를 닫는다).
+  func saveLoginPassword(_ password: String, confirm: String) async -> Bool {
+    if let message = PasswordRule.validate(password, confirm: confirm) {
+      passwordErrorMessage = message
+      return false
+    }
+    isSavingPassword = true
+    passwordErrorMessage = nil
+    defer { isSavingPassword = false }
+    do {
+      try await authUsecase.setPassword(password)
+      hasLoginPassword = true
+      passwordSavedToast = true
+      return true
+    } catch {
+      passwordErrorMessage = (error as? MutterError)?.userMessage ?? L10n.commonRetryLater
+      return false
+    }
   }
 
   func saveNickname() async {

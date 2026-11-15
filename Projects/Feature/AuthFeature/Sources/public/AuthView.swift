@@ -3,7 +3,7 @@ import SwiftUI
 import Domain
 import UIComponent
 
-/// 로그인 화면 — 이메일 매직코드(가입 겸용) + 비밀번호. 수신 무마찰 원칙상 가볍게.
+/// 로그인 화면 — 비밀번호 로그인(기본) + 코드 로그인 + 이메일 회원가입 + 소셜. 수신 무마찰 원칙상 가볍게.
 /// pre-auth 루트 화면이라 navbar/뒤로가기 없음(항상 AuthViewWrapper로만 표시, push 안 됨).
 public struct AuthView: View {
   @State private var model: AuthModelData
@@ -31,9 +31,11 @@ public struct AuthView: View {
 
             VStack(spacing: 12) {
               switch model.step {
-              case .enterEmail: emailStep
-              case .enterCode: codeStep
               case .enterPassword: passwordStep
+              case .enterEmail: emailStep
+              case .signUp: signUpStep
+              case .enterCode: codeStep
+              case .setPassword: setPasswordStep
               }
 
               if let message = model.errorMessage {
@@ -47,7 +49,10 @@ public struct AuthView: View {
             .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
             .shadows(.shadowLow)
 
-            socialSection
+            // 비밀번호 설정 단계는 이미 로그인된 상태, 회원가입은 이메일 가입 중 — 소셜 버튼을 보이지 않는다.
+            if model.step != .setPassword && model.step != .signUp {
+              socialSection
+            }
 
             Spacer(minLength: 0)
           }
@@ -70,7 +75,7 @@ public struct AuthView: View {
         Task { await model.requestCode() }
       }
       MutterButton(L10n.authLoginWithPassword, style: .ghost) {
-        model.switchToPassword()
+        model.showPasswordLogin()
       }
     }
   }
@@ -86,7 +91,7 @@ public struct AuthView: View {
         Task { await model.verifyCode() }
       }
       MutterButton(L10n.authReenterEmail, style: .ghost) {
-        model.backToEmail()
+        model.backFromCode()
       }
     }
   }
@@ -94,16 +99,56 @@ public struct AuthView: View {
   private var passwordStep: some View {
     VStack(spacing: 12) {
       field(L10n.authEmail, text: $model.email, keyboard: .emailAddress)
-      SecureField(L10n.authPassword, text: $model.password)
-        .textFieldStyle(.plain)
-        .padding(14)
-        .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+      secureField(L10n.authPassword, text: $model.password, contentType: .password)
       MutterButton(L10n.authLogin, isLoading: model.isLoading, isEnabled: model.isEmailValid && !model.password.isEmpty) {
         Task { await model.signInWithPassword() }
       }
       MutterButton(L10n.authLoginWithCode, style: .ghost) {
-        model.backToEmail()
+        model.showCodeLogin()
       }
+      MutterButton(L10n.authSignUpOpen, style: .ghost) {
+        model.showSignUp()
+      }
+    }
+  }
+
+  /// 이메일 회원가입 — 비밀번호를 정하고 코드로 이메일을 인증하면 가입이 끝난다.
+  private var signUpStep: some View {
+    VStack(spacing: 12) {
+      Text(L10n.authSignUpTitle)
+        .fonts(.bodyLargeBold)
+        .foregroundStyle(Asset.Colors.ink.color)
+      field(L10n.authEmail, text: $model.email, keyboard: .emailAddress)
+      secureField(L10n.authSetPasswordNew, text: $model.password, contentType: .newPassword)
+      secureField(L10n.authSetPasswordConfirm, text: $model.passwordConfirm, contentType: .newPassword)
+      MutterButton(L10n.authSignUpRequestCode, isLoading: model.isLoading, isEnabled: model.canRequestSignUpCode) {
+        Task { await model.requestSignUpCode() }
+      }
+      MutterButton(L10n.authBackToLogin, style: .ghost) {
+        model.showPasswordLogin()
+      }
+    }
+  }
+
+  /// 코드 로그인 직후 — 비밀번호를 정해 두면 다음부터 비밀번호로 로그인할 수 있다. 건너뛸 수 있다.
+  private var setPasswordStep: some View {
+    VStack(spacing: 12) {
+      Text(L10n.authSetPasswordTitle)
+        .fonts(.bodyLargeBold)
+        .foregroundStyle(Asset.Colors.ink.color)
+      Text(L10n.authSetPasswordGuide)
+        .fonts(.caption)
+        .foregroundStyle(Asset.Colors.inkSoft.color)
+        .multilineTextAlignment(.center)
+      secureField(L10n.authSetPasswordNew, text: $model.password, contentType: .newPassword)
+      secureField(L10n.authSetPasswordConfirm, text: $model.passwordConfirm, contentType: .newPassword)
+      MutterButton(L10n.authSetPasswordSave, isLoading: model.isLoading, isEnabled: model.canSavePassword) {
+        Task { await model.saveNewPassword() }
+      }
+      MutterButton(L10n.authSetPasswordLater, style: .ghost) {
+        model.skipPasswordSetup()
+      }
+      .disabled(model.isLoading)
     }
   }
 
@@ -126,6 +171,14 @@ public struct AuthView: View {
   }
 
   // MARK: - Helpers
+
+  private func secureField(_ placeholder: String, text: Binding<String>, contentType: UITextContentType) -> some View {
+    SecureField(placeholder, text: text)
+      .textFieldStyle(.plain)
+      .textContentType(contentType)
+      .padding(14)
+      .background(Asset.Colors.ivory.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
+  }
 
   private func field(_ placeholder: String, text: Binding<String>, keyboard: UIKeyboardType) -> some View {
     TextField(placeholder, text: text)

@@ -43,6 +43,7 @@ public final class InboxRepository: InboxRepositorable {
 
 | 서버 메시지 / 조건 | MutterError |
 |---|---|
+| Auth `error_code` `invalid_credentials` / `email_not_confirmed` / `weak_password` / `same_password` / `reauthentication_needed` | `.invalidCredentials` / `.emailNotConfirmed` / `.weakPassword` / `.samePassword` / `.reauthenticationNeeded` (메시지가 아니라 `AuthError.errorCode`로 판정, `docs/specs/2026-11-14-login-password.md`) |
 | JWT 만료·무효(401) | `.unauthorized` + `SessionInvalidation.notifyUnauthorized()`(전역 신호 → 온보딩 복귀) |
 | `NOT_YET_REVEALED:<ISO8601>` | `.linkNotYetRevealed(Date)` |
 | `WRONG_PASSWORD` / `LINK_REVOKED` / `LINK_EXPIRED` | `.wrongPassword` / `.linkRevoked` / `.linkExpired` |

@@ -12,6 +12,8 @@ public protocol AuthUsecasable {
   func signInApple(idToken: String, nonce: String) async throws -> Session
   /// 소셜 로그인(google/kakao).
   func signInSocial(provider: SocialProvider, token: String) async throws -> Session
+  /// 로그인 비밀번호 설정·변경(이메일 계정). 이후 이메일+비밀번호로 로그인할 수 있다.
+  func setPassword(_ password: String) async throws
   /// 로그아웃.
   func signOut() async throws
   /// 현재 세션(없으면 nil).

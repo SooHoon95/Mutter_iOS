@@ -35,6 +35,18 @@
 "auth.password" = "Password";
 "auth.login" = "Sign In";
 "auth.loginWithCode" = "Sign in with Code";
+"auth.signUp.open" = "Sign Up with Email";
+"auth.signUp.title" = "Sign Up with Email";
+"auth.signUp.requestCode" = "Get Verification Code";
+"auth.backToLogin" = "Back to Sign In";
+"auth.setPassword.title" = "Set a Password";
+"auth.setPassword.guide" = "Set a password to sign in without a code next time.";
+"auth.setPassword.new" = "New password (6+ characters)";
+"auth.setPassword.confirm" = "Confirm password";
+"auth.setPassword.save" = "Save and Continue";
+"auth.setPassword.later" = "Later";
+"auth.password.mismatch" = "Passwords don't match.";
+"auth.password.tooShort" = "Password must be at least 6 characters.";
 "auth.error.openLogin" = "Couldn't open the sign-in screen.";
 "auth.error.googleToken" = "Couldn't get a Google token.";
 "auth.error.kakaoFailed" = "Kakao sign-in failed.";
@@ -212,6 +224,11 @@
 "profile.contact.body" = "Please describe your inquiry.\n\n———\n(Including your app version and device info helps us respond faster.)";
 "profile.logout" = "Sign Out";
 "profile.deleteAccount" = "Delete Account";
+"profile.loginPassword" = "Sign-in Password";
+"profile.loginPassword.set" = "Set";
+"profile.loginPassword.unset" = "Set Up";
+"profile.loginPassword.save" = "Save";
+"profile.loginPassword.savedToast" = "Password saved";
 
 /* ===== Threads ===== */
 "threads.unnamed" = "Unnamed";
@@ -311,6 +328,9 @@
 "access.kept" = "You kept this letter";
 "access.choicePermanent" = "Permanent letter";
 "access.choiceFreeDays" = "%d-day letter";
+"access.sendPermanentChosen" = "Sending as a permanent letter";
+"access.sendPermanentHint" = "1 ticket is used when you create the link or send";
+"access.chooseAgain" = "Choose again";
 /* ===== Checkout sheet (shown when there is no ticket) ===== */
 "checkout.send.point1" = "It never closes, however much time passes";
 "checkout.send.point2" = "It stays in the recipient's inbox even if you delete it";
@@ -325,6 +345,3 @@
 "checkout.keep.point2" = "It stays in your inbox even if the sender deletes it";
 "checkout.keep.buy" = "Buy and keep";
 "checkout.keep.use" = "Keep with 1 ticket";
-"access.sendPermanentChosen" = "Sending as a permanent letter";
-"access.sendPermanentHint" = "1 ticket is used when you create the link or send";
-"access.chooseAgain" = "Choose again";
