@@ -3,11 +3,11 @@ import SwiftUI
 import Domain
 import UIComponent
 
-/// 잠김 화면 — 무료 기간이 끝난 편지. 본문 대신 제목·보낸 사람·다시 열 수 있는 기한을 보이고,
+/// 잠김 화면 — 무료 기간이 끝난 편지. 본문 대신 제목·보낸 사람·삭제되는 날짜를 보이고,
 /// 간직할 수 있는 로그인 사용자에게만 "편지권으로 간직하기"를 준다.
 struct ViewerLockedView: View {
   let cover: LetterCover
-  /// 삭제 예정 시각 — 이날까지 편지권을 붙이면 다시 열린다.
+  /// 삭제 예정 시각 — 이날 편지가 삭제된다. 그 전에 편지권을 붙이면 다시 열린다.
   let deleteAt: Date
   let canKeep: Bool
   /// 지금 쓸 편지권이 있는지 — 있으면 버튼이 바로 1장을 쓰므로 버튼 아래에 미리 알린다. 없으면 결제 안내가 뜬다.
@@ -76,9 +76,11 @@ struct ViewerLockedView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 
-  /// "{M}월 {D}일까지 다시 열 수 있어요." — 기기 달력 기준 날짜.
+  /// "{M}월 {D}일에 삭제돼요." + (간직할 수 있으면) "그 전에 간직하면 계속 열 수 있어요." — 기기 달력 기준 날짜.
   private var untilText: String {
     let parts = Calendar.current.dateComponents([.month, .day], from: deleteAt)
-    return L10n.accessLockedUntil(parts.month ?? 0, parts.day ?? 0)
+    let deleteOn = L10n.accessLockedDeleteOn(parts.month ?? 0, parts.day ?? 0)
+    // 두 문장을 줄로 나눈다 — 한 줄로 이으면 좁은 화면에서 어색한 자리에서 접힌다.
+    return canKeep ? deleteOn + "\n" + L10n.accessLockedKeepHint : deleteOn
   }
 }

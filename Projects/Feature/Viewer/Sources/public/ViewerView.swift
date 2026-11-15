@@ -212,6 +212,7 @@ public struct ViewerView: View {
           ViewerKeepFooter(
             openUntil: model.openUntil(payload),
             closingSoonDays: model.closingSoonDays(payload),
+            graceDays: model.entitlements?.graceDays,
             isKept: model.isKept,
             canKeep: model.canKeep,
             hasTicket: model.hasTicketForKeep,

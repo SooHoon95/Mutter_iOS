@@ -28,8 +28,11 @@ public struct LetterAccessState: Equatable {
       guard let accessUntil else { return nil }
       // 당일 닫히는 편지도 "0일 남음" 대신 1일로 보인다(목록 문구엔 "오늘"이 없다).
       return .daysLeft(max(1, LetterAccessCountdown.days(until: accessUntil, from: now, calendar: calendar)))
-    case .locked, .gone:
-      return .locked
+    case .locked:
+      // 닫힌 뒤 유예가 끝나면 삭제된다 — 목록에서 며칠 남았는지 함께 보인다(계약 "삭제 안내").
+      return .locked(deleteInDays: deleteAt.map { LetterAccessCountdown.days(until: $0, from: now, calendar: calendar) })
+    case .gone:
+      return .locked(deleteInDays: nil)
     }
   }
 }

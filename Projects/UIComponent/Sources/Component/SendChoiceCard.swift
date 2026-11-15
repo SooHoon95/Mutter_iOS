@@ -14,6 +14,7 @@ public struct SendChoiceCard: View {
 
   private let ticketCount: Int
   private let freeDays: Int
+  private let graceDays: Int?
   private let hasTicket: Bool
   private let onPermanent: () -> Void
   private let onFreeDays: () -> Void
@@ -21,18 +22,21 @@ public struct SendChoiceCard: View {
   @State private var choice: Choice = .permanent
 
   /// - Parameters:
+  ///   - graceDays: 닫힌 뒤 삭제까지의 일수 — 있으면 {n}일 편지 설명 아래에 "닫힌 뒤 {n}일이 지나면 편지가 삭제돼요"를 보인다.
   ///   - hasTicket: 영구 편지에 쓸 편지권이 있는지(관리자는 차감이 없어 true).
   ///   - onPermanent: 영구 편지를 고르고 버튼을 눌렀다 — 편지권이 있으면 그대로 진행, 없으면 결제 안내(구매).
   ///   - onFreeDays: {n}일 편지를 고르고 버튼을 눌렀다.
   public init(
     ticketCount: Int,
     freeDays: Int,
+    graceDays: Int?,
     hasTicket: Bool,
     onPermanent: @escaping () -> Void,
     onFreeDays: @escaping () -> Void
   ) {
     self.ticketCount = ticketCount
     self.freeDays = freeDays
+    self.graceDays = graceDays
     self.hasTicket = hasTicket
     self.onPermanent = onPermanent
     self.onFreeDays = onFreeDays
@@ -57,7 +61,7 @@ public struct SendChoiceCard: View {
       MutterChoiceRow(
         isSelected: choice == .freeDays,
         title: L10n.accessChoiceFreeDays(freeDays),
-        detail: L10n.accessSendFreeDaysDetail(freeDays),
+        detail: freeDaysDetail,
         trailing: L10n.accessSendFree
       ) {
         withAnimation(.easeInOut(duration: 0.15)) { choice = .freeDays }
@@ -78,5 +82,12 @@ public struct SendChoiceCard: View {
       }
       .padding(.top, 4)
     }
+  }
+
+  /// {n}일 편지 설명 — 무료로 보내면 편지가 언젠가 삭제된다는 것을 고르는 자리에서 알린다.
+  private var freeDaysDetail: String {
+    let detail = L10n.accessSendFreeDaysDetail(freeDays)
+    guard let graceDays else { return detail }
+    return detail + "\n" + L10n.accessPurgeAfterLetter(graceDays)
   }
 }

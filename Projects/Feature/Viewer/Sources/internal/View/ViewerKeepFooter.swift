@@ -5,6 +5,7 @@ import UIComponent
 /// 편지 맨 끝(본문·사진 뒤) 간직 안내 — 읽기를 끊지 않도록 스크롤 마지막에 조용히 둔다.
 /// ① "이 편지는 {M}월 {D}일까지 열려요" + "계속 간직하기", ② 닫힘 예고 "이 편지는 {n}일 뒤 닫혀요" + "간직하기".
 /// 간직한 뒤에는 "간직한 편지예요" 한 줄만. 버튼은 한 개만 둔다 — 닫힘 예고가 있으면 그쪽에 붙인다.
+/// 버튼이 붙는 줄 끝에 "닫힌 뒤 {n}일이 지나면 삭제돼요."를 잇는다 — 처음 받은 사람이 규칙을 아는 유일한 자리다(계약 "삭제 안내").
 ///
 /// 편지권이 있으면 글자 버튼을 누른 자리에서 한 번 더 묻는다(팝업 없이 같은 줄이 확인으로 바뀐다) —
 /// 작은 글자 버튼 한 번에 편지권이 쓰이지 않게. 편지권이 없으면 누르는 즉시 결제 안내 시트가 뜬다.
@@ -13,6 +14,8 @@ struct ViewerKeepFooter: View {
   let openUntil: Date?
   /// ② 닫히기까지 남은 일수(0 = 오늘, nil이면 ② 없음).
   let closingSoonDays: Int?
+  /// 닫힌 뒤 삭제까지의 일수(nil이면 삭제 문장을 뺀다 — 권한을 받지 못했을 때).
+  let graceDays: Int?
   let isKept: Bool
   let canKeep: Bool
   /// 지금 쓸 편지권이 있는지 — 있으면 같은 자리에서 확인을 받고, 없으면 바로 `onKeep`(결제 안내).
@@ -34,10 +37,14 @@ struct ViewerKeepFooter: View {
         confirmation
       } else {
         if let openUntil {
-          line(untilText(openUntil), button: closingSoonDays == nil ? L10n.accessKeepContinue : nil)
+          if closingSoonDays == nil {
+            line(withPurge(untilText(openUntil)), button: L10n.accessKeepContinue)
+          } else {
+            line(untilText(openUntil), button: nil)
+          }
         }
         if let days = closingSoonDays {
-          line(days == 0 ? L10n.accessClosingToday : L10n.accessClosingIn(days), button: L10n.accessKeepShort)
+          line(withPurge(days == 0 ? L10n.accessClosingToday : L10n.accessClosingIn(days)), button: L10n.accessKeepShort)
         }
       }
 
@@ -96,6 +103,12 @@ struct ViewerKeepFooter: View {
         .disabled(isKeeping)
       }
     }
+  }
+
+  /// 안내 문장 뒤에 "닫힌 뒤 {n}일이 지나면 삭제돼요."를 잇는다. 일수를 모르면 그대로.
+  private func withPurge(_ text: String) -> String {
+    guard let graceDays else { return text }
+    return text + ". " + L10n.accessPurgeAfter(graceDays)
   }
 
   /// "이 편지는 {M}월 {D}일까지 열려요" — 기기 달력 기준 날짜.

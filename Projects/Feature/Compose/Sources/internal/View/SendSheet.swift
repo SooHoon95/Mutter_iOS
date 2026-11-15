@@ -56,6 +56,7 @@ struct SendSheet: View {
               SendChoiceCard(
                 ticketCount: model.sendEntitlements?.tickets ?? 0,
                 freeDays: model.sendEntitlements?.freeDays ?? 0,
+                graceDays: model.sendEntitlements?.graceDays,
                 hasTicket: model.hasTicketForPermanent,
                 onPermanent: { model.choosePermanent() },
                 onFreeDays: { model.choseFreeDays = true }

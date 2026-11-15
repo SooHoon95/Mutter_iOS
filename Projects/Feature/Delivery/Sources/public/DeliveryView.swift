@@ -74,11 +74,14 @@ public struct DeliveryView: View {
               SendChoiceCard(
                 ticketCount: model.entitlements?.tickets ?? 0,
                 freeDays: model.entitlements?.freeDays ?? 0,
+                graceDays: model.entitlements?.graceDays,
                 hasTicket: model.hasTicketForPermanent,
                 onPermanent: { model.choosePermanent() },
                 onFreeDays: { model.choseFreeDays = true }
               )
             } else {
+              // 닫힌 편지 — 언제 삭제되는지를 "영구 편지로 만들기" 위에서 알린다.
+              if let deleteAt = model.lockedDeleteAt { lockedNotice(deleteAt) }
               if model.canMakePermanent {
                 // 이미 보낸 편지에만 보인다. 문구가 편지권 1장을 말하므로 확인 팝업 없이 진행하고, 편지권이 없으면 결제 안내 시트.
                 MutterButton(L10n.accessMakePermanent, style: .secondary, isLoading: model.isMakingPermanent) {
@@ -144,8 +147,8 @@ public struct DeliveryView: View {
       }
 
       // 무료 기간이 적용되는 편지 — 받는 분 기준 열람 기간 안내(일수는 서버 설정값).
-      if let days = model.freeDaysNotice {
-        Text(L10n.accessFreeDaysNotice(days)).fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
+      if let days = model.freeDaysNotice, let graceDays = model.entitlements?.graceDays {
+        Text(L10n.accessFreeDaysNotice(days, graceDays)).fonts(.caption).foregroundStyle(Asset.Colors.inkSoft.color)
       }
 
       MutterButton(L10n.deliveryIssue, isLoading: model.isLoading, isEnabled: model.canIssue) {
@@ -155,6 +158,24 @@ public struct DeliveryView: View {
     .padding(20)
     .background(Asset.Colors.surface.color, in: RoundedRectangle(cornerRadius: MutterRadius.xl))
     .shadows(.shadowLow)
+  }
+
+  /// "이 편지는 닫혔어요. {M}월 {D}일에 삭제돼요." — 편지권 UI가 보이는 계정에는 되살리는 방법도 한 줄.
+  private func lockedNotice(_ deleteAt: Date) -> some View {
+    let parts = Calendar.current.dateComponents([.month, .day], from: deleteAt)
+    return VStack(alignment: .leading, spacing: 4) {
+      Text(L10n.accessSentLockedNotice(parts.month ?? 0, parts.day ?? 0))
+        .fonts(.bodyMediumBold)
+        .foregroundStyle(Asset.Colors.ink.color)
+      if model.showsLockedTicketHint {
+        Text(L10n.accessSentLockedTicketHint)
+          .fonts(.caption)
+          .foregroundStyle(Asset.Colors.inkSoft.color)
+      }
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .padding(16)
+    .background(Asset.Colors.goldSoft.color, in: RoundedRectangle(cornerRadius: MutterRadius.md))
   }
 
   private func linkURL(_ token: String) -> String { "\(linkBaseURL)/l/\(token)" }

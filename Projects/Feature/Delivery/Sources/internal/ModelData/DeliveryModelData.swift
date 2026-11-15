@@ -94,6 +94,15 @@ final class DeliveryModelData {
     return entitlements?.freeDays
   }
 
+  /// 닫힌 편지의 삭제 예정 시각 — 닫혀 있는 동안 상세 화면에 "○월 ○일에 삭제돼요"를 보인다. 닫힌 편지가 아니면 nil.
+  var lockedDeleteAt: Date? {
+    guard accessState?.type == .locked else { return nil }
+    return accessState?.deleteAt
+  }
+
+  /// 닫힘 안내 아래 "편지권을 쓰면 다시 열리고 삭제되지 않아요" — 편지권 UI가 보이는 계정에만.
+  var showsLockedTicketHint: Bool { entitlements?.showsTicketUI == true }
+
   /// 사본 보내기는 새 서버 계약(duplicate-letter)이 있을 때만 — 권한 조회 성공으로 판단한다.
   var canDuplicate: Bool { entitlements != nil }
 
