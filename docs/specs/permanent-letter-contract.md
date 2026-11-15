@@ -215,11 +215,31 @@
 
 - `200 {"granted": true, "tickets": 5}` — `tickets`는 지급 후 잔액.
 - `200 {"granted": false, "tickets": 5}` — 이미 지급된 영수증. **성공이다.** 앱은 이때도 거래를 finish/consume 한다.
-- 오류 `{"error":"<코드>"}`: `401 unauthorized` · `403 not_tester` · `400 bad_request` · `400 invalid_receipt` ·
-  `400 unknown_product` · `501 store_mode_unavailable` · `501 android_verify_unconfigured` · `500 internal`.
+- 오류 `{"error":"<코드>"}`: `401 unauthorized` · `403 not_tester` · `403 account_mismatch` · `400 bad_request` ·
+  `400 invalid_receipt` · `400 unknown_product` · `501 store_mode_unavailable` · `501 android_verify_unconfigured` · `500 internal`.
 - 앱은 **200을 받은 뒤에만** 거래를 finish(iOS)/consume(Android) 한다. 그 외에는 거래를 남겨 두고 다음 실행 때 다시 보낸다.
-- 상품: `mutter.ticket.1`(1장), `mutter.ticket.5`(5장). 소모성.
-- 지금은 테스트 모드다: `purchase_testers`에 든 계정만 지급된다(그 외 `403 not_tester`).
+- 상품: `mutter.ticket.1`(1장), `mutter.ticket.5`(5장). 소모성. 만료 없음.
+- **계정 묶기**: 앱은 결제 때 로그인 사용자 id를 싣는다 — iOS `Product.purchase(options: [.appAccountToken(<user id UUID>)])`,
+  Android `BillingFlowParams.setObfuscatedAccountId(<user id>)`. 서버는 그 값이 있으면 로그인 사용자와 같아야 지급한다.
+  다르면 `403 account_mismatch` — 앱은 거래를 **마무리하지 않고** 남겨 두고(구매한 계정으로 로그인하면 재전송으로 지급),
+  `다른 계정으로 구매한 편지권이에요. 구매한 계정으로 로그인하면 들어와요.`를 보인다. 값이 없으면(예전 구매) 묻지 않는다.
+- **모드**(`PURCHASE_MODE`)
+  - `live`(운영): iOS JWS 서명을 Apple Root CA - G3까지 검증한다. 실제 결제(iOS `Production`, Play 일반 구매)는 누구에게나 지급.
+    시험 결제(iOS `Sandbox` — TestFlight·App Review, Play 라이선스 테스터 구매 `purchaseType=0`)는 `purchase_testers`에만 지급(그 외 `403 not_tester`).
+    **App Review 심사 계정은 `purchase_testers`에 넣는다** — 심사관의 결제는 Sandbox로 온다.
+  - `test`(로컬): Xcode StoreKit 테스트 결제는 Apple 서명이 아니라 디코드만 한다. `purchase_testers`만, `Xcode`·`Sandbox` 거래만.
+  - 그 밖·미설정: `501 store_mode_unavailable`.
+- 결제 화면(결제 안내 시트·편지권 화면)의 구매 버튼 아래 안내: `구매한 편지권은 바로 지급돼요. 환불은 App Store(Google Play)에서 요청할 수 있고, 환불되면 그만큼 편지권이 회수돼요.`
+
+### 환불 — 스토어 환불을 편지권에 반영 (0043)
+
+- `refund_purchase(p_platform, p_keys text[], p_raw)`(service_role): 거래를 찾아 `ticket_purchases.refunded_at`을 찍고 원장에
+  그 장수만큼 음수(`reason='refund'`)를 넣는다. 거래당 한 번. 이미 쓴 편지권이면 잔액이 0 아래로 갈 수 있고, 그동안은 편지권을 쓸 수 없다.
+  편지에 붙은 영구 표시는 되돌리지 않는다. 보이는 잔액(`get_my_entitlements.tickets`)은 0 아래로 내려가지 않는다.
+- iOS: Edge Function `apple-notifications` — App Store Server Notifications V2. 서명 검증 후 `REFUND`만 반영, 그 외 알림은 200으로 넘긴다.
+  App Store Connect → 앱 정보 → App Store 서버 알림: 운영·샌드박스 URL 모두 `https://<project>.supabase.co/functions/v1/apple-notifications`, 버전 2.
+- Android: Edge Function `play-voided-sync` — Voided Purchases API에서 최근 7일을 가져와 반영. pg_cron `play-voided-sync`가 하루 한 번(KST 04:00).
+- 편지권 내역의 `refund` 사유 문구는 `환불`(음수로 보인다).
 
 ### `duplicate-letter` — 같은 내용으로 한 통 더 보내기
 

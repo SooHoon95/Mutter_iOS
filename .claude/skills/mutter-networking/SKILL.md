@@ -62,7 +62,7 @@ public final class InboxRepository: InboxRepositorable {
 
 ## 영구 편지권 계약
 
-편지 접근 상태(`permanent`/`open`/`locked`/`gone`)·새 RPC·Edge Function(`verify-purchase`, `duplicate-letter`)·푸시 타입(`letter_lock_soon`, `letter_locked`)·세 플랫폼 공통 문구는 `docs/specs/permanent-letter-contract.md`에 있다. 이 기능을 건드릴 때는 그 문서가 기준이다.
+편지 접근 상태(`permanent`/`open`/`locked`/`gone`)·새 RPC·Edge Function(`verify-purchase`(오류 `not_tester`·`account_mismatch` 포함), `duplicate-letter`, `apple-notifications`, `play-voided-sync`)·푸시 타입(`letter_lock_soon`, `letter_locked`, `letter_purge_soon`, `received_*`)·세 플랫폼 공통 문구는 `docs/specs/permanent-letter-contract.md`에 있다. 이 기능을 건드릴 때는 그 문서가 기준이다.
 
 ## 자가 점검
 
