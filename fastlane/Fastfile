@@ -171,6 +171,9 @@ platform :ios do
       clean: true,
       xcargs: "-allowProvisioningUpdates CURRENT_PROJECT_VERSION=#{next_build}"
     )
+    # 업로드 전에 아카이브를 검사한다 — Date.>=·Date.<=의 시스템 구현을 부르는 바이너리가 있으면
+    # iOS 27.2 초기 베타에서 죽는다(Vendor/supabase-swift/VENDORED.md). 있으면 여기서 멈춘다.
+    sh("#{PROJECT_ROOT}/scripts/check_date_backdeploy.sh", lane_context[SharedValues::XCODEBUILD_ARCHIVE])
   end
 
   desc "아카이브만 — 서명/빌드 점검용(업로드 없음)"

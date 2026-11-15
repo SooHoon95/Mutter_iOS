@@ -44,7 +44,8 @@ let packageSettings = PackageSettings(
 let package = Package(
   name: "SwiftPackages",
   dependencies: [
-    .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.0.0"),
+    // 2.48.0 원본에 두 줄을 고친 사본 — 이유와 갱신 방법은 Vendor/supabase-swift/VENDORED.md.
+    .package(path: "../Vendor/supabase-swift"),
     .package(url: "https://github.com/swiftlang/swift-testing.git", from: "0.9.0"),
     .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "7.0.0"),
     .package(url: "https://github.com/kakao/kakao-ios-sdk", branch: "master"),
