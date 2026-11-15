@@ -129,3 +129,6 @@ marketing/video/**/*.validation.json
 
 # 로컬 개발 서버 설정(개인 환경)
 XCConfigs/DevServer.xcconfig
+
+# 브라우저 자동 조작(Playwright MCP)의 임시 산출물 — 화면 캡처·콘솔 로그. 개인 정보가 찍힐 수 있어 올리지 않는다.
+.playwright-mcp/
