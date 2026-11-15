@@ -20,14 +20,15 @@ public struct AuthView: View {
         // 작은 화면(mini/SE)·키보드에서 컨텐츠가 잘리지 않도록 ScrollView로 감싼다.
         // minHeight=화면높이 → 여백 있으면 Spacer가 중앙 정렬, 넘치면 스크롤.
         ScrollView(showsIndicators: false) {
-          VStack(spacing: 24) {
+          VStack(spacing: 20) {
             Spacer(minLength: 0)
 
-            // 로고는 작은 화면에서 축소한다(고정 300pt는 mini/SE에서 넘침).
+            // 로고는 화면 높이의 1/4쯤만 쓴다 — 입력 카드와 소셜 로그인 세 개가 스크롤 없이 한 화면에 들어오게.
+            // (작은 화면에서 넘치면 스크롤된다.)
             Asset.Images.onboardingLogo.image
               .resizable()
               .scaledToFit()
-              .frame(height: min(300, geo.size.height * 0.33))
+              .frame(height: min(220, geo.size.height * 0.24))
 
             VStack(spacing: 12) {
               switch model.step {
@@ -103,11 +104,10 @@ public struct AuthView: View {
       MutterButton(L10n.authLogin, isLoading: model.isLoading, isEnabled: model.isEmailValid && !model.password.isEmpty) {
         Task { await model.signInWithPassword() }
       }
-      MutterButton(L10n.authLoginWithCode, style: .ghost) {
-        model.showCodeLogin()
-      }
-      MutterButton(L10n.authSignUpOpen, style: .ghost) {
-        model.showSignUp()
+      // 보조 경로 두 개는 낮은 글자 버튼으로 붙여 둔다(큰 버튼 두 개면 사이가 벌어지고 소셜 로그인이 화면 밖으로 밀린다).
+      VStack(spacing: 0) {
+        linkButton(L10n.authLoginWithCode) { model.showCodeLogin() }
+        linkButton(L10n.authSignUpOpen) { model.showSignUp() }
       }
     }
   }
@@ -171,6 +171,19 @@ public struct AuthView: View {
   }
 
   // MARK: - Helpers
+
+  /// 카드 안의 보조 글자 버튼 — 기본 버튼(54pt)보다 낮게(40pt) 잡아 여러 개를 가깝게 쌓는다.
+  private func linkButton(_ title: String, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Text(title)
+        .fonts(.bodyLargeBold)
+        .foregroundStyle(Asset.Colors.ink.color)
+        .frame(maxWidth: .infinity)
+        .frame(height: 40)
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(PressableButtonStyle())
+  }
 
   private func secureField(_ placeholder: String, text: Binding<String>, contentType: UITextContentType) -> some View {
     SecureField(placeholder, text: text)
