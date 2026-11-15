@@ -352,3 +352,19 @@
 "checkout.keep.point2" = "보낸 분이 편지를 지워도 내 편지함에는 남아요";
 "checkout.keep.buy" = "구매하고 간직하기";
 "checkout.keep.use" = "편지권 1장으로 간직하기";
+
+/* ===== 새 소식 안내 ===== */
+"whatsNew.skip" = "건너뛰기";
+"whatsNew.next" = "다음";
+"whatsNew.start" = "시작하기";
+"whatsNew.page1.title" = "지금까지 보낸 편지는 그대로예요";
+"whatsNew.page1.body" = "이미 보낸 편지는 기간 제한 없이 계속 열려요.\n달라지는 건 앞으로 보내는 새 편지예요.";
+"whatsNew.page2.title" = "새 편지는 보낼 때 골라요";
+"whatsNew.page2.body" = "영구 편지는 편지권 1장으로 기간 제한 없이 보내요.\n%d일 편지는 무료로 보낼 수 있어요.";
+"whatsNew.page3.title" = "%d일 편지는 %d일 동안 열려요";
+"whatsNew.page3.body" = "받는 분이 처음 연 날부터 %d일이에요.\n닫힌 뒤 %d일이 지나면 편지와 사진이 삭제돼요.";
+"whatsNew.page4.title" = "닫힌 편지도 간직할 수 있어요";
+"whatsNew.page4.body" = "삭제되기 전까지 편지권 1장으로 다시 열 수 있어요.\n보낸 사람도, 받은 사람도 할 수 있어요.";
+"whatsNew.page5.title" = "편지권은 필요할 때 바로";
+"whatsNew.page5.body" = "편지권이 없으면 그 자리에서 살 수 있어요.\n가진 편지권은 프로필에서 볼 수 있어요.";
+"profile.whatsNew" = "새 소식";

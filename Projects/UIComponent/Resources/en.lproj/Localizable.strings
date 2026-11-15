@@ -352,3 +352,19 @@
 "checkout.keep.point2" = "It stays in your inbox even if the sender deletes it";
 "checkout.keep.buy" = "Buy and keep";
 "checkout.keep.use" = "Keep with 1 ticket";
+
+/* ===== What's new ===== */
+"whatsNew.skip" = "Skip";
+"whatsNew.next" = "Next";
+"whatsNew.start" = "Get started";
+"whatsNew.page1.title" = "Letters you already sent stay as they are";
+"whatsNew.page1.body" = "They stay open with no time limit.\nWhat changes is the new letters you send from now on.";
+"whatsNew.page2.title" = "Choose how to send each new letter";
+"whatsNew.page2.body" = "A permanent letter uses 1 ticket and never closes.\nA %d-day letter is free.";
+"whatsNew.page3.title" = "A %d-day letter stays open for %d days";
+"whatsNew.page3.body" = "The %d days start when the recipient first opens it.\nThe letter and photos are deleted %d days after it closes.";
+"whatsNew.page4.title" = "You can keep a closed letter";
+"whatsNew.page4.body" = "Until it is deleted, 1 ticket reopens it.\nThe sender or the recipient can do this.";
+"whatsNew.page5.title" = "Get tickets when you need them";
+"whatsNew.page5.body" = "If you have none, you can buy one right there.\nYour tickets are in Profile.";
+"profile.whatsNew" = "What's new";

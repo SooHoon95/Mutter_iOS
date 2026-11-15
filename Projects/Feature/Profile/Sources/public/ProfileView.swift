@@ -11,6 +11,7 @@ public struct ProfileView: View {
   @State private var isEditingNickname = false
   @State private var mailFallbackToast = false
   @State private var showPasswordSheet = false
+  @State private var showWhatsNew = false
   @FocusState private var nicknameFocused: Bool
   @Environment(\.openURL) private var openURL
   /// 편지권 화면으로(라우팅 레이어가 주입).
@@ -55,6 +56,12 @@ public struct ProfileView: View {
     .toastIfNeeded($model.passwordSavedToast, text: L10n.profileLoginPasswordSavedToast)
     .sheet(isPresented: $showPasswordSheet) {
       LoginPasswordSheet(model: model, isPresented: $showPasswordSheet)
+    }
+    // 새 소식 다시 보기 — 앱을 처음 열 때 한 번 뜨는 안내와 같은 화면.
+    .fullScreenCover(isPresented: $showWhatsNew) {
+      WhatsNewView(freeDays: model.entitlements?.freeDays ?? 0, graceDays: model.entitlements?.graceDays ?? 0) {
+        showWhatsNew = false
+      }
     }
     .confirmationDialog(L10n.profileDeleteConfirm, isPresented: $showDeleteConfirm, titleVisibility: .visible) {
       Button(L10n.commonDelete, role: .destructive) { Task { await model.deleteAccount() } }
@@ -146,6 +153,16 @@ public struct ProfileView: View {
           value: L10n.ticketBalance(model.tickets),
           action: onOpenTickets
         )
+
+        hairlineDivider
+
+        settingsRow(
+          icon: Asset.Images.paper,
+          label: L10n.profileWhatsNew,
+          value: ""
+        ) {
+          showWhatsNew = true
+        }
       }
     }
     .background(Asset.Colors.surface.color)

@@ -55,6 +55,8 @@ struct MainView: View {
       let minSplash = Task { try? await Task.sleep(nanoseconds: 2_000_000_000) }
       await sessionManager.refresh()
       isUserLoggedIn = sessionManager.isLoggedIn
+      // 새 소식 안내 대상 정하기 — 이 버전을 처음 열 때 이미 로그인돼 있던 사람만(새로 설치한 사람 제외).
+      WhatsNewStore.markBaselineIfNeeded(isLoggedIn: isUserLoggedIn)
       await minSplash.value
       isSplashDone = true
       // splash 완료 시점에 이미 로그인돼 있으면 보류 초대 토큰 소비(cold-start-logged-in, EC-5.5).
@@ -127,6 +129,7 @@ struct MainView: View {
     } else {
       NavigationStack(path: $coordinator.rootStack) {
         MainTabViewWrapperView()
+          .modifier(WhatsNewGate())
           .navigationDestination(for: FeatureRoute.self) { route in
             RootViewFactory(coordinator: coordinator).makeView(route)
           }
