@@ -24,6 +24,8 @@
   설정 뒤 "테스트 알림 보내기"가 있으면 눌러 함수 로그에 `"type":"TEST"`가 찍히는지 본다.
 - ☐ **앱 개인정보**(App Privacy): 추가·확인할 항목 — 구매 내역(구매), 사진(사용자 콘텐츠), 기타 사용자 콘텐츠(편지 본문), 이메일 주소, 사용자 ID.
   모두 "사용자와 연결됨", "추적 아님", 목적 "앱 기능". 앱의 `PrivacyInfo.xcprivacy`와 맞춘다.
+  iOS 앱은 Firebase Crashlytics·Analytics도 쓴다 — 충돌 데이터·성능 데이터·제품 상호작용(목적 "분석")도 신고한다.
+  아카이브 뒤 Xcode Organizer → Generate Privacy Report로 SDK 매니페스트까지 합친 목록을 보고 빠진 것이 없는지 맞춘다.
 - ☐ **개인정보 처리방침 URL**: `https://letter-app-nine-kohl.vercel.app/legal/privacy`(웹 `main` 배포 뒤 새 내용이 보인다 — 아래 5).
 - ☐ **심사 메모**(아래 7)와 **데모 계정**(아래 4).
 
