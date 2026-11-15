@@ -389,6 +389,13 @@ final class ComposeModelData {
     chosePermanent && sendAccessState?.type == .open && issuedLink == nil
   }
 
+  /// 무료 기간으로 보내는 편지의 안내에 쓸 일수(열려 있는 일수, 닫힌 뒤 삭제까지의 일수) — 서버 설정값.
+  /// 영구로 보내기로 했거나 권한을 받지 못했으면 nil(안내 없음).
+  var freeDaysNotice: (freeDays: Int, graceDays: Int)? {
+    guard sendAccessState?.type == .open, !chosePermanent, let sendEntitlements, sendEntitlements.paidEnabled else { return nil }
+    return (sendEntitlements.freeDays, sendEntitlements.graceDays)
+  }
+
   /// 영구 선택 시 편지권이 있는지(관리자는 차감 없음). 없으면 결제 안내 시트(구매)를 띄운다.
   var hasTicketForPermanent: Bool {
     guard let sendEntitlements else { return false }

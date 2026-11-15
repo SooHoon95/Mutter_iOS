@@ -69,6 +69,13 @@ struct SendSheet: View {
               if model.showsPermanentPending {
                 PermanentSendNotice(onChooseAgain: { model.chooseAgain() })
               }
+              // 무료 기간으로 보낼 때 — 며칠 열리고 언제 삭제되는지를 발송 방법 위에서 한 번 더 알린다(계약 "삭제 안내").
+              if let notice = model.freeDaysNotice {
+                Text(L10n.accessFreeDaysNotice(notice.freeDays, notice.graceDays))
+                  .fonts(.caption)
+                  .foregroundStyle(Asset.Colors.inkSoft.color)
+                  .padding(.horizontal, 4)
+              }
               switch method {
               case .link: linkSection
               case .connection: connectionSection
