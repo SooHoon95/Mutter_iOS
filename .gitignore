@@ -132,3 +132,6 @@ XCConfigs/DevServer.xcconfig
 
 # 브라우저 자동 조작(Playwright MCP)의 임시 산출물 — 화면 캡처·콘솔 로그. 개인 정보가 찍힐 수 있어 올리지 않는다.
 .playwright-mcp/
+
+# 노션에 올린 페이지 기록(이 컴퓨터의 발행 상태) — 워크스페이스 페이지 주소가 들어 있어 올리지 않는다.
+marketing/data/notion_state.json
