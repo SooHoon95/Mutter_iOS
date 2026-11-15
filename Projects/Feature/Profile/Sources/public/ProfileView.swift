@@ -253,7 +253,7 @@ public struct ProfileView: View {
 
   // MARK: - 액션 버튼
 
-  private let contactEmail = "dkehskeh@gmail.com"
+  private let contactEmail = "musicletter2026@gmail.com"
 
   /// 문의 메일 URL — 제목에 반드시 "Mutter" 포함(요구사항). mailto로 기본 메일 앱을 연다.
   private var contactMailURL: URL? {
