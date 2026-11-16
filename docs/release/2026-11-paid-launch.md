@@ -27,6 +27,7 @@
   iOS 앱은 Firebase Crashlytics·Analytics도 쓴다 — 충돌 데이터·성능 데이터·제품 상호작용(목적 "분석")도 신고한다.
   아카이브 뒤 Xcode Organizer → Generate Privacy Report로 SDK 매니페스트까지 합친 목록을 보고 빠진 것이 없는지 맞춘다.
 - ☐ **개인정보 처리방침 URL**: `https://letter-app-nine-kohl.vercel.app/legal/privacy`(웹 `main` 배포 뒤 새 내용이 보인다 — 아래 5).
+- ☐ **이용약관(EULA)**: 앱 정보의 「사용권 계약」은 Apple 표준 EULA 그대로 두거나, 맞춤 약관으로 `https://letter-app-nine-kohl.vercel.app/legal/terms`를 안내한다(웹 `main` 배포 뒤 열림). 앱 설명 끝에 약관·처리방침 주소를 적어 두면 좋다.
 - ☐ **심사 메모**(아래 7)와 **데모 계정**(아래 4).
 
 ## 3. Google Play Console
