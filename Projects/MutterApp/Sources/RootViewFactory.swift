@@ -96,6 +96,7 @@ struct RootViewFactory {
     case .legal(let legalRoute):
       LegalViewFactory(
         takedownUsecase: TakedownUsecase(repository: TakedownRepository()),
+        termsURL: AppLink.termsURL,
         privacyURL: AppLink.privacyPolicyURL,
         onBack: { coordinator.pop() }
       ).makeView(legalRoute)

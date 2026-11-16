@@ -29,6 +29,7 @@ struct ProfileViewWrapperView: View, ProfileViewable {
       ticketUsecase: ticketUsecase,
       onSignedOut: { Task { await sessionManager.refresh() } },
       onOpenTickets: { coordinator.push(.tickets) },
+      onOpenTerms: { coordinator.push(.legal(.terms)) },
       onOpenPrivacy: { coordinator.push(.legal(.privacy)) }
     )
   }

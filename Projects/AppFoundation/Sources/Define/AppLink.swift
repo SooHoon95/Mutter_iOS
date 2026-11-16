@@ -20,4 +20,9 @@ public enum AppLink {
   public static var privacyPolicyURL: URL {
     URL(string: baseURL + "/legal/privacy") ?? URL(string: productionBaseURL + "/legal/privacy")!
   }
+
+  /// 웹의 정식 이용약관. 앱 안 약관 화면이 이 문서를 연다.
+  public static var termsURL: URL {
+    URL(string: baseURL + "/legal/terms") ?? URL(string: productionBaseURL + "/legal/terms")!
+  }
 }
