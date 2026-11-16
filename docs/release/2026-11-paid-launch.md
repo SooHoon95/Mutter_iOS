@@ -42,6 +42,8 @@
 
 ## 4. 운영 서버 반영 (letter-app)
 
+> 2026-11-16 반영 완료: 비밀값 2개(PURCHASE_MODE=live, PLAY_SERVICE_ACCOUNT_JSON), 마이그레이션 0041~0043, 함수 6개. 반영 전 운영 DB 백업을 받았다. 남은 것은 3번 데모 계정.
+
 1. ☐ 비밀값: `supabase secrets set PURCHASE_MODE=live`, `supabase secrets set PLAY_SERVICE_ACCOUNT_JSON="$(cat <키>.json)"`
 2. ☐ `scripts/release-paid.sh`로 반영할 것을 확인 → `scripts/release-paid.sh --apply`
    - 마이그레이션 0041(계정 단위 삭제·보낼 때 차감)·0042(삭제 안내 푸시)·0043(환불)
