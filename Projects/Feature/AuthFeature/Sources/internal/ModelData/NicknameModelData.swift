@@ -30,6 +30,7 @@ final class NicknameModelData {
     defer { isLoading = false }
     do {
       try await profileUsecase.updateNickname(nickname)
+      AppAnalytics.log(.onboardComplete)
       onComplete()
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorNicknameSave

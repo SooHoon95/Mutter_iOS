@@ -291,11 +291,13 @@ final class ComposeModelData {
       case .new:
         let letter = try await letterUsecase.create(draft)
         mode = .edit(letter.id)   // 이후 저장은 갱신 — 반복 저장 시 중복 생성 방지.
+        AppAnalytics.log(.letterCreate(reply: false))
         applySaved(letter.blocks)
         return letter.id
       case .reply:
         let letter = try await letterUsecase.create(draft)
         mode = .edit(letter.id)   // 답장도 첫 저장 후 갱신 — 중복 생성 방지(isReply는 유지).
+        AppAnalytics.log(.letterCreate(reply: true))
         applySaved(letter.blocks)
         return letter.id
       }
@@ -341,6 +343,7 @@ final class ComposeModelData {
     do {
       // 답장은 선택 카드를 거치지 않는다 — 무료 기간 편지로 보낸다.
       try await connectionUsecase.send(letterId: letterId, recipientId: recipientId, permanent: false)
+      AppAnalytics.log(.letterSend(permanent: false, reply: true))
       onDone()
     } catch {
       errorMessage = (error as? MutterError)?.userMessage ?? L10n.errorSend
@@ -442,13 +445,16 @@ final class ComposeModelData {
     isIssuing = true
     errorMessage = nil
     defer { isIssuing = false }
+    let permanent = showsPermanentPending
+    let hasPassword = usePassword
     do {
       let link = try await deliveryUsecase.issue(
         letterId: id,
-        password: usePassword ? password : nil,
+        password: hasPassword ? password : nil,
         revealAt: nil,
-        permanent: showsPermanentPending
+        permanent: permanent
       )
+      AppAnalytics.log(.linkIssue(permanent: permanent, hasPassword: hasPassword))
       issuedLink = link
       password = ""
       // 영구로 보냈으면 상태가 바뀌었다 — "영구" 표시를 위해 다시 받는다.
@@ -468,7 +474,9 @@ final class ComposeModelData {
     errorMessage = nil
     defer { isSending = false }
     do {
-      try await connectionUsecase.send(letterId: id, recipientId: recipientId, permanent: showsPermanentPending)
+      let permanent = showsPermanentPending
+      try await connectionUsecase.send(letterId: id, recipientId: recipientId, permanent: permanent)
+      AppAnalytics.log(.letterSend(permanent: permanent, reply: isReply))
       finishSend()
     } catch let error as MutterError where error.define == .noTicket {
       handleNoTicket(error)

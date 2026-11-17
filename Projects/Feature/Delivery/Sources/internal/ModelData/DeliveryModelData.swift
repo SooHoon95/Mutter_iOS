@@ -163,6 +163,7 @@ final class DeliveryModelData {
     defer { isMakingPermanent = false }
     do {
       try await ticketUsecase.makePermanent(letterId: letterId)
+      AppAnalytics.log(.letterMakePermanent)
       await load()
     } catch let error as MutterError where error.define == .noTicket {
       if entitlements?.showsPurchaseUI == true {
@@ -190,13 +191,16 @@ final class DeliveryModelData {
   }
 
   func issue() async {
+    let permanent = showsPermanentPending
+    let hasPassword = usePassword
     await run {
       let link = try await deliveryUsecase.issue(
         letterId: letterId,
-        password: usePassword ? password : nil,
+        password: hasPassword ? password : nil,
         revealAt: useReveal ? revealAt : nil,
-        permanent: showsPermanentPending
+        permanent: permanent
       )
+      AppAnalytics.log(.linkIssue(permanent: permanent, hasPassword: hasPassword))
       lastIssuedLink = link
       password = ""
       await load()

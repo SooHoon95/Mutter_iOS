@@ -86,6 +86,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
   /// `FirebaseApp.configure()`가 GoogleService-Info.plist를 읽어 Analytics·Crashlytics·Messaging을 켠다.
   private func configFirebase(_ application: UIApplication) {
     FirebaseApp.configure()
+    // 화면·이벤트 기록을 GA4로 보낸다(그 전에는 no-op). 계약: docs/specs/2026-11-16-analytics.md
+    AppAnalytics.configure(FirebaseAnalyticsLogger())
     Messaging.messaging().delegate = self
     UNUserNotificationCenter.current().delegate = self
     requestPushAuthorization(application)

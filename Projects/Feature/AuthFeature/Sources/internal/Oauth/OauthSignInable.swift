@@ -6,6 +6,15 @@ import Domain
 enum OauthProvider: CaseIterable, Identifiable {
   case apple, google, kakao
   var id: Self { self }
+
+  /// GA4 `login` 이벤트의 method 값.
+  var analyticsMethod: String {
+    switch self {
+    case .apple: return "apple"
+    case .google: return "google"
+    case .kakao: return "kakao"
+    }
+  }
 }
 
 /// provider가 SDK 인증을 마치고 반환하는 자격증명 → Supabase 교환용.

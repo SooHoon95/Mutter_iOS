@@ -31,5 +31,6 @@ struct HomeViewWrapperView: View, HomeViewable {
 //      onEdit: { coordinator.push(.compose(.edit(letterId: $0))) },
 //      onPreview: { coordinator.push(.viewer(.myLetter(letterId: $0))) }
     )
+    .analyticsScreen(.home)
   }
 }

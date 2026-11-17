@@ -42,6 +42,7 @@ struct AuthViewWrapperView: View, AuthViewable {
         onAuthenticated: { Task { await handleAuthenticated() } },
         onOnboarded: { onComplete?() }
       ).makeView(.signIn)
+        .analyticsScreen(.signIn)
     case .onboardNickname:
       AuthViewFactory(
         authUsecase: authUsecase,
@@ -49,6 +50,7 @@ struct AuthViewWrapperView: View, AuthViewable {
         onAuthenticated: { Task { await handleAuthenticated() } },
         onOnboarded: { onComplete?() }
       ).makeView(.onboardNickname)
+        .analyticsScreen(.onboardNickname)
     }
   }
 

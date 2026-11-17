@@ -32,5 +32,6 @@ struct ProfileViewWrapperView: View, ProfileViewable {
       onOpenTerms: { coordinator.push(.legal(.terms)) },
       onOpenPrivacy: { coordinator.push(.legal(.privacy)) }
     )
+    .analyticsScreen(.profile)
   }
 }

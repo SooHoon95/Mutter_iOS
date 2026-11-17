@@ -45,7 +45,7 @@
 | 수탁자 | 위탁 업무 | 관련 정책 |
 |---|---|---|
 | Supabase | 인증·데이터베이스·서버 인프라 | supabase.com/privacy |
-| Google (Firebase Cloud Messaging) | 푸시 알림 전송 | firebase.google.com/support/privacy |
+| Google (Firebase Cloud Messaging·Analytics, Google Analytics) | 푸시 알림 전송, 앱·웹 이용 통계(웹은 세션 쿠키만) | firebase.google.com/support/privacy |
 | Apple / Google / Kakao | 소셜 로그인 인증 | 각 사업자 정책 |
 | `<호스팅 제공자(예: Vercel)>` | 웹 페이지 호스팅 | `<정책 URL>` |
 

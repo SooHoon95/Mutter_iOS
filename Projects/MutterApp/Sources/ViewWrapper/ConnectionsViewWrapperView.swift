@@ -16,5 +16,6 @@ struct ConnectionsViewWrapperView: View, ConnectionsViewable {
 
   var body: some View {
     ConnectionsView(connectionUsecase: connectionUsecase, inviteBaseURL: AppLink.baseURL)
+      .analyticsScreen(.connections)
   }
 }

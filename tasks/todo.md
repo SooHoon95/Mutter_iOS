@@ -2,6 +2,18 @@
 
 > 끝난 작업은 `tasks/archive/`로 옮긴다(`mutter-harness-ops`). 2026-09 이전 작업은 `tasks/archive/todo-2026-09.md`.
 
+## 현재 작업 — GA4 분석 3플랫폼 (2026-11-16)
+
+계약: `docs/specs/2026-11-16-analytics.md`. 사용자 결정: 세 플랫폼 모두, 웹은 세션 쿠키만, 앱은 화면+핵심 단계.
+
+- [x] 스펙 — 화면 이름·이벤트 11개·개인정보 규칙·웹 쿠키 방식
+- [x] iOS — AppFoundation `AppAnalytics`(연결 전 no-op), Infrastructure `FirebaseAnalyticsLogger`, 화면(라우트·탭·결제 시트), 이벤트, Info.plist(자동 화면 기록·광고 신호 끔). 컴파일 통과
+- [x] 웹 — `lib/ga.ts`(측정 ID 있을 때만, 토큰 지운 주소, 세션 쿠키), 처리방침 문구. tsc·eslint·vitest 387/387, 테스트 빌드에서 토큰 미전송·세션 쿠키 확인
+- [x] Android — domain `Analytics` 인터페이스(NoOp 기본) + data `FirebaseAnalyticsTracker`, NavHost 중앙 화면 기록, ViewModel 8개 이벤트, 매니페스트(자동 화면·광고 신호·광고 ID 끔, AD_ID·ADSERVICES 권한 제거). assembleDebug·단위 테스트 27/27, 에뮬레이터에서 화면 전부와 letter_open 확인. `legal_privacy` 없음(외부 브라우저)
+- [x] letter_open 시점 통일 — iOS도 "편지 열기"를 누를 때(봉투만 본 사람 제외)
+- [x] iOS 런타임 — 시뮬레이터 `-FIRDebugEnabled`: `screen_view`(sign_in) 기록·업로드 204, AdSupport 미링크 확인. 로그인·발송 등 동작 이벤트는 런타임 미확인
+- [ ] 사람 — Firebase에 GA 연결 확인, 웹 스트림 측정 ID → Vercel `VITE_GA_MEASUREMENT_ID`, 웹 스트림 "브라우저 기록 이벤트 기반 페이지 변경" 끄기, App Store·Play 개인정보 표시 갱신
+
 ## 현재 작업 — 새 소식 안내: 업데이트한 사람에게 한 번 뜨는 넘겨 보는 화면 (2026-11-15)
 
 기존 사용자가 편지권 변화를 헷갈리지 않게, 실제 화면 캡처 + 설명 다섯 장을 한 번 보여 준다. 사양: `docs/specs/2026-11-15-whats-new.md`. 시안은 사용자 확인("딱 원하던 것", 설명은 문장별 줄바꿈).

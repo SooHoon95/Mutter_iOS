@@ -27,5 +27,6 @@ struct InboxViewWrapperView: View, InboxViewable {
       onOpen: { coordinator.push(.viewer(.token($0, password: nil))) },
       onOpenTrash: { coordinator.push(.inboxTrash) }
     )
+    .analyticsScreen(.inbox)
   }
 }

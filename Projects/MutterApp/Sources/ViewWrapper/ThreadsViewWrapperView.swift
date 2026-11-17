@@ -21,5 +21,6 @@ struct ThreadsViewWrapperView: View, ThreadsViewable {
       onReply: { coordinator.push(.compose(.reply(recipientId: $0))) },
       onOpen: { coordinator.push(.viewer(.token($0, password: nil))) }
     )
+    .analyticsScreen(.threads)
   }
 }

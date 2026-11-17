@@ -26,8 +26,31 @@ struct RootViewFactory {
   let coordinator: NavigationCoordinator<FeatureRoute>
   var onAuthenticated: () -> Void = {}
 
-  @ViewBuilder
   func makeView(_ route: FeatureRoute) -> some View {
+    routeView(route).analyticsScreen(Self.analyticsScreen(for: route))
+  }
+
+  /// push 화면의 GA4 화면 이름(docs/specs/2026-11-16-analytics.md). 기록하지 않는 라우트는 nil.
+  private static func analyticsScreen(for route: FeatureRoute) -> AnalyticsScreen? {
+    switch route {
+    case .auth(.signIn): return .signIn
+    case .auth(.onboardNickname): return .onboardNickname
+    case .compose: return .compose
+    case .viewer: return .viewer
+    case .delivery: return .delivery
+    case .connect: return .connectInvite
+    case .thread: return nil   // 시트로 처리해 push되지 않는다
+    case .legal(.terms): return .legalTerms
+    case .legal(.privacy): return .legalPrivacy
+    case .legal(.takedown): return .legalTakedown
+    case .trash: return .trash
+    case .inboxTrash: return .inboxTrash
+    case .tickets: return .tickets
+    }
+  }
+
+  @ViewBuilder
+  private func routeView(_ route: FeatureRoute) -> some View {
     switch route {
     case .auth(let authRoute):
       AuthViewFactory(
@@ -134,6 +157,7 @@ struct RootViewFactory {
           purchaser: StoreKitTicketPurchaser.shared,
           onFinish: onFinish
         )
+        .analyticsScreen(.ticketCheckout)
       )
     }
   }

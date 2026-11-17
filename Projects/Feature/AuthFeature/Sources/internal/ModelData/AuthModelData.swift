@@ -74,6 +74,8 @@ final class AuthModelData {
   func verifyCode() async {
     await run {
       let session = try await authUsecase.verifyCode(email: email, code: code)
+      AppAnalytics.log(.login(method: "code"))
+      if pendingSignUpPassword != nil { AppAnalytics.log(.signUpEmail) }
       if let signUpPassword = pendingSignUpPassword {
         pendingSignUpPassword = nil
         do {
@@ -122,6 +124,7 @@ final class AuthModelData {
   func signInWithPassword() async {
     await run {
       _ = try await authUsecase.signIn(email: email, password: password)
+      AppAnalytics.log(.login(method: "password"))
       onAuthenticated()
     }
   }
@@ -136,6 +139,7 @@ final class AuthModelData {
       case .apple(let idToken, let nonce):
         _ = try await authUsecase.signInApple(idToken: idToken, nonce: nonce)
       }
+      AppAnalytics.log(.login(method: provider.analyticsMethod))
       onAuthenticated()
     }
   }

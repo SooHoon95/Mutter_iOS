@@ -31,6 +31,7 @@ final class ConnectionsModelData {
   func createInvite() async {
     await run {
       inviteToken = try await connectionUsecase.createInvite()
+      AppAnalytics.log(.inviteCreate)
     }
   }
 

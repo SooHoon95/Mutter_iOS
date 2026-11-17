@@ -71,6 +71,7 @@ final class TicketCheckoutModelData {
       if !canUseNow {
         switch try await purchaser.purchase(selectedProduct) {
         case .completed:
+          AppAnalytics.log(.ticketPurchase(productId: selectedProduct.productId))
           entitlements = try? await ticketUsecase.entitlements()
         case .pending:
           errorMessage = L10n.ticketPending
@@ -98,8 +99,10 @@ final class TicketCheckoutModelData {
       break
     case .makePermanent(let letterId):
       try await ticketUsecase.makePermanent(letterId: letterId)
+      AppAnalytics.log(.letterMakePermanent)
     case .keepReceived(let token, let password):
       try await ticketUsecase.keepReceived(token: token, password: password)
+      AppAnalytics.log(.letterKeep)
     }
   }
 }

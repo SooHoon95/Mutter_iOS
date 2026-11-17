@@ -66,6 +66,7 @@ final class TicketModelData {
     do {
       switch try await purchaser.purchase(product) {
       case .completed:
+        AppAnalytics.log(.ticketPurchase(productId: product.productId))
         await load()
       case .pending:
         errorMessage = L10n.ticketPending

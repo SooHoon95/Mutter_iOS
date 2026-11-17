@@ -61,6 +61,8 @@ final class ViewerModelData {
   private let ticketUsecase: TicketUsecasable?
   /// 마지막으로 연 암호(잠긴 편지를 간직할 때 같은 암호로 다시 보낸다).
   @ObservationIgnored private var lastPassword: String?
+  /// GA4 letter_open을 이 화면에서 이미 남겼는지.
+  @ObservationIgnored private var didLogOpen = false
 
   init(
     source: Source,
@@ -162,6 +164,7 @@ final class ViewerModelData {
     defer { isKeeping = false }
     do {
       try await ticketUsecase.keepReceived(token: token, password: lastPassword)
+      AppAnalytics.log(.letterKeep)
       isKept = true
       if case .letterLocked = state {
         await loadByToken(token, password: lastPassword)
@@ -181,6 +184,15 @@ final class ViewerModelData {
   func open() async {
     isOpened = true
     player.start()
+    // GA4 letter_open — 봉투만 본 사람은 세지 않고 실제로 연 순간에 한 번(Android 동일).
+    if !didLogOpen {
+      didLogOpen = true
+      if case .token = source {
+        AppAnalytics.log(.letterOpen(source: "link"))
+      } else {
+        AppAnalytics.log(.letterOpen(source: "my_letter"))
+      }
+    }
     if case .token(let token) = source {
       try? await receiptUsecase.recordOpen(token: token)
     }
