@@ -97,7 +97,6 @@ public struct DeliveryView: View {
             }
             if let link = model.lastIssuedLink { issuedLink(link) }
             if !model.links.isEmpty { existingLinks }
-            if !model.readers.isEmpty { DeliveryReadersSection(readers: model.readers) }
 
             if model.canDuplicate {
               MutterButton(L10n.accessDuplicate, style: .ghost, isLoading: model.isDuplicating) {

@@ -303,9 +303,6 @@
 "access.makePermanent" = "영구 편지로 만들기 · 편지권 1장";
 "access.freeDaysNotice" = "받는 분이 처음 연 날부터 %d일 동안 열려요. 닫힌 뒤 %d일이 지나면 삭제돼요.";
 "access.duplicate" = "같은 내용으로 한 통 더 보내기";
-"access.readers" = "열어본 사람";
-"access.reader" = "%@ · %d월 %d일에 열어봄";
-"access.readerUnnamed" = "이름 없는 사용자";
 "ticket.title" = "편지권";
 "ticket.balance" = "%d장";
 "ticket.description" = "편지권 1장으로 편지 한 통을 기간 제한 없이 간직할 수 있어요.";

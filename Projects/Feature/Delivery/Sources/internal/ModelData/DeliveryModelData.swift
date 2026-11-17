@@ -24,8 +24,6 @@ final class DeliveryModelData {
   private(set) var accessState: LetterAccessState?
   /// 권한·잔액. nil이면 편지권 UI·사본 보내기를 숨긴다(새 서버 계약이 없는 상태).
   private(set) var entitlements: Entitlements?
-  /// 열람자(처음 연 순). 조회 실패면 비어 있어 섹션을 숨긴다.
-  private(set) var readers: [LetterReader] = []
   var isMakingPermanent = false
   var isDuplicating = false
   /// 이 화면에서 "{n}일 편지로 보내기"를 골랐는지 — 화면에 머무는 동안만 기억한다.
@@ -113,15 +111,13 @@ final class DeliveryModelData {
   func load() async {
     isLoading = true
     defer { isLoading = false }
-    // 상태·권한·열람자는 표시용 부가 정보 — 실패하면 조용히 비워 두고 지금 화면 그대로 보인다.
+    // 상태·권한은 표시용 부가 정보 — 실패하면 조용히 비워 두고 지금 화면 그대로 보인다.
     async let linksTask = deliveryUsecase.links(letterId: letterId)
     async let statesTask = letterAccessUsecase.accessStates(letterIds: [letterId])
     async let entitlementsTask = ticketUsecase.entitlements()
-    async let readersTask = letterAccessUsecase.readers(letterId: letterId)
     links = (try? await linksTask) ?? []
     accessState = (try? await statesTask)?[letterId]
     entitlements = try? await entitlementsTask
-    readers = (try? await readersTask) ?? []
     hasLoaded = true
   }
 
