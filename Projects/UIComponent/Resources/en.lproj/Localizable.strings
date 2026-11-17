@@ -320,7 +320,7 @@
 "ticket.deleteAccountWarning" = "Your remaining %d tickets will be lost.";
 "ticket.productPrice" = "%d tickets · %@";
 "ticket.pending" = "Waiting for payment approval. Tickets arrive once approved.";
-"ticket.purchaseNotice" = "Tickets are added right away. You can request a refund from the App Store; refunded tickets are taken back.";
+"ticket.purchaseNotice" = "Tickets are added right away and can't be refunded after purchase.";
 "ticket.accountMismatch" = "These tickets were bought with another account. Sign in with that account to receive them.";
 "access.sendChoiceTitle" = "How would you like to send it?";
 "access.sendPermanent" = "Send as a permanent letter";

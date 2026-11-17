@@ -64,7 +64,7 @@ public struct TicketCheckoutView: View {
           MutterButton(buttonTitle, isLoading: model.isWorking || model.isLoading, isEnabled: model.canConfirm) {
             Task { await model.confirm() }
           }
-          // 구매 버튼일 때만 — 지급 시점과 환불(App Store)·회수 안내.
+          // 구매 버튼일 때만 — 지급 시점과 환불 불가 안내.
           if !model.canUseNow {
             Text(L10n.ticketPurchaseNotice)
               .fonts(.caption)

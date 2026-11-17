@@ -45,7 +45,7 @@ public struct TicketView: View {
                     Task { await model.purchase(product) }
                   }
                 }
-                // 지급 시점과 환불(App Store)·회수 안내.
+                // 지급 시점과 환불 불가 안내.
                 Text(L10n.ticketPurchaseNotice)
                   .fonts(.caption)
                   .foregroundStyle(Asset.Colors.inkSoft.color)
