@@ -57,7 +57,7 @@
    insert into purchase_testers (user_id, note) select id, 'app review' from u on conflict do nothing;
    update profiles set nickname = '심사' where id = (select id from auth.users where email = 'appreview@<도메인>') and nickname is null;
    ```
-   테스터라서 유료 스위치가 꺼져 있어도 편지권 기능이 보이고, 심사관의 Sandbox 결제가 지급된다. 편지권은 0장 그대로 둔다(결제 시트가 바로 뜨게).
+   테스터라서 유료 스위치가 꺼져 있어도 편지권 기능이 보인다(시험 결제 지급은 테스터와 무관). 편지권은 0장 그대로 둔다(결제 시트가 바로 뜨게).
    데모 계정에 받은 편지 하나·보낸 편지 하나가 있으면 심사관이 7일 편지 화면을 보기 쉽다(선택).
 
 ### 반영 뒤 확인
@@ -65,7 +65,7 @@
 - ☐ `supabase migration list --linked`에 0043까지.
 - ☐ 데모 계정으로 iOS TestFlight 빌드 로그인 → 편지권 1장 Sandbox 구매 → 잔액 1, `ticket_purchases`에 `environment = Sandbox` 한 행.
 - ☐ 같은 계정으로 Android 내부 테스트 트랙 빌드 → 라이선스 테스터 결제 → 잔액 증가, `environment = PlayTest`.
-- ☐ 테스터가 아닌 계정의 TestFlight Sandbox 결제는 `403 not_tester`로 지급되지 않는다(결제는 남고 다음 실행 때 다시 시도 — 의도된 동작).
+- ☐ 시험 결제(Sandbox·PlayTest)는 테스터가 아니어도 지급된다(심사관이 다른 계정으로 사도 들어오게). 테스터 명단은 유료 스위치 전 편지권 화면 노출에만 쓴다.
 
 ## 5. 웹 (letter-app `main`)
 

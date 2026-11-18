@@ -215,7 +215,7 @@
 
 - `200 {"granted": true, "tickets": 5}` — `tickets`는 지급 후 잔액.
 - `200 {"granted": false, "tickets": 5}` — 이미 지급된 영수증. **성공이다.** 앱은 이때도 거래를 finish/consume 한다.
-- 오류 `{"error":"<코드>"}`: `401 unauthorized` · `403 not_tester` · `403 account_mismatch` · `400 bad_request` ·
+- 오류 `{"error":"<코드>"}`: `401 unauthorized` · `403 not_tester`(test 모드만) · `403 account_mismatch` · `400 bad_request` ·
   `400 invalid_receipt` · `400 unknown_product` · `501 store_mode_unavailable` · `501 android_verify_unconfigured` · `500 internal`.
 - 앱은 **200을 받은 뒤에만** 거래를 finish(iOS)/consume(Android) 한다. 그 외에는 거래를 남겨 두고 다음 실행 때 다시 보낸다.
 - 상품: `mutter.ticket.1`(1장), `mutter.ticket.5`(5장). 소모성. 만료 없음.
@@ -224,9 +224,10 @@
   다르면 `403 account_mismatch` — 앱은 거래를 **마무리하지 않고** 남겨 두고(구매한 계정으로 로그인하면 재전송으로 지급),
   `다른 계정으로 구매한 편지권이에요. 구매한 계정으로 로그인하면 들어와요.`를 보인다. 값이 없으면(예전 구매) 묻지 않는다.
 - **모드**(`PURCHASE_MODE`)
-  - `live`(운영): iOS JWS 서명을 Apple Root CA - G3까지 검증한다. 실제 결제(iOS `Production`, Play 일반 구매)는 누구에게나 지급.
-    시험 결제(iOS `Sandbox` — TestFlight·App Review, Play 라이선스 테스터 구매 `purchaseType=0`)는 `purchase_testers`에만 지급(그 외 `403 not_tester`).
-    **App Review 심사 계정은 `purchase_testers`에 넣는다** — 심사관의 결제는 Sandbox로 온다.
+  - `live`(운영): iOS JWS 서명을 Apple Root CA - G3까지 검증한다. 실제 결제(iOS `Production`, Play 일반 구매)와
+    시험 결제(iOS `Sandbox` — TestFlight·App Review, Play 라이선스 테스터 구매 `purchaseType=0`) 모두 누구에게나 지급.
+    시험 결제를 할 수 있는 사람은 스토어가 이미 정한다. 심사관이 데모 계정이 아닌 계정으로 사도 지급돼야 반려되지 않는다.
+    원장의 `environment`(`Sandbox`·`PlayTest`)로 구분한다. `purchase_testers`는 유료 스위치 전 편지권 UI 노출에만 쓴다.
   - `test`(로컬): Xcode StoreKit 테스트 결제는 Apple 서명이 아니라 디코드만 한다. `purchase_testers`만, `Xcode`·`Sandbox` 거래만.
   - 그 밖·미설정: `501 store_mode_unavailable`.
 - 결제 화면(결제 안내 시트·편지권 화면)의 구매 버튼 아래 안내: `구매한 편지권은 바로 지급되며, 구매 후에는 환불되지 않아요.`
