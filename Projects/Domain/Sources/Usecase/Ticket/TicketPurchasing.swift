@@ -8,4 +8,10 @@ public protocol TicketPurchasing {
   func purchase(_ product: TicketProductType) async throws -> TicketPurchaseResult
   /// 마무리되지 않은 거래를 서버에 다시 보낸다(앱 시작·로그인·편지권 화면 진입 때). 실패는 다음 기회로 미룬다.
   func resendUnfinished() async
+  /// 상품을 못 받았을 때의 원인 요약(스토어 국가·받은 상품 수·오류). TestFlight(샌드박스) 빌드에서만 값이 있다 — 운영 사용자에게는 nil.
+  func storeDiagnosis() async -> String?
+}
+
+public extension TicketPurchasing {
+  func storeDiagnosis() async -> String? { nil }
 }

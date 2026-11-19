@@ -46,6 +46,7 @@ final class TicketModelData {
     // 스토어 상품을 못 받으면 버튼이 꺼진 채 이유가 안 보인다 — 살 수 없는 상태임을 알린다.
     if prices.isEmpty && showsPurchaseUI && errorMessage == nil {
       errorMessage = MutterError(.purchaseUnavailable).userMessage
+      if let diagnosis = await purchaser.storeDiagnosis() { errorMessage? += "\n(\(diagnosis))" }
     }
   }
 

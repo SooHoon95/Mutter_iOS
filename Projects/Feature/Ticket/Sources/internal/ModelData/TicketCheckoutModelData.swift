@@ -58,6 +58,7 @@ final class TicketCheckoutModelData {
     prices = (try? await pricesTask) ?? [:]
     if !canUseNow && prices.isEmpty {
       errorMessage = MutterError(.purchaseUnavailable).userMessage
+      if let diagnosis = await purchaser.storeDiagnosis() { errorMessage? += "\n(\(diagnosis))" }
     }
   }
 

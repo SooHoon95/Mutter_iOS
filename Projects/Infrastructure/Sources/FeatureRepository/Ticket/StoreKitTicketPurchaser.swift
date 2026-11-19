@@ -22,6 +22,8 @@ public actor StoreKitTicketPurchaser: TicketPurchasing {
   private let verifyFunction = "verify-purchase"
   private var products: [TicketProductType: Product] = [:]
   private var updatesTask: Task<Void, Never>?
+  /// 마지막 상품 조회가 비었거나 실패한 이유 — `storeDiagnosis()`가 보여 준다.
+  private var lastLoadIssue: String?
 
   public init(provider: SupabaseProvider = .shared) {
     self.provider = provider
@@ -76,6 +78,13 @@ public actor StoreKitTicketPurchaser: TicketPurchasing {
     }
   }
 
+  public func storeDiagnosis() async -> String? {
+    // 운영(App Store) 설치에는 보이지 않는다 — TestFlight·개발 빌드에서 원인을 화면으로 보기 위한 것.
+    guard case .verified(let app)? = try? await AppTransaction.shared, app.environment != .production else { return nil }
+    let store = await Storefront.current?.countryCode ?? "nil"
+    return "store=\(store) canPay=\(AppStore.canMakePayments) \(lastLoadIssue ?? "-")"
+  }
+
   // MARK: - Private
 
   private func loadProducts() async throws -> [TicketProductType: Product] {
@@ -85,8 +94,10 @@ public actor StoreKitTicketPurchaser: TicketPurchasing {
     do {
       loaded = try await Product.products(for: ids)
     } catch {
+      lastLoadIssue = "error=\(error)"
       throw MutterError(.purchaseUnavailable)
     }
+    lastLoadIssue = "products=\(loaded.count)/\(ids.count)"
     products = Dictionary(
       loaded.compactMap { product in TicketProductType(rawValue: product.id).map { ($0, product) } },
       uniquingKeysWith: { first, _ in first }
