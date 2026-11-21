@@ -42,13 +42,15 @@
 | `get_letter_access_states` | 로그인 | `p_letter_ids uuid[]` | `[{letter_id, state, access_until, delete_at, kept_by_recipient}]` — 내가 보냈거나 받은 편지함에 가진 편지만. `kept_by_recipient`는 0041부터 항상 false다(쓰지 않는다) |
 | `get_letter_readers` | 소유자 | `p_letter_id uuid` | `[{user_id, nickname, first_opened_at, last_opened_at, open_count}]` 처음 연 순. 소유자 아니면 `FORBIDDEN` |
 | `get_my_entitlements` | 로그인 | 없음 | `{is_admin, tickets, paid_enabled, free_days, grace_days, warn_days}` — `warn_days`(지금 2)는 닫힘 예고를 며칠 전부터 보일지. 키가 없으면 2로 본다 |
-| `get_my_ticket_history` | 로그인 | 없음 | `[{created_at, delta, reason, letter_title}]` 최근 순. `reason` ∈ `purchase`·`use`·`grant`·`refund` |
+| `get_my_ticket_history` | 로그인 | 없음 | `[{created_at, delta, reason, letter_title}]` 최근 순. `reason` ∈ `purchase`·`use`·`grant`·`refund`·`welcome`(가입 선물, 0046). 모르는 값이 와도 깨지지 않게 받는다 |
 | `make_letter_permanent` | 소유자 | `p_letter_id uuid` | void. `FORBIDDEN`·`NO_TICKET`·`LETTER_GONE` |
 | `keep_received_letter` | 로그인 | `p_token text, p_password text` | void. 링크 오류들 + `NO_TICKET`·`LETTER_GONE`. 성공하면 받은 편지함에 들어간다. **잠기기 전(`open`)에도 쓸 수 있다** |
 | `is_admin` | 로그인 | 없음 | boolean |
 
 - `make_letter_permanent`·`keep_received_letter`는 이미 영구인 편지에 부르면 차감 없이 성공한다.
 - 관리자는 차감 없이 영구가 된다.
+- 계정을 만들면 편지권을 무료로 받는다(0046) — `monetization_config.welcome_tickets`장(지금 2), 계정당 한 번, 원장 사유 `welcome`.
+  구매한 편지권과 똑같이 쓰이고 앱 내역에는 "가입 선물"로 나온다. 규칙·악용 조회는 `letter-app/docs/specs/welcome-tickets.md`.
 - `p_password`는 암호가 없어도 **키를 생략하지 말고 null을 보낸다**(Android: DTO에 `= null` 기본값 금지 —
   생략되면 PostgREST가 함수를 못 찾는다).
 

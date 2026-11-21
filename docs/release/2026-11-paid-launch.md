@@ -57,7 +57,12 @@
    insert into purchase_testers (user_id, note) select id, 'app review' from u on conflict do nothing;
    update profiles set nickname = '심사' where id = (select id from auth.users where email = 'appreview@<도메인>') and nickname is null;
    ```
-   테스터라서 유료 스위치가 꺼져 있어도 편지권 기능이 보인다(시험 결제 지급은 테스터와 무관). 편지권은 0장 그대로 둔다(결제 시트가 바로 뜨게).
+   테스터라서 유료 스위치가 꺼져 있어도 편지권 기능이 보인다(시험 결제 지급은 테스터와 무관). 편지권은 0장으로 둔다(결제 시트가 바로 뜨게).
+   새로 만든 계정은 가입 선물 2장을 받으므로(0046) 데모 계정은 그 줄을 지운다:
+   ```sql
+   delete from ticket_ledger where reason = 'welcome'
+    and user_id = (select id from auth.users where email = 'appreview@<도메인>');
+   ```
    데모 계정에 받은 편지 하나·보낸 편지 하나가 있으면 심사관이 7일 편지 화면을 보기 쉽다(선택).
 
 ### 반영 뒤 확인

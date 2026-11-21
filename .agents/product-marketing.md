@@ -145,6 +145,7 @@ B2C 앱이라 B2B 페르소나는 생략. 대신 발신 상황 3종으로 대체
 | **공유 시트 + 동봉 문구**(암호·예약 안내 포함) | iOS c4fc890 · Android 3a25505 |
 | **링크 미리보기 카드(OG)** — 테마별 봉투, 잠금은 봉인 카드 | 웹 e3bbe60, RPC `get_letter_preview`(0033) |
 | **편지 마지막 장 CTA 3단**(답장 → 받은편지함 → 나도 보내기) | 웹 e3bbe60 `LetterEndCta` |
+| 가입하면 편지권 2장 무료(장수는 서버 설정값). **2.0.0 출시·유료 전환 뒤부터 쓸 수 있는 주장** | `letter-app` 마이그레이션 0046(커밋 d71e1b8), `docs/specs/permanent-letter-contract.md` |
 | 프라이버시: 추적 없음, 민감 권한 없음, 오디오 미저장 | `docs/appstore-submission.md` §3 |
 | App Store KR `고백편지`·`노래선물`·`음악 편지`·`뮤터` 1위 | 자동 생성 블록(측정일 포함). 인용 전 재조회 |
 
