@@ -6,5 +6,7 @@ public enum TicketReasonType: String, Equatable {
   case use
   case grant
   case refund
+  /// 가입 선물(계정을 만들 때 서버가 자동으로 준 편지권).
+  case welcome
   case unknown
 }

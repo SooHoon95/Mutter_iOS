@@ -314,6 +314,7 @@
 "ticket.reason.use" = "사용";
 "ticket.reason.grant" = "지급";
 "ticket.reason.refund" = "환불";
+"ticket.reason.welcome" = "가입 선물";
 "ticket.deleteAccountWarning" = "남은 편지권 %d장이 사라져요.";
 "ticket.productPrice" = "편지권 %d장 · %@";
 "ticket.pending" = "결제 승인을 기다리고 있어요. 승인되면 편지권이 들어와요.";

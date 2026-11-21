@@ -314,6 +314,7 @@
 "ticket.reason.use" = "Used";
 "ticket.reason.grant" = "Granted";
 "ticket.reason.refund" = "Refund";
+"ticket.reason.welcome" = "Welcome gift";
 "ticket.deleteAccountWarning" = "Your remaining %d tickets will be lost.";
 "ticket.productPrice" = "%d tickets · %@";
 "ticket.pending" = "Waiting for payment approval. Tickets arrive once approved.";

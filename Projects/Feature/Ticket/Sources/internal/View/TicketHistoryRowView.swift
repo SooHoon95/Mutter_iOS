@@ -39,6 +39,7 @@ struct TicketHistoryRowView: View {
     case .use: return L10n.ticketReasonUse
     case .grant: return L10n.ticketReasonGrant
     case .refund: return L10n.ticketReasonRefund
+    case .welcome: return L10n.ticketReasonWelcome
     case .unknown: return L10n.ticketTitle
     }
   }
