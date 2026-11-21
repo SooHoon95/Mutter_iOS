@@ -97,6 +97,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
       .filter { $0 }
       .sink { [weak self] _ in
         self?.syncPushToken()
+        self?.reportAppClient()
         // 로그인되면 마무리 못 한 편지권 거래를 서버에 다시 보낸다(200 뒤에만 finish).
         Task { await StoreKitTicketPurchaser.shared.resendUnfinished() }
       }
@@ -113,6 +114,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         try await PushTokenUsecase(repository: PushTokenRepository()).register(token: token, deviceId: deviceId)
       } catch {
         print("[Push] FCM 토큰 등록 실패: \(error.localizedDescription)")
+      }
+    }
+  }
+
+  /// 로그인 상태가 될 때마다(앱 실행 시 세션 복원 포함) 지금 쓰는 앱 버전을 서버에 남긴다(report_app_client RPC).
+  /// 운영 통계용이라 실패해도 사용자 흐름에는 영향을 주지 않는다 — 다음 실행 때 다시 보낸다.
+  private func reportAppClient() {
+    guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else { return }
+    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+    Task {
+      do {
+        try await AppClientUsecase(repository: AppClientRepository()).report(appVersion: version, build: build)
+      } catch {
+        print("[AppClient] 앱 버전 보고 실패: \(error.localizedDescription)")
       }
     }
   }
